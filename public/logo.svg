@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Smooth Cream Background Circle -->
+  <circle cx="150" cy="150" r="146" fill="#f8f6eb" stroke="#ebe6d3" stroke-width="2"/>
+  
+  <!-- Organic Detailed Teal Ink Splash -->
+  <g fill="#60b2b2">
+    <!-- Main Splatter Silhouette -->
+    <path d="M 152,70 C 162,70 167,82 173,88 C 182,72 195,78 198,92 C 208,88 215,95 210,105 C 220,110 225,122 220,132 C 235,138 240,152 232,165 C 242,175 238,190 225,195 C 222,208 208,212 195,205 C 188,218 172,228 160,218 C 150,225 138,228 130,218 C 122,230 108,228 102,215 C 92,218 82,210 84,198 C 72,192 70,178 78,168 C 70,155 72,142 85,135 C 78,122 84,108 98,105 C 96,92 108,82 120,88 C 128,75 142,70 152,70 Z" />
+    
+    <!-- Top-Right Ink Drops -->
+    <circle cx="218" cy="116" r="9" />
+    <circle cx="223" cy="99" r="4.5" />
+    
+    <!-- Top-Left Ink Drop -->
+    <circle cx="128" cy="110" r="6" />
+    
+    <!-- Bottom-Left Ink Drop -->
+    <circle cx="98" cy="195" r="8.5" />
+
+    <!-- Bottom Drop Leg -->
+    <path d="M 142,212 C 145,225 142,235 146,238 C 152,240 158,232 154,215 Z" />
+  </g>
+  
+  <!-- Hand-Lettered Style Logo Typography INKY SISTERS -->
+  <g fill="#0b4347" font-family="'Inter', 'Arial Rounded MT Bold', sans-serif" font-weight="900">
+    <text x="150" y="172" text-anchor="middle" font-size="44" letter-spacing="2">INKY SISTERS</text>
+  </g>
+</svg>

@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Category {
+  id        String     @id @default(uuid())
+  name      String
+  slug      String     @unique
+  icon      String?    @default("BookOpen")
+  imageUrl  String?
+  parentId  String?
+  parent    Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Category[] @relation("SubCategories")
+  products  Product[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Product {
+  id               String      @id @default(uuid())
+  barcode          String      @unique
+  name             String
+  description      String?
+  categoryId       String
+  category         Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  imageUrl         String?
+  
+  // Financials & Costs
+  costYuan         Float       @default(0)   // Авсан үнэ (¥)
+  yuanRate         Float       @default(485) // Юанийн ханш (₮)
+  costMnt          Float       @default(0)   // Өртөг ₮
+  priceMnt         Float       @default(0)   // Зарах үнэ ₮ (Admin manual input)
+  priceYuan        Float?      // Зарах үнэ (¥)
+  
+  // Stock
+  boxCount         Int         @default(1)   // Хайрцагны тоо
+  unitsPerBox      Int         @default(1)   // Хайрцаг дахь ширхэг
+  stock            Int         @default(0)   // Нийт үлдэгдэл ширхэг
+
+  // Promotions & Discounts
+  isDiscounted     Boolean     @default(false)
+  discountPercent  Float?      // e.g. 20 for 20%
+  discountPriceMnt Float?      // Хямдарсан үнэ ₮
+  discountEndDate  DateTime?   // Хямдрал дуусах хугацаа
+  isFeatured       Boolean     @default(false)
+  clickCount       Int         @default(0)   // Үзсэн/товшсон тоо
+
+  orderItems       OrderItem[]
+  history          ProductHistory[]
+  bundleItems      BundleItem[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+model ProductBundle {
+  id               String       @id @default(uuid())
+  name             String
+  description      String?
+  imageUrl         String?
+  originalPriceMnt Float        @default(0)
+  discountPercent  Float        @default(0)
+  bundlePriceMnt   Float        @default(0)
+  isActive         Boolean      @default(true)
+  items            BundleItem[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model BundleItem {
+  id         String        @id @default(uuid())
+  bundleId   String
+  bundle     ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity   Int           @default(1)
+  createdAt  DateTime      @default(now())
+}
+
+model ProductHistory {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  changeType   String   // RESTOCK, PRICE_CHANGE, EDIT, INITIAL
+  description  String?
+  oldCostYuan  Float?
+  newCostYuan  Float?
+  oldYuanRate  Float?
+  newYuanRate  Float?
+  oldPriceMnt  Float?
+  newPriceMnt  Float?
+  addedStock   Int?
+  newStock     Int?
+  note         String?
+  createdAt    DateTime @default(now())
+}
+
+model Order {
+  id                 String      @id @default(uuid())
+  orderNumber        String      @unique // e.g. INKY-982341
+  customerName       String
+  customerPhone      String
+  customerEmail      String?
+  deliveryAddress    String
+  notes              String?
+  totalMnt           Float
+  selectedBank       String      // KHAN, GOLOMT, TDB
+  paymentMethod      String      @default("TRANSFER") // TRANSFER, CARD, CASH
+  paymentStatus      String      @default("PENDING_PAYMENT") // PENDING_PAYMENT, PAID, CANCELLED
+  orderStatus        String      @default("PENDING") // PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  paymentConfirmedAt DateTime?
+  returnNote         String?
+  items              OrderItem[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productName String
+  barcode     String
+  priceMnt    Float
+  quantity    Int
+}
+
+model BankQR {
+  id            String   @id @default(uuid())
+  bankName      String   // Хаан Банк, Голомт Банк, ХХБ
+  bankCode      String   // KHAN, GOLOMT, TDB
+  bankLogoUrl   String?  @default("") // Банкны лого
+  accountName   String   // Инкий Систерс ХХК
+  accountNumber String   // 5091234567
+  qrImageUrl    String   // URL or Data URI
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PromotionBanner {
+  id           String   @id @default(uuid())
+  title        String
+  subtitle     String?
+  imageUrl     String?
+  discountCode String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FinancialLog {
+  id          String   @id @default(uuid())
+  type        String   // RESTOCK_EXPENSE, ORDER_INCOME, ORDER_REFUND, ORDER_ADJUSTMENT
+  amountMnt   Float
+  description String
+  referenceId String?
+  createdAt   DateTime @default(now())
+}
+
+model StoreSetting {
+  id                String   @id @default("default")
+  showStockQuantity Boolean  @default(true)
+  logoUrl           String?  @default("/logo.svg")
+  heroTitle         String?  @default("Онцлох Бичиг Хэргийн Цуглуулга")
+  heroSubtitle      String?  @default("Хамгийн тренд болж буй пастел үзэг, эстетик тэмдэглэлийн дэвтэр ба зургийн хэрэгслүүдийг шууд онлайн захиалаарай.")
+  heroProductId     String?
+  heroImageUrl      String?  @default("https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=80")
+  heroBadge         String?  @default("🔥 ЭРЭЛТТЭЙ БАРАА")
+
+  // Store Address & Contact details for Footer
+  address           String?  @default("Улаанбаатар хот, Сүхбаатар дүүрэг, 1-р хороо, Энхтайваны өргөн чөлөө")
+  phone             String?  @default("88112233, 99112233")
+  email             String?  @default("info@inkysisters.mn")
+  workingHours      String?  @default("Даваа - Ням: 10:00 - 20:00")
+
+  // 3 Promo Banners Grid (Images, Products & Clickable Links)
+  banner1Image      String?  @default("https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=800&auto=format&fit=crop&q=80")
+  banner1Title      String?  @default("Эстэтик Пастел Үзэгнүүд")
+  banner1Link       String?  @default("#products")
+  banner1ProductId  String?
+
+  banner2Image      String?  @default("https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80")
+  banner2Title      String?  @default("Планер & Төлөвлөгч Дэвтрүүд")
+  banner2Link       String?  @default("#products")
+  banner2ProductId  String?
+
+  banner3Image      String?  @default("https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&auto=format&fit=crop&q=80")
+  banner3Title      String?  @default("Зургийн Усан Будаг & Багс")
+  banner3Link       String?  @default("#products")
+  banner3ProductId  String?
+
+  // Homepage Bundle Section Settings
+  bundleSectionTitle String?  @default("🎁 ОНЦЛОХ ИЖ БҮРЭН БАГЦУУД")
+  bundleSectionBadge String?  @default("Хямдралтай Багц Сетүүд")
+
+  updatedAt         DateTime @updatedAt
+}
+
+model FeaturedCollection {
+  id           String   @id @default(uuid())
+  title        String
+  subtitle     String?
+  imageUrl     String
+  linkCategory String?  // category slug or link
+  productId    String?
+  orderIndex   Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model HeroSlide {
+  id          String   @id @default(uuid())
+  title       String
+  subtitle    String?
+  imageUrl    String
+  badge       String?  @default("🔥 ОНЦЛОХ БАРАА")
+  productId   String?
+  bundleId    String?
+  linkUrl     String?
+  active      Boolean  @default(true)
+  orderIndex  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminUser {
+  id        String   @id @default("admin")
+  username  String   @default("inkysisters")
+  password  String   @default("inkysisters")
+  updatedAt DateTime @updatedAt
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  title       String
+  category    String   // Түрээс, Ус, Тог, Интернэт, Хоолны мөнгө, Бусад
+  amountMnt   Float
+  note        String?
+  expenseDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
