@@ -341,14 +341,14 @@ export default function Navbar({
         </div>
 
         {/* Navigation Bar with Mega Menu Trigger & Delivery Button */}
-        <div className="flex items-center justify-between py-2 border-t border-gray-100">
+        <div className="py-2 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           
-          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             {/* Mega Menu Button */}
             <button
               onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
               onMouseEnter={() => setIsMegaMenuOpen(true)}
-              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center gap-2 transition-all shadow-sm shrink-0"
+              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm shrink-0 flex-1 sm:flex-none"
             >
               <Menu className="w-4 h-4" />
               <span>БҮХ АНГИЛАЛ</span>
@@ -361,7 +361,7 @@ export default function Navbar({
                 onSelectCategory('bundles');
                 setIsMegaMenuOpen(false);
               }}
-              className={`px-4 py-2 text-xs font-extrabold rounded-lg flex items-center transition-all shadow-sm shrink-0 active:scale-95 ${
+              className={`px-4 py-2 text-xs font-extrabold rounded-lg flex items-center justify-center transition-all shadow-sm shrink-0 active:scale-95 flex-1 sm:flex-none ${
                 activeCategory === 'bundles'
                   ? 'bg-teal-800 text-white shadow-md ring-2 ring-teal-600'
                   : 'bg-teal-700 hover:bg-teal-800 text-white'
@@ -371,14 +371,14 @@ export default function Navbar({
             </button>
           </div>
 
-          {/* Delivery Terms & Zone Map Button on FAR RIGHT (RED) */}
+          {/* Delivery Terms & Zone Map Button (Full-width on Mobile, Auto on Desktop) */}
           {onOpenDelivery && (
             <button
               onClick={() => {
                 onOpenDelivery();
                 setIsMegaMenuOpen(false);
               }}
-              className="px-3.5 py-2 rounded-lg text-xs font-black whitespace-nowrap transition-all flex items-center gap-1.5 bg-cherry-600 hover:bg-cherry-700 text-white border border-cherry-500 shadow-xs shrink-0 ml-auto active:scale-95"
+              className="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-black whitespace-nowrap transition-all flex items-center justify-center gap-1.5 bg-cherry-600 hover:bg-cherry-700 text-white border border-cherry-500 shadow-xs shrink-0 active:scale-95"
             >
               <span>Хүргэлтийн Нөхцөл &amp; Бүс</span>
             </button>
