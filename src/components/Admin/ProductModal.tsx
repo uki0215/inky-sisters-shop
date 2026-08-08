@@ -108,11 +108,10 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
       setCostYuanRaw('0');
       setFormData((prev) => ({
         ...prev,
-        categoryId: categories[0]?.id || '',
-        barcode: '',
+        categoryId: prev.categoryId || categories[0]?.id || '',
       }));
     }
-  }, [product, categories]);
+  }, [product]);
 
   const parsedCostYuan = parseComma(costYuanRaw);
 
