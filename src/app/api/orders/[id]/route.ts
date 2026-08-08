@@ -279,6 +279,11 @@ export async function DELETE(
       }
     }
 
+    // Clean up associated financial log entries for complete financial audit integrity
+    await db.financialLog.deleteMany({
+      where: { referenceId: params.id },
+    });
+
     await db.order.delete({
       where: { id: params.id },
     });
