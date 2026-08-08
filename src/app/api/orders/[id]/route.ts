@@ -11,7 +11,7 @@ export async function PUT(
 
     const existing = await db.order.findUnique({
       where: { id: params.id },
-      include: { items: true },
+      include: { items: { include: { product: true } } },
     });
 
     if (!existing) {
@@ -44,10 +44,10 @@ export async function PUT(
         });
       }
 
-      // If cancelled, restore stock!
+      // If cancelled, restore stock with original purchase unit cost!
       if (paymentStatus === 'CANCELLED' && existing.paymentStatus !== 'CANCELLED') {
         for (const item of existing.items) {
-          await db.product.update({
+          const updatedProd = await db.product.update({
             where: { id: item.productId },
             data: {
               stock: {
@@ -55,6 +55,28 @@ export async function PUT(
               },
             },
           });
+
+          // Original unit cost at time of purchase
+          const itemCostUnit = (item.costMnt !== null && item.costMnt !== undefined && item.costMnt > 0)
+            ? item.costMnt
+            : (item.product?.costYuan && item.product?.yuanRate ? item.product.costYuan * item.product.yuanRate : (item.product?.costMnt || 0));
+
+          // Log Product History with original cost
+          try {
+            await db.productHistory.create({
+              data: {
+                productId: item.productId,
+                changeType: 'ORDER_RETURN',
+                description: `Захиалга цуцлагдсан буцаалт (${existing.orderNumber}): +${item.quantity} ш (Анх авсан нэгж өртөг: ${itemCostUnit.toLocaleString()}₮)`,
+                newCostMnt: itemCostUnit,
+                addedStock: item.quantity,
+                newStock: updatedProd.stock,
+                note: `Захиалга цуцлалт: ${existing.customerName} | Анх авсан өртгөөр (${itemCostUnit.toLocaleString()}₮) агуулахад буцааж оруулав`,
+              },
+            });
+          } catch (e) {
+            console.error('Failed to log product history for cancellation', e);
+          }
         }
       }
     }
@@ -72,6 +94,11 @@ export async function PUT(
       for (const oldItem of existing.items) {
         const matchingNewItem = updatedItems.find((ni: any) => ni.productId === oldItem.productId);
 
+        // Derive original unit cost at purchase time
+        const originalUnitCost = (oldItem.costMnt !== null && oldItem.costMnt !== undefined && oldItem.costMnt > 0)
+          ? oldItem.costMnt
+          : (oldItem.product?.costYuan && oldItem.product?.yuanRate ? oldItem.product.costYuan * oldItem.product.yuanRate : (oldItem.product?.costMnt || 0));
+
         if (!matchingNewItem || matchingNewItem.quantity <= 0) {
           // Item completely removed / returned: restore full stock
           const updatedProd = await db.product.update({
@@ -84,19 +111,20 @@ export async function PUT(
           });
 
           historyChanges.push(
-            `❌ Буцаасан: "${oldItem.productName}" (${oldItem.quantity} ш) - ${Math.round(oldItem.quantity * oldItem.priceMnt).toLocaleString()}₮`
+            `❌ Буцаасан: "${oldItem.productName}" (${oldItem.quantity} ш) - Зарсан үнэ: ${Math.round(oldItem.quantity * oldItem.priceMnt).toLocaleString()}₮ | Авсан өртөг: ${Math.round(oldItem.quantity * originalUnitCost).toLocaleString()}₮`
           );
 
-          // Record Product History
+          // Record Product History with original purchase cost
           try {
             await db.productHistory.create({
               data: {
                 productId: oldItem.productId,
                 changeType: 'ORDER_RETURN',
-                description: `Захиалга буцаалт (${existing.orderNumber}): -${oldItem.quantity} ш`,
+                description: `Захиалга буцаалт (${existing.orderNumber}): +${oldItem.quantity} ш (Анх авсан нэгж өртөг: ${originalUnitCost.toLocaleString()}₮)`,
+                newCostMnt: originalUnitCost,
                 addedStock: oldItem.quantity,
                 newStock: updatedProd.stock,
-                note: `Захиалагч: ${existing.customerName}`,
+                note: `Захиалагч: ${existing.customerName} | Анх авсан өртгөөр (${originalUnitCost.toLocaleString()}₮) буцааж агуулахад оруулав`,
               },
             });
           } catch (e) {
@@ -112,29 +140,46 @@ export async function PUT(
             });
 
             if (qtyDiff < 0) {
+              const returnedQty = Math.abs(qtyDiff);
               historyChanges.push(
-                `🔻 Тоо хассан: "${oldItem.productName}" (${oldItem.quantity} ш ➔ ${matchingNewItem.quantity} ш)`
+                `🔻 Тоо хассан (Буцаасан): "${oldItem.productName}" (${oldItem.quantity} ш ➔ ${matchingNewItem.quantity} ш, буцаасан ${returnedQty} ш - Авсан өртөг: ${Math.round(returnedQty * originalUnitCost).toLocaleString()}₮)`
               );
+
+              // Log partial return with original purchase cost
+              try {
+                await db.productHistory.create({
+                  data: {
+                    productId: oldItem.productId,
+                    changeType: 'ORDER_RETURN',
+                    description: `Захиалга хэсэгчлэн буцаалт (${existing.orderNumber}): +${returnedQty} ш (Анх авсан нэгж өртөг: ${originalUnitCost.toLocaleString()}₮)`,
+                    newCostMnt: originalUnitCost,
+                    addedStock: returnedQty,
+                    newStock: updatedProd.stock,
+                    note: `Захиалагч: ${existing.customerName} | Анх авсан өртгөөр (${originalUnitCost.toLocaleString()}₮) буцааж агуулахад оруулав`,
+                  },
+                });
+              } catch (e) {
+                console.error('Failed to log product history for return edit', e);
+              }
             } else {
               historyChanges.push(
                 `🔺 Тоо нэмсэн: "${oldItem.productName}" (${oldItem.quantity} ш ➔ ${matchingNewItem.quantity} ш)`
               );
-            }
 
-            // Record Product History
-            try {
-              await db.productHistory.create({
-                data: {
-                  productId: oldItem.productId,
-                  changeType: 'ORDER_EDIT',
-                  description: `Захиалгын тоо өөрчлөгдсөн (${existing.orderNumber}): ${oldItem.quantity} ш -> ${matchingNewItem.quantity} ш`,
-                  addedStock: -qtyDiff,
-                  newStock: updatedProd.stock,
-                  note: `Захиалагч: ${existing.customerName}`,
-                },
-              });
-            } catch (e) {
-              console.error('Failed to log product history for edit', e);
+              try {
+                await db.productHistory.create({
+                  data: {
+                    productId: oldItem.productId,
+                    changeType: 'ORDER_EDIT',
+                    description: `Захиалгын тоо өөрчлөгдсөн (${existing.orderNumber}): ${oldItem.quantity} ш -> ${matchingNewItem.quantity} ш`,
+                    addedStock: -qtyDiff,
+                    newStock: updatedProd.stock,
+                    note: `Захиалагч: ${existing.customerName}`,
+                  },
+                });
+              } catch (e) {
+                console.error('Failed to log product history for edit', e);
+              }
             }
           }
 
@@ -258,7 +303,7 @@ export async function DELETE(
   try {
     const existing = await db.order.findUnique({
       where: { id: params.id },
-      include: { items: true },
+      include: { items: { include: { product: true } } },
     });
 
     if (!existing) {
@@ -268,7 +313,7 @@ export async function DELETE(
     // Only restore stock if order was PENDING/UNPAID (not yet paid/sold and not cancelled)
     if (existing.paymentStatus !== 'PAID' && existing.paymentStatus !== 'CANCELLED') {
       for (const item of existing.items) {
-        await db.product.update({
+        const updatedProd = await db.product.update({
           where: { id: item.productId },
           data: {
             stock: {
@@ -276,6 +321,27 @@ export async function DELETE(
             },
           },
         });
+
+        // Original unit cost at time of purchase
+        const itemCostUnit = (item.costMnt !== null && item.costMnt !== undefined && item.costMnt > 0)
+          ? item.costMnt
+          : (item.product?.costYuan && item.product?.yuanRate ? item.product.costYuan * item.product.yuanRate : (item.product?.costMnt || 0));
+
+        try {
+          await db.productHistory.create({
+            data: {
+              productId: item.productId,
+              changeType: 'ORDER_RETURN',
+              description: `Захиалга устгагдсан буцаалт (${existing.orderNumber}): +${item.quantity} ш (Анх авсан нэгж өртөг: ${itemCostUnit.toLocaleString()}₮)`,
+              newCostMnt: itemCostUnit,
+              addedStock: item.quantity,
+              newStock: updatedProd.stock,
+              note: `Захиалга устгалт: ${existing.customerName} | Анх авсан өртгөөр (${itemCostUnit.toLocaleString()}₮) агуулахад буцааж оруулав`,
+            },
+          });
+        } catch (e) {
+          console.error('Failed to log product history for order delete', e);
+        }
       }
     }
 
