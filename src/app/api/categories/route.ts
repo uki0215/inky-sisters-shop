@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
     const whereCondition = parentOnly === 'true' ? { parentId: null } : {};
 
-    const categories = await db.category.findMany({
+    let categories = await db.category.findMany({
       where: whereCondition,
       include: {
         children: {
@@ -25,6 +25,26 @@ export async function GET(request: Request) {
       },
       orderBy: { name: 'asc' },
     });
+
+    if (categories.length === 0) {
+      await fetch(new URL('/api/admin/seed', request.url).toString(), { method: 'POST' }).catch(() => {});
+      categories = await db.category.findMany({
+        where: whereCondition,
+        include: {
+          children: {
+            include: {
+              _count: { select: { products: true } },
+            },
+            orderBy: { name: 'asc' },
+          },
+          _count: {
+            select: { products: true },
+          },
+        },
+        orderBy: { name: 'asc' },
+      });
+    }
+
     return NextResponse.json(categories);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

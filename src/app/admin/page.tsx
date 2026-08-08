@@ -1449,6 +1449,39 @@ export default function AdminPage() {
                 </form>
               </div>
 
+              {/* SEED DATA RESTORE BUTTON */}
+              <div className="bg-teal-50 border border-teal-200 p-6 rounded-2xl space-y-4">
+                <div className="flex items-center gap-2 text-teal-800 font-extrabold text-sm uppercase">
+                  <Sparkles className="w-5 h-5 text-teal-600" />
+                  <span>🌱 АНХНЫ ӨГӨГДӨЛ СЭРГЭЭХ (INITIAL SEED DATA)</span>
+                </div>
+                <p className="text-xs text-teal-700 leading-relaxed font-sans">
+                  Анхны жишээ категориуд, пастел үзэг болон дэвтрийн жишээ бараануудыг системд сэргээн оруулна.
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (confirm('Анхны жишээ ангилал ба бараануудыг сэргээх үү?')) {
+                      setLoading(true);
+                      try {
+                        const res = await fetch('/api/admin/seed', { method: 'POST' });
+                        const data = await res.json();
+                        alert(data.message || 'Сэргээгдлээ');
+                        fetchAdminData();
+                      } catch (e) {
+                        console.error(e);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Анхны ангилал ба бараануудыг сэргээх (Restore Seed Data)</span>
+                </button>
+              </div>
+
               {/* DANGER ZONE: DATABASE RESET TO 0 */}
               <div className="bg-red-50 border border-red-200 p-6 rounded-2xl space-y-4">
                 <div className="flex items-center gap-2 text-red-700 font-extrabold text-sm uppercase">
