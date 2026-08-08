@@ -23,8 +23,6 @@ export async function GET() {
 
     return NextResponse.json({
       username: admin.username,
-      email: admin.email || 'inkysisters1223@gmail.com',
-      resetPassword: admin.resetPassword || 'inkysisters',
       updatedAt: admin.updatedAt,
     });
   } catch (e: any) {
@@ -34,7 +32,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const { currentPassword, newPassword, newUsername, newResetPassword, newEmail } = await request.json();
+    const { currentPassword, newPassword, newUsername, newResetPassword } = await request.json();
 
     let admin = await db.adminUser.findUnique({
       where: { id: 'admin' },
@@ -46,16 +44,16 @@ export async function PUT(request: Request) {
           id: 'admin',
           username: 'inkysisters',
           password: 'inkysisters',
-          resetPassword: 'inky1234',
-          email: 'uki.0215@gmail.com',
+          resetPassword: 'inkysisters',
+          email: 'inkysisters1223@gmail.com',
         },
       });
     }
 
-    // Verify current password
+    // Verify current admin login password
     if (currentPassword !== admin.password) {
       return NextResponse.json(
-        { error: 'Одоогийн нууц үг буруу байна!' },
+        { error: 'Одоогийн админы нууц үг буруу байна!' },
         { status: 400 }
       );
     }
@@ -64,16 +62,21 @@ export async function PUT(request: Request) {
       username: newUsername ? newUsername.trim() : admin.username,
     };
 
+    let updatedSomething = false;
+
+    // Optional: Update login password
     if (newPassword && newPassword.trim() !== '') {
       if (newPassword.length < 3) {
         return NextResponse.json(
-          { error: 'Шинэ нууц үг хамгийн багадаа 3 тэмдэгттэй байх ёстой.' },
+          { error: 'Шинэ нэвтрэх нууц үг хамгийн багадаа 3 тэмдэгттэй байх ёстой.' },
           { status: 400 }
         );
       }
-      dataToUpdate.password = newPassword;
+      dataToUpdate.password = newPassword.trim();
+      updatedSomething = true;
     }
 
+    // Optional: Update DB Reset password
     if (newResetPassword && newResetPassword.trim() !== '') {
       if (newResetPassword.length < 3) {
         return NextResponse.json(
@@ -82,10 +85,11 @@ export async function PUT(request: Request) {
         );
       }
       dataToUpdate.resetPassword = newResetPassword.trim();
+      updatedSomething = true;
     }
 
-    if (newEmail && newEmail.trim() !== '') {
-      dataToUpdate.email = newEmail.trim();
+    if (newUsername && newUsername.trim() !== admin.username) {
+      updatedSomething = true;
     }
 
     const updated = await db.adminUser.update({
@@ -95,10 +99,8 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Админы нууц үг болон өгөгдөл арилгах нууц үг амжилттай шинэчлэгдлээ!',
+      message: '✓ Тохиргоо амжилттай шинэчлэгдлээ!',
       username: updated.username,
-      email: updated.email,
-      resetPassword: updated.resetPassword,
     });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

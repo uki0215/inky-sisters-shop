@@ -2,15 +2,36 @@
 
 import React, { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
-import { User, Lock, Key, ShieldCheck, CheckCircle2, AlertCircle, Save, MapPin, Phone, Mail, Clock, Store } from 'lucide-react';
+import {
+  User,
+  Lock,
+  Key,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Save,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Store,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 
 export default function ProfileManager() {
   const [username, setUsername] = useState('inkysisters');
   const [currentPassword, setCurrentPassword] = useState('');
+  
+  // Login Password Change
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [resetPassword, setResetPassword] = useState('inkysisters');
-  const [adminEmail, setAdminEmail] = useState('inkysisters1223@gmail.com');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  // DB Reset Password Change
+  const [newResetPassword, setNewResetPassword] = useState('');
+  const [confirmResetPassword, setConfirmResetPassword] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   // Store Contact Details
   const [address, setAddress] = useState('');
@@ -31,8 +52,6 @@ export default function ProfileManager() {
       .then((res) => res.json())
       .then((data) => {
         if (data.username) setUsername(data.username);
-        if (data.resetPassword) setResetPassword(data.resetPassword);
-        if (data.email) setAdminEmail(data.email);
       })
       .catch(console.error);
 
@@ -92,13 +111,18 @@ export default function ProfileManager() {
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setError('Шинэ нууц үг болон баталгаажуулах нууц үг хоорондоо таарахгүй байна.');
+    if (newPassword && newPassword !== confirmPassword) {
+      setError('Шинэ нэвтрэх нууц үг болон баталгаажуулах нууц үг хоорондоо таарахгүй байна.');
       return;
     }
 
-    if (newPassword.length < 3) {
-      setError('Шинэ нууц үг хамгийн багадаа 3 тэмдэгттэй байх ёстой.');
+    if (newResetPassword && newResetPassword !== confirmResetPassword) {
+      setError('Өгөгдөл арилгах тусгай нууц үг хоорондоо таарахгүй байна.');
+      return;
+    }
+
+    if (!newPassword && !newResetPassword && username === 'inkysisters') {
+      setError('Солих шинэ нэвтрэх нууц үг эсвэл өгөгдөл арилгах тусгай нууц үгээ оруулна уу.');
       return;
     }
 
@@ -110,20 +134,21 @@ export default function ProfileManager() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           currentPassword,
-          newPassword,
           newUsername: username,
-          newResetPassword: resetPassword,
-          newEmail: adminEmail,
+          newPassword: newPassword || undefined,
+          newResetPassword: newResetPassword || undefined,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Нууц үг солиход алдаа гарлаа');
 
-      setSuccess('✓ Нууц үг амжилттай шинэчлэгдлээ!');
+      setSuccess('✓ Админы тохиргоо болон нууц үг амжилттай шинэчлэгдлээ!');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setNewResetPassword('');
+      setConfirmResetPassword('');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -237,28 +262,28 @@ export default function ProfileManager() {
         </div>
       </form>
 
-      {/* 2. ADMIN PASSWORD & PROFILE */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4">
+      {/* 2. ADMIN PROFILE & PASSWORDS CHANGE */}
+      <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-5">
         <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2 border-b border-gray-100 pb-3">
           <ShieldCheck className="w-5 h-5 text-teal-700" />
-          Админы Профайл & Нууц Үг Солих
+          Админы Нууц Үг Солих
         </h3>
 
         {error && (
-          <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+          <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-3.5 bg-teal-50 border border-teal-200 text-teal-800 text-xs rounded-xl flex items-center gap-2">
+          <div className="p-3.5 bg-teal-50 border border-teal-200 text-teal-800 text-xs font-bold rounded-xl flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-teal-700 shrink-0" />
             <span>{success}</span>
           </div>
         )}
 
-        <form onSubmit={handlePasswordChange} className="space-y-4">
+        <form onSubmit={handlePasswordChange} className="space-y-5 font-sans">
           
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
@@ -274,7 +299,7 @@ export default function ProfileManager() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+            <label className="block text-xs font-bold text-gray-800 mb-1 flex items-center gap-1.5">
               <Key className="w-4 h-4 text-amber-600" /> Одоогийн Нууц Үг (Current Password) *
             </label>
             <input
@@ -285,68 +310,92 @@ export default function ProfileManager() {
               onChange={(e) => setCurrentPassword(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-teal-500"
             />
+            <p className="text-[11px] text-gray-400 mt-1">Тохиргоо болон нууц үг шинэчлэхийн тулд одоогийн нууц үгээ заавал оруулна уу.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
-                <Lock className="w-4 h-4 text-teal-700" /> Шинэ Нэвтрэх Нууц Үг *
-              </label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-teal-500"
-              />
+          {/* CHANGE LOGIN PASSWORD SECTION */}
+          <div className="pt-3 border-t border-gray-100 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                <Lock className="w-4 h-4 text-teal-700" />
+                1. Нэвтрэх Нууц Үг Солих
+              </h4>
+              <button
+                type="button"
+                onClick={() => setShowLoginPassword(!showLoginPassword)}
+                className="text-xs text-gray-500 hover:text-gray-800 flex items-center gap-1 font-bold"
+              >
+                {showLoginPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span>{showLoginPassword ? 'Нуух' : 'Харуулах'}</span>
+              </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
-                <Lock className="w-4 h-4 text-teal-700" /> Шинэ Нууц Үг Давтах *
-              </label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-          </div>
-
-          {/* DB RESET SECURITY PASSWORD & EMAIL RECOVERY */}
-          <div className="p-4 bg-rose-50/70 border border-rose-200 rounded-2xl space-y-3 mt-4">
-            <h4 className="text-xs font-extrabold text-rose-900 uppercase tracking-wider flex items-center gap-1.5 font-sans">
-              <Key className="w-4 h-4 text-rose-700" />
-              🔒 Өгөгдөл Арилгах Тусгай Нууц Үг (DB Reset Security Password)
-            </h4>
-            <p className="text-[11px] text-rose-700 leading-relaxed font-sans">
-              Системийн бүх өгөгдөл, бараа, захиалга, санхүүг 0 болгож цэвэрлэх үед шаардагдах тусгай пин/нууц үг. Мартагдсан үед и-мэйлээр сэргээгдэнэ.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block font-bold text-gray-800 mb-1 font-sans">Өгөгдөл Арилгах Нууц Үг (DB Reset Password):</label>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Шинэ Нэвтрэх Нууц Үг:</label>
                 <input
-                  type="text"
-                  value={resetPassword}
-                  onChange={(e) => setResetPassword(e.target.value)}
-                  placeholder="inky1234"
-                  className="w-full px-3.5 py-2 bg-white border border-rose-300 rounded-xl font-mono text-sm font-bold text-rose-950 focus:ring-2 focus:ring-rose-500 shadow-2xs"
+                  type={showLoginPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-gray-800 mb-1 font-sans">Нууц Үг Сэргээх Админ И-мэйл Хаяг:</label>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Шинэ Нууц Үг Давтах:</label>
                 <input
-                  type="email"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="inkysisters1223@gmail.com"
-                  className="w-full px-3.5 py-2 bg-white border border-rose-300 rounded-xl font-sans text-xs font-bold text-gray-900 focus:ring-2 focus:ring-rose-500 shadow-2xs"
+                  type={showLoginPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* CHANGE DB RESET PASSWORD SECTION */}
+          <div className="p-4 bg-rose-50/70 border border-rose-200 rounded-2xl space-y-3 pt-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-extrabold text-rose-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Key className="w-4 h-4 text-rose-700" />
+                2. 🔒 Өгөгдөл Арилгах Тусгай Нууц Үг Солих (DB Reset Password)
+              </h4>
+              <button
+                type="button"
+                onClick={() => setShowResetPassword(!showResetPassword)}
+                className="text-xs text-rose-700 hover:text-rose-900 flex items-center gap-1 font-bold"
+              >
+                {showResetPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span>{showResetPassword ? 'Нуух' : 'Харуулах'}</span>
+              </button>
+            </div>
+
+            <p className="text-[11px] text-rose-700 leading-relaxed">
+              Системийн бүх өгөгдөл, бараа, захиалга, санхүүг 0 болгож цэвэрлэх үед асуугдах аюулгүй байдлын тусгай нууц үг. (Оруулсны дараа textbox-д хадгалагдахгүй ил харагдахгүй).
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-800 mb-1">Шинэ Өгөгдөл Арилгах Нууц Үг:</label>
+                <input
+                  type={showResetPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={newResetPassword}
+                  onChange={(e) => setNewResetPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-rose-300 rounded-xl text-sm font-mono font-bold text-rose-950 focus:ring-2 focus:ring-rose-500 shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-800 mb-1">Тусгай Нууц Үг Давтах:</label>
+                <input
+                  type={showResetPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmResetPassword}
+                  onChange={(e) => setConfirmResetPassword(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-rose-300 rounded-xl text-sm font-mono font-bold text-rose-950 focus:ring-2 focus:ring-rose-500 shadow-2xs"
                 />
               </div>
             </div>
@@ -359,7 +408,7 @@ export default function ProfileManager() {
               className="px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              <span>{loading ? 'Хадгалж байна...' : 'Шинэ Нууц Үг Хадгалах'}</span>
+              <span>{loading ? 'Хадгалж байна...' : 'Нууц Үг & Тохиргоо Хадгалах'}</span>
             </button>
           </div>
         </form>
