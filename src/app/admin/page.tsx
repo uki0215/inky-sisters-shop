@@ -344,7 +344,7 @@ export default function AdminPage() {
       channel.onmessage = () => {
         fetchAdminData(true);
       };
-    } catch (e) {}
+    } catch (e) { }
 
     // Storage event fallback
     const handleStorageChange = (e: StorageEvent) => {
@@ -398,12 +398,11 @@ export default function AdminPage() {
           <strong style="font-size: 14px; color: #111827; display: block;">${p.name}</strong>
         </td>
         <td style="padding: 10px; border: 1px solid #e5e7eb; font-family: monospace; font-weight: bold; font-size: 14px; color: #0d9488; text-align: right; white-space: nowrap;">
-          ${
-            p.isDiscounted && p.discountPriceMnt
-              ? `<div><span style="text-decoration: line-through; color: #9ca3af; font-size: 11px; display: block;">${(p.priceMnt || 0).toLocaleString()}₮</span>${(
-                  p.discountPriceMnt || 0
-                ).toLocaleString()}₮</div>`
-              : `${(p.priceMnt || 0).toLocaleString()}₮`
+          ${p.isDiscounted && p.discountPriceMnt
+            ? `<div><span style="text-decoration: line-through; color: #9ca3af; font-size: 11px; display: block;">${(p.priceMnt || 0).toLocaleString()}₮</span>${(
+              p.discountPriceMnt || 0
+            ).toLocaleString()}₮</div>`
+            : `${(p.priceMnt || 0).toLocaleString()}₮`
           }
         </td>
         <td style="padding: 10px; border: 1px solid #e5e7eb; font-size: 12px; color: #4b5563; line-height: 1.4;">
@@ -518,7 +517,7 @@ export default function AdminPage() {
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#2dd4bf_1px,transparent_1px)] [background-size:24px_24px]" />
 
         <div className="relative w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8 shadow-2xl space-y-6 z-10 animate-scaleUp">
-          
+
           {/* Header */}
           <div className="text-center space-y-2">
             <img
@@ -607,7 +606,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-100 text-gray-900 font-sans selection:bg-teal-700 selection:text-white">
-      
+
       {/* Hardware Barcode Scanner Listener for Products Tab */}
       {activeTab === 'products' && (
         <BarcodeListener onScan={handleBarcodeScan} />
@@ -615,7 +614,7 @@ export default function AdminPage() {
 
       {/* LEFT SIDEBAR NAVIGATION */}
       <aside className="w-64 bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between p-4 shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden">
-        
+
         <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin">
           {/* Brand Header */}
           <div className="flex items-center gap-3 px-2 py-2.5 border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10">
@@ -635,11 +634,10 @@ export default function AdminPage() {
             {/* IN-STORE POS TAB - VERY TOP OF SIDEBAR */}
             <button
               onClick={() => setActiveTab('pos')}
-              className={`w-full flex items-center justify-between p-3 rounded-2xl font-black text-xs transition-all shadow-lg mb-2 ${
-                activeTab === 'pos'
+              className={`w-full flex items-center justify-between p-3 rounded-2xl font-black text-xs transition-all shadow-lg mb-2 ${activeTab === 'pos'
                   ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 text-slate-950 ring-2 ring-amber-300 shadow-amber-500/20'
                   : 'bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 border border-amber-400/30'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <ShoppingBag className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20" />
@@ -650,11 +648,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('financials')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'financials'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'financials'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -665,11 +662,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('products')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'products'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'products'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <Package className="w-4 h-4 text-amber-400" />
@@ -680,11 +676,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('orders')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'orders'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'orders'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <ShoppingBag className="w-4 h-4 text-teal-300" />
@@ -699,11 +694,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('bundles')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'bundles'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'bundles'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <Gift className="w-4 h-4 text-purple-400" />
@@ -714,11 +708,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('categories')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'categories'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'categories'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <Layers className="w-4 h-4 text-sky-400" />
@@ -729,11 +722,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('banks')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'banks'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'banks'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <QrCode className="w-4 h-4 text-emerald-300" />
@@ -744,11 +736,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('promotions')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'promotions'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'promotions'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <Sparkles className="w-4 h-4 text-pink-400" />
@@ -759,11 +750,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('collections')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'collections'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'collections'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <Layers className="w-4 h-4 text-amber-400" />
@@ -774,11 +764,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'settings'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'settings'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <Settings className="w-4 h-4 text-purple-400" />
@@ -789,11 +778,10 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('profile')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                activeTab === 'profile'
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'profile'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 <User className="w-4 h-4 text-amber-300" />
@@ -827,7 +815,7 @@ export default function AdminPage() {
 
       {/* RIGHT MAIN CONTENT CONTAINER */}
       <div className="flex-1 flex flex-col min-w-0 bg-gray-50 min-h-screen">
-        
+
         {/* Top Header Bar */}
         <header className="bg-white border-b border-gray-200 px-6 sm:px-8 py-4 flex items-center justify-between shadow-xs sticky top-0 z-20">
           <div>
@@ -847,11 +835,10 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className={`p-2.5 rounded-xl border transition-all relative flex items-center justify-center ${
-                  totalNotifCount > 0
+                className={`p-2.5 rounded-xl border transition-all relative flex items-center justify-center ${totalNotifCount > 0
                     ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
                     : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                }`}
+                  }`}
                 title="Сануулга & Мэдэгдэл"
               >
                 <Bell className="w-4.5 h-4.5" />
@@ -989,7 +976,7 @@ export default function AdminPage() {
 
         {/* Tab Body Content */}
         <main className="p-6 sm:p-8 space-y-6 flex-1">
-          
+
           {/* TAB 0: IN-STORE POS CASHIER TERMINAL */}
           {activeTab === 'pos' && (
             <PosManager
@@ -1008,7 +995,7 @@ export default function AdminPage() {
           {/* TAB 2: PRODUCTS & BARCODES */}
           {activeTab === 'products' && (
             <div className="space-y-5">
-              
+
               {/* Stock Display Toggle Card */}
               <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -1040,11 +1027,10 @@ export default function AdminPage() {
                 </div>
 
                 <span
-                  className={`text-xs px-3 py-1.5 rounded-full font-bold ${
-                    settings.showStockQuantity
+                  className={`text-xs px-3 py-1.5 rounded-full font-bold ${settings.showStockQuantity
                       ? 'bg-teal-100 text-teal-800'
                       : 'bg-gray-100 text-gray-600'
-                  }`}
+                    }`}
                 >
                   {settings.showStockQuantity ? 'Тоо харагдаж байна' : 'Тоо нуугдсан'}
                 </span>
@@ -1346,11 +1332,10 @@ export default function AdminPage() {
                   </div>
 
                   <span
-                    className={`text-xs px-3 py-1 rounded-full font-bold ${
-                      settings.showStockQuantity
+                    className={`text-xs px-3 py-1 rounded-full font-bold ${settings.showStockQuantity
                         ? 'bg-teal-100 text-teal-800'
                         : 'bg-gray-100 text-gray-600'
-                    }`}
+                      }`}
                   >
                     {settings.showStockQuantity ? 'Идэвхтэй' : 'Идэвхгүй'}
                   </span>

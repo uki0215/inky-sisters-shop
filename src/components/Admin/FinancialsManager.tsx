@@ -158,56 +158,31 @@ export default function FinancialsManager() {
     .filter((o: any) => o.paymentStatus === 'PAID' && !o.orderNumber?.startsWith('POS-') && !o.deliveryAddress?.includes('POS'))
     .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
 
-  // Payment Method Totals & Refund Deductions
-  const cashRefundLogs = (financialData.financialLogs || []).filter(
-    (l: any) => l.type === 'ORDER_REFUND' && (l.description?.includes('Бэлэн') || l.description?.includes('CASH'))
-  );
-  const cashRefundTotal = cashRefundLogs.reduce((acc: number, l: any) => acc + (l.amountMnt || 0), 0);
-  const rawCashTotal = (financialData.orders || [])
-    .filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CASH')
-    .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
-  const cashOrdersTotal = Math.max(0, rawCashTotal - cashRefundTotal);
-
+  // Payment Method Totals & Active Order Counts
+  // (order.totalMnt is dynamically updated when items are returned or edited)
   const cashPaidOrders = (financialData.orders || []).filter(
-    (o: any) => o.paymentStatus === 'PAID' && o.totalMnt > 0 && o.paymentMethod === 'CASH'
+    (o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CASH' && o.totalMnt > 0
   );
-  const cashOrdersCount = Math.max(0, cashPaidOrders.length - cashRefundLogs.length);
-
-  const transferRefundLogs = (financialData.financialLogs || []).filter(
-    (l: any) => l.type === 'ORDER_REFUND' && (l.description?.includes('Шилжүүлэг') || l.description?.includes('TRANSFER') || l.description?.includes('Данс'))
-  );
-  const transferRefundTotal = transferRefundLogs.reduce((acc: number, l: any) => acc + (l.amountMnt || 0), 0);
-  const rawTransferTotal = (financialData.orders || [])
-    .filter((o: any) => o.paymentStatus === 'PAID' && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod))
-    .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
-  const transferOrdersTotal = Math.max(0, rawTransferTotal - transferRefundTotal);
+  const cashOrdersTotal = cashPaidOrders.reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+  const cashOrdersCount = cashPaidOrders.length;
 
   const transferPaidOrders = (financialData.orders || []).filter(
-    (o: any) => o.paymentStatus === 'PAID' && o.totalMnt > 0 && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod)
+    (o: any) => o.paymentStatus === 'PAID' && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod) && o.totalMnt > 0
   );
-  const transferOrdersCount = Math.max(0, transferPaidOrders.length - transferRefundLogs.length);
-
-  const cardRefundLogs = (financialData.financialLogs || []).filter(
-    (l: any) => l.type === 'ORDER_REFUND' && (l.description?.includes('Карт') || l.description?.includes('CARD') || l.description?.includes('POS'))
-  );
-  const cardRefundTotal = cardRefundLogs.reduce((acc: number, l: any) => acc + (l.amountMnt || 0), 0);
-  const rawCardTotal = (financialData.orders || [])
-    .filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CARD')
-    .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
-  const cardOrdersTotal = Math.max(0, rawCardTotal - cardRefundTotal);
+  const transferOrdersTotal = transferPaidOrders.reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+  const transferOrdersCount = transferPaidOrders.length;
 
   const cardPaidOrders = (financialData.orders || []).filter(
-    (o: any) => o.paymentStatus === 'PAID' && o.totalMnt > 0 && o.paymentMethod === 'CARD'
+    (o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CARD' && o.totalMnt > 0
   );
-  const cardOrdersCount = Math.max(0, cardPaidOrders.length - cardRefundLogs.length);
+  const cardOrdersTotal = cardPaidOrders.reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+  const cardOrdersCount = cardPaidOrders.length;
 
-  const creditOrdersTotal = (financialData.orders || [])
-    .filter((o: any) => (o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID') && o.paymentStatus !== 'PAID')
-    .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
-
-  const creditOrdersCount = (financialData.orders || []).filter(
+  const creditPaidOrders = (financialData.orders || []).filter(
     (o: any) => (o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID') && o.paymentStatus !== 'PAID' && o.totalMnt > 0
-  ).length;
+  );
+  const creditOrdersTotal = creditPaidOrders.reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+  const creditOrdersCount = creditPaidOrders.length;
 
   // EXCEL / CSV EXPORT GENERATOR
   const handleExportExcel = () => {
