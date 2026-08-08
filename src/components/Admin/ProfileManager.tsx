@@ -22,6 +22,7 @@ export default function ProfileManager() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/profile')
@@ -49,6 +50,7 @@ export default function ProfileManager() {
     e.preventDefault();
     setSettingsLoading(true);
     setSettingsSuccess(null);
+    setSettingsError(null);
 
     try {
       const res = await fetch('/api/settings', {
@@ -63,14 +65,14 @@ export default function ProfileManager() {
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Дэлгүүрийн мэдээлэл хадгалахад алдаа гарлаа');
+        throw new Error(data.error || 'Дэлгүүрийн мэдээлэл хадгалахад алдаа гарлаа');
       }
 
       setSettingsSuccess('✓ Дэлгүүрийн хаяг болон холбоо барих мэдээлэл амжилттай шинэчлэгдлээ!');
     } catch (err: any) {
-      alert(err.message);
+      setSettingsError(err.message);
     } finally {
       setSettingsLoading(false);
     }
@@ -139,6 +141,13 @@ export default function ProfileManager() {
             </p>
           </div>
         </div>
+
+        {settingsError && (
+          <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{settingsError}</span>
+          </div>
+        )}
 
         {settingsSuccess && (
           <div className="p-3.5 bg-teal-50 border border-teal-200 text-teal-800 text-xs font-bold rounded-xl flex items-center gap-2">
