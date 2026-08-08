@@ -1,53 +1,113 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, Link as LinkIcon, Loader2, Check, X, AlertTriangle } from 'lucide-react';
+import { Upload, Link as LinkIcon, Loader2, Check, X, AlertTriangle, Star, Plus } from 'lucide-react';
 
 interface ImageUploaderProps {
-  value: string;
-  onChange: (url: string) => void;
+  value?: string;
+  onChange?: (url: string) => void;
+  values?: string[];
+  onChangeMultiple?: (urls: string[]) => void;
+  multiple?: boolean;
   label?: string;
 }
 
-export default function ImageUploader({ value, onChange, label = 'Барааны Зураг' }: ImageUploaderProps) {
+export default function ImageUploader({
+  value = '',
+  onChange,
+  values,
+  onChangeMultiple,
+  multiple = false,
+  label = 'Барааны Зураг',
+}: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'file' | 'url'>('file');
+  const [urlInput, setUrlInput] = useState('');
+
+  // Normalize image list
+  const currentImages: string[] = multiple
+    ? (values || (value ? value.split(',').filter(Boolean) : []))
+    : (value ? [value] : []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
     setUploading(true);
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const uploadedUrls: string[] = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-      const data = await res.json();
-      if (res.ok && data.url) {
-        onChange(data.url);
+        const data = await res.json();
+        if (res.ok && data.url) {
+          uploadedUrls.push(data.url);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        if (multiple && onChangeMultiple) {
+          onChangeMultiple([...currentImages, ...uploadedUrls]);
+        } else if (onChange) {
+          onChange(uploadedUrls[0]);
+        }
       } else {
-        setError(data.error || 'Зураг хуулахад алдаа гарлаа.');
+        setError('Зураг хуулахад алдаа гарлаа.');
       }
     } catch (err: any) {
       console.error(err);
       setError(err?.message || 'Зургаа хуулахад холболтын алдаа гарлаа.');
     } finally {
       setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleAddUrl = () => {
+    if (!urlInput.trim()) return;
+    const url = urlInput.trim();
+    if (multiple && onChangeMultiple) {
+      onChangeMultiple([...currentImages, url]);
+    } else if (onChange) {
+      onChange(url);
+    }
+    setUrlInput('');
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    const updated = currentImages.filter((_, idx) => idx !== indexToRemove);
+    if (multiple && onChangeMultiple) {
+      onChangeMultiple(updated);
+    } else if (onChange) {
+      onChange(updated[0] || '');
+    }
+  };
+
+  const handleSetPrimary = (indexToPrimary: number) => {
+    if (!multiple || indexToPrimary === 0) return;
+    const item = currentImages[indexToPrimary];
+    const rest = currentImages.filter((_, idx) => idx !== indexToPrimary);
+    const updated = [item, ...rest];
+    if (onChangeMultiple) {
+      onChangeMultiple(updated);
     }
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3 font-sans">
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-bold text-gray-700">{label}</label>
+        <label className="block text-xs font-bold text-gray-700">
+          {label} {multiple && <span className="text-[11px] text-gray-500 font-normal">(Олон зураг оруулж болно)</span>}
+        </label>
         <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 bg-gray-100 p-0.5 rounded-lg border border-gray-200">
           <button
             type="button"
@@ -83,6 +143,7 @@ export default function ImageUploader({ value, onChange, label = 'Барааны
           <input
             type="file"
             accept="image/*"
+            multiple={multiple}
             onChange={handleFileChange}
             disabled={uploading}
             className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
@@ -95,7 +156,7 @@ export default function ImageUploader({ value, onChange, label = 'Барааны
               <Upload className="w-6 h-6 text-gray-400 group-hover:text-teal-600 transition-colors" />
             )}
             <span className="text-xs font-bold text-gray-700 group-hover:text-teal-700">
-              {uploading ? 'Зураг хуулж байна...' : 'Компьютерээс зураг сонгож хуулах'}
+              {uploading ? 'Зургуудыг хуулж байна...' : (multiple ? 'Нэг болон олон зураг сонгож хуулах' : 'Компьютерээс зураг сонгож хуулах')}
             </span>
             <span className="text-[10px] text-gray-400">
               PNG, JPG, WEBP (Дээд хэмжээ 10MB)
@@ -103,38 +164,76 @@ export default function ImageUploader({ value, onChange, label = 'Барааны
           </div>
         </div>
       ) : (
-        <div className="relative flex items-center">
-          <LinkIcon className="w-4 h-4 text-gray-400 absolute left-3 pointer-events-none" />
-          <input
-            type="url"
-            placeholder="https://images.unsplash.com/... эсвэл зургийн URL линк"
-            value={value}
-            onChange={(e) => { onChange(e.target.value); setError(null); }}
-            className="w-full pl-9 pr-3 py-2 bg-white border border-gray-300 rounded-xl text-xs text-gray-900 focus:ring-2 focus:ring-teal-500"
-          />
-        </div>
-      )}
-
-      {/* Image Preview */}
-      {value && (
-        <div className="relative aspect-[16/9] max-h-36 w-full rounded-xl overflow-hidden bg-gray-100 border border-gray-200 mt-2 group shadow-xs">
-          <img
-            src={value}
-            alt="Preview"
-            onError={() => setError('Зургийн линк буруу эсвэл зураг ачаалагдах боломжгүй байна.')}
-            className="w-full h-full object-contain bg-slate-900/5"
-          />
-          <div className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
-            <Check className="w-3 h-3" /> Зураг сонгогдсон
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <LinkIcon className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="url"
+              placeholder="https://... Зургийн URL линк"
+              value={urlInput}
+              onChange={(e) => { setUrlInput(e.target.value); setError(null); }}
+              className="w-full pl-9 pr-3 py-2 bg-white border border-gray-300 rounded-xl text-xs text-gray-900 focus:ring-2 focus:ring-teal-500"
+            />
           </div>
           <button
             type="button"
-            onClick={() => onChange('')}
-            className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold p-1 rounded-full flex items-center justify-center shadow-md transition-all"
-            title="Зураг устгах"
+            onClick={handleAddUrl}
+            className="px-3.5 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl flex items-center gap-1 shadow-2xs shrink-0"
           >
-            <X className="w-3.5 h-3.5" />
+            <Plus className="w-4 h-4" />
+            <span>Нэмэх</span>
           </button>
+        </div>
+      )}
+
+      {/* Uploaded Gallery Grid */}
+      {currentImages.length > 0 && (
+        <div className="space-y-1.5 pt-1">
+          <span className="text-[11px] font-bold text-gray-600 block">
+            Сонгогдсон зургууд ({currentImages.length}):
+          </span>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+            {currentImages.map((imgUrl, idx) => (
+              <div
+                key={idx}
+                className={`relative aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 group shadow-xs ${
+                  idx === 0 ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-gray-200'
+                }`}
+              >
+                <img
+                  src={imgUrl}
+                  alt={`Product Image ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+
+                {/* Primary Thumbnail Badge */}
+                {idx === 0 ? (
+                  <span className="absolute top-1 left-1 bg-teal-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-md flex items-center gap-0.5">
+                    <Star className="w-2.5 h-2.5 fill-current" /> Үндсэн
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleSetPrimary(idx)}
+                    className="absolute top-1 left-1 bg-black/60 hover:bg-teal-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                    title="Үндсэн зураг болгох"
+                  >
+                    Үндсэн болгох
+                  </button>
+                )}
+
+                {/* Remove Button */}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(idx)}
+                  className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full shadow-md transition-all"
+                  title="Зураг устгах"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

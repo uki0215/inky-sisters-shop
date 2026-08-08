@@ -13,10 +13,18 @@ export default function PromoModal({ banner, onExploreDiscounts }: PromoModalPro
 
   useEffect(() => {
     if (banner && banner.active) {
-      const timer = setTimeout(() => {
+      try {
+        const alreadyShown = sessionStorage.getItem('inky_promo_modal_shown');
+        if (!alreadyShown) {
+          const timer = setTimeout(() => {
+            setIsOpen(true);
+            sessionStorage.setItem('inky_promo_modal_shown', 'true');
+          }, 500);
+          return () => clearTimeout(timer);
+        }
+      } catch (e) {
         setIsOpen(true);
-      }, 500);
-      return () => clearTimeout(timer);
+      }
     }
   }, [banner]);
 
@@ -48,11 +56,6 @@ export default function PromoModal({ banner, onExploreDiscounts }: PromoModalPro
               alt={banner.title}
               className="w-full h-full object-cover"
             />
-            {banner.discountCode && (
-              <div className="absolute bottom-3 right-3 bg-red-500 text-white px-3 py-1 rounded-md font-mono font-bold text-xs shadow-md">
-                Код: {banner.discountCode}
-              </div>
-            )}
           </div>
         )}
 

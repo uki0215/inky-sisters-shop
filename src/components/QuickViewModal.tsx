@@ -24,10 +24,16 @@ export default function QuickViewModal({
   const [currentProduct, setCurrentProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedImgIndex, setSelectedImgIndex] = useState(0);
 
   const recommendScrollRef = useRef<HTMLDivElement>(null);
 
   if (!currentProduct) return null;
+
+  const productImages = currentProduct.imageUrl
+    ? currentProduct.imageUrl.split(',').map((s: string) => s.trim()).filter(Boolean)
+    : [];
+  const mainImgUrl = productImages[selectedImgIndex] || productImages[0] || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80';
 
   const isOutOfStock = currentProduct.stock <= 0;
 
@@ -205,21 +211,41 @@ export default function QuickViewModal({
         {/* MAIN PRODUCT DETAILS CONTAINER */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
           
-          {/* Main Image */}
-          <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-sm">
-            <img
-              src={currentProduct.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
-              alt={currentProduct.name}
-              className={`w-full h-full object-cover ${isOutOfStock ? 'opacity-40 grayscale' : ''}`}
-            />
-            {hasDiscount && currentProduct.discountPercent && (
-              <span className="absolute top-3 left-3 px-3 py-1 bg-red-600 text-white font-black text-xs rounded-xl shadow-md">
-                -{currentProduct.discountPercent}% ХЯМДРАЛ
-              </span>
-            )}
-            {isOutOfStock && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 font-bold text-red-600 text-base uppercase shadow-inner">
-                Дууссан
+          {/* Main Image & Gallery */}
+          <div className="space-y-2">
+            <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 shadow-sm">
+              <img
+                src={mainImgUrl}
+                alt={currentProduct.name}
+                className={`w-full h-full object-cover ${isOutOfStock ? 'opacity-40 grayscale' : ''}`}
+              />
+              {hasDiscount && currentProduct.discountPercent && (
+                <span className="absolute top-3 left-3 px-3 py-1 bg-red-600 text-white font-black text-xs rounded-xl shadow-md">
+                  -{currentProduct.discountPercent}% ХЯМДРАЛ
+                </span>
+              )}
+              {isOutOfStock && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 font-bold text-red-600 text-base uppercase shadow-inner">
+                  Дууссан
+                </div>
+              )}
+            </div>
+
+            {/* Gallery Thumbnails */}
+            {productImages.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pt-1 scrollbar-none">
+                {productImages.map((img: string, idx: number) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedImgIndex(idx)}
+                    className={`w-14 h-14 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
+                      selectedImgIndex === idx ? 'border-teal-600 ring-2 ring-teal-500/20' : 'border-gray-200 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
               </div>
             )}
           </div>

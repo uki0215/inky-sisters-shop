@@ -37,7 +37,7 @@ export default function PromotionManager() {
     setLoading(true);
     try {
       const [resPromo, resSlides, resProd, resCat, resSet, resBundles] = await Promise.all([
-        fetch('/api/promotions'),
+        fetch('/api/promotions?admin=true'),
         fetch('/api/hero-slides'),
         fetch('/api/products'),
         fetch('/api/categories'),
@@ -182,29 +182,16 @@ export default function PromotionManager() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">Хямдралын Промо Код</label>
+          <div className="pt-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-gray-800 cursor-pointer">
               <input
-                type="text"
-                placeholder="INKY2026"
-                value={promo.discountCode || ''}
-                onChange={(e) => setPromo({ ...promo, discountCode: e.target.value })}
-                className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-mono text-red-600 focus:bg-white"
+                type="checkbox"
+                checked={!!promo.active}
+                onChange={(e) => setPromo({ ...promo, active: e.target.checked })}
+                className="w-4 h-4 rounded accent-teal-700 cursor-pointer"
               />
-            </div>
-
-            <div className="flex items-center pt-4">
-              <label className="flex items-center gap-2 text-xs font-bold text-gray-800 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={promo.active}
-                  onChange={(e) => setPromo({ ...promo, active: e.target.checked })}
-                  className="w-4 h-4 rounded accent-teal-700"
-                />
-                Идэвхтэй харуулах (Active)
-              </label>
-            </div>
+              Идэвхтэй харуулах (Active)
+            </label>
           </div>
 
           <div className="pt-2 flex justify-end">

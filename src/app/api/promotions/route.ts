@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const isAdmin = searchParams.get('admin') === 'true';
+
     const banner = await db.promotionBanner.findFirst({
-      where: { active: true },
+      ...(isAdmin ? {} : { where: { active: true } }),
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json(banner || null);
@@ -16,24 +19,44 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, subtitle, imageUrl, discountCode, active } = body;
+    const { title, subtitle, imageUrl, active } = body;
 
-    // Deactivate existing
-    if (active) {
+    const isActive = active !== undefined ? Boolean(active) : true;
+
+    // Deactivate existing banners if activating new one
+    if (isActive) {
       await db.promotionBanner.updateMany({ data: { active: false } });
     }
 
-    const banner = await db.promotionBanner.create({
-      data: {
-        title,
-        subtitle: subtitle || '',
-        imageUrl: imageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1000&auto=format&fit=crop&q=80',
-        discountCode: discountCode || '',
-        active: active !== undefined ? active : true,
-      },
+    // Check if there is an existing promo banner to update, or create new
+    const existing = await db.promotionBanner.findFirst({
+      orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(banner, { status: 201 });
+    let banner;
+    if (existing) {
+      banner = await db.promotionBanner.update({
+        where: { id: existing.id },
+        data: {
+          title,
+          subtitle: subtitle || '',
+          imageUrl: imageUrl || '',
+          active: isActive,
+        },
+      });
+    } else {
+      banner = await db.promotionBanner.create({
+        data: {
+          title,
+          subtitle: subtitle || '',
+          imageUrl: imageUrl || '',
+          discountCode: '',
+          active: isActive,
+        },
+      });
+    }
+
+    return NextResponse.json(banner, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
