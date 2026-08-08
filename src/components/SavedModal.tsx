@@ -66,8 +66,14 @@ export default function SavedModal({ onQuickView }: SavedModalProps) {
                   className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
                 >
                   <img
-                    src={item.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=200&auto=format&fit=crop&q=80'}
+                    src={(() => {
+                      const raw = typeof item.imageUrl === 'string' ? item.imageUrl : '';
+                      return raw.split(',').map((s: string) => s.trim()).find((s: string) =>
+                        s.length > 7 && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:image/'))
+                      ) || '/placeholder-product.svg';
+                    })()}
                     alt={item.name}
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
                     className="w-14 h-14 object-cover rounded-xl border border-gray-200 shrink-0"
                   />
                   <div className="min-w-0">

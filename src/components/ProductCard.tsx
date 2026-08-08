@@ -51,15 +51,20 @@ export default function ProductCard({ product, onQuickView, showStockQuantity = 
 
       {/* Image Container */}
       <div className="relative aspect-square w-full bg-gray-50 overflow-hidden">
-        <img
-          src={product.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
-          alt={product.name}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80';
-          }}
-          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'opacity-40 grayscale' : 'opacity-100'
-            }`}
-        />
+        {(() => {
+          const raw = typeof product.imageUrl === 'string' ? product.imageUrl : '';
+          const firstUrl = raw.split(',').map((s: string) => s.trim()).find((s: string) =>
+            s.length > 7 && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:image/'))
+          ) || '/placeholder-product.svg';
+          return (
+            <img
+              src={firstUrl}
+              alt={product.name}
+              onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
+              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'opacity-40 grayscale' : 'opacity-100'}`}
+            />
+          );
+        })()}
 
         {/* Top Badges */}
         <div className="absolute top-2 right-2 z-10 flex flex-col gap-1 items-end">

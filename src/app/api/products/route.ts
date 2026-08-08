@@ -113,7 +113,7 @@ export async function POST(request: Request) {
         name,
         description: description || '',
         categoryId,
-        imageUrl: imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80',
+        imageUrl: imageUrl || '',
         costYuan: costYuanVal,
         yuanRate: yuanRateVal,
         costMnt: costMntVal,

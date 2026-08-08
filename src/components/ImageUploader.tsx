@@ -14,7 +14,7 @@ interface ImageUploaderProps {
   multiple?: boolean;
 }
 
-const FALLBACK_IMG = 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80';
+const FALLBACK_IMG = '/placeholder-product.svg';
 
 const isValidUrl = (url?: string): boolean => {
   if (!url || typeof url !== 'string') return false;

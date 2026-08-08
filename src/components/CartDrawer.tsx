@@ -66,8 +66,14 @@ export default function CartDrawer() {
                 return (
                   <div key={item.id} className="pt-4 first:pt-0 flex items-center gap-3">
                     <img
-                      src={item.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
+                      src={(() => {
+                        const raw = typeof item.imageUrl === 'string' ? item.imageUrl : '';
+                        return raw.split(',').map((s: string) => s.trim()).find((s: string) =>
+                          s.length > 7 && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:image/'))
+                        ) || '/placeholder-product.svg';
+                      })()}
                       alt={item.name}
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
                       className="w-16 h-16 object-cover rounded-lg border border-gray-200 bg-gray-50 flex-shrink-0"
                     />
                     
