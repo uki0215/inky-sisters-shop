@@ -91,17 +91,18 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn font-sans">
-      <div className="relative w-full max-w-lg bg-white border border-gray-200 rounded-3xl p-6 shadow-2xl text-gray-900 overflow-hidden transform transition-all animate-scaleUp space-y-4 font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto animate-fadeIn font-sans">
+      <div className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-white border border-gray-200 rounded-3xl p-5 sm:p-6 shadow-2xl text-gray-900 overflow-hidden transform transition-all animate-scaleUp font-sans my-auto">
         
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-700 bg-gray-100 rounded-full transition-all"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Header (Fixed Top) */}
+        <div className="shrink-0 relative pb-3 border-b border-gray-100 pr-8">
+          <button
+            onClick={onClose}
+            className="absolute top-0 right-0 p-2 text-gray-400 hover:text-gray-700 bg-gray-100 rounded-full transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-        <div>
           <h3 className="text-lg font-extrabold text-gray-900 font-sans flex items-center gap-2">
             <PackageCheck className="w-5 h-5 text-teal-700" />
             Бараа Нэмж Нөхөх & Ханш Тулгах
@@ -109,166 +110,170 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
           <p className="text-xs text-gray-500 mt-0.5 font-sans">
             <span className="font-bold text-gray-900">{product.name}</span> (#{product.barcode})
           </p>
-        </div>
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl">
-            ⚠️ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleRestock} className="space-y-4">
-          
-          {/* Restock Quantity */}
-          <div className="p-3.5 bg-teal-50/70 border border-teal-200 rounded-2xl space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-teal-950">
-              <span>Одоогийн Үлдэгдэл: <span className="font-mono">{product.stock} ш</span></span>
-              <span>Нэмэгдсэний дараа: <span className="font-mono text-teal-800">{product.stock + addQuantity} ш</span></span>
-            </div>
-
-            <div>
-              <label className="block text-xs font-extrabold text-gray-800 mb-1">
-                Нэмж авах ширхэгийн тоо (Pieces) *
-              </label>
-              <input
-                type="number"
-                min="1"
-                required
-                value={addQuantity}
-                onChange={(e) => setAddQuantity(parseInt(e.target.value) || 0)}
-                className="w-full px-4 py-2.5 bg-white border border-teal-400 rounded-xl text-lg font-bold font-mono text-gray-900 focus:ring-2 focus:ring-teal-600 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* RMB Rate & Yuan Cost Fluctuation Inputs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            
-            {/* Yuan Rate Input */}
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
-              <label className="block text-[11px] font-bold text-gray-700">
-                Шинэ Юанийн Ханш (₮):
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                required
-                value={yuanRate}
-                onChange={(e) => setYuanRate(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg font-mono font-bold text-xs text-gray-900"
-              />
-              <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">
-                <span>Өмнөх: {prevRate}₮</span>
-                {rateDiff !== 0 && (
-                  <span className={`font-bold flex items-center gap-0.5 ${rateDiff > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    {rateDiff > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                    {rateDiff > 0 ? `+${rateDiff.toFixed(1)}₮` : `${rateDiff.toFixed(1)}₮`}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Yuan Cost Input */}
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
-              <label className="block text-[11px] font-bold text-gray-700">
-                Шинэ Авсан Үнэ (¥ Юань):
-              </label>
-              <input
-                type="text"
-                placeholder="0.00"
-                value={costYuanRaw}
-                onChange={(e) => setCostYuanRaw(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg font-mono font-bold text-xs text-gray-900"
-              />
-              <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">
-                <span>Өмнөх: ¥{prevCostYuan}</span>
-                {costYuanDiff !== 0 && (
-                  <span className={`font-bold flex items-center gap-0.5 ${costYuanDiff > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    {costYuanDiff > 0 ? `+¥${costYuanDiff.toFixed(2)}` : `¥${costYuanDiff.toFixed(2)}`}
-                  </span>
-                )}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Direct MNT cost input if costYuan is 0 or yuanRate is 0 */}
-          {(costYuan === 0 || yuanRate === 0) && (
-            <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl space-y-1">
-              <label className="block text-xs font-bold text-amber-900">
-                ₮ Төгрөгийн Өртөг Оруулах (Юань 0 үед шууд төгрөгөөр) *
-              </label>
-              <input
-                type="text"
-                placeholder="10,000"
-                value={formatComma(costMntInput || '')}
-                onChange={(e) => setCostMntInput(parseDecimal(e.target.value))}
-                className="w-full px-3.5 py-2 bg-white border border-amber-400 rounded-xl font-mono text-base font-extrabold text-amber-950 focus:ring-2 focus:ring-amber-500 shadow-2xs"
-              />
+          {error && (
+            <div className="mt-2 p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl">
+              ⚠️ {error}
             </div>
           )}
+        </div>
 
-          {/* Selling Price Input Field (Editable during Restock) */}
-          <div className="p-3.5 bg-rose-50/70 border border-rose-200 rounded-2xl space-y-1 font-sans">
-            <label className="block text-xs font-bold text-rose-950">
-              Нэгжийн Зарах Үнэ (₮) (Шаардлагатай бол засах):
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="12,500"
-              value={formatComma(priceMntInput || '')}
-              onChange={(e) => setPriceMntInput(parseDecimal(e.target.value))}
-              className="w-full px-3.5 py-2 bg-white border border-rose-300 rounded-xl font-mono text-base font-extrabold text-red-600 focus:ring-2 focus:ring-rose-500 shadow-2xs"
-            />
-            <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5 font-mono">
-              <span>Одоогийн зарах үнэ: {formatMNT(product.priceMnt)}</span>
-              {priceMntInput !== product.priceMnt && (
-                <span className="font-bold text-rose-600">
-                  Шинэ зарах үнэ: {formatMNT(priceMntInput)}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* FLUTTER & COST COMPARISON REPORT CARD */}
-          <div className="p-4 bg-slate-900 text-white rounded-2xl space-y-2 text-xs">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-teal-300 font-bold flex items-center gap-1">
-                <Calculator className="w-3.5 h-3.5" />
-                Өмнөх болон Шинэ Өртгийн Харьцуулалт:
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">Live calculation</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div>
-                <span className="text-slate-400 block">Өмнөх 1ш Өртөг ₮:</span>
-                <span className="font-mono font-bold text-slate-200">{formatMNT(prevCostMnt)}</span>
+        {/* Scrollable Form Body */}
+        <form onSubmit={handleRestock} className="flex flex-col flex-1 overflow-hidden space-y-0">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1 py-3">
+            
+            {/* Restock Quantity */}
+            <div className="p-3.5 bg-teal-50/70 border border-teal-200 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-teal-950">
+                <span>Одоогийн Үлдэгдэл: <span className="font-mono">{product.stock} ш</span></span>
+                <span>Нэмэгдсэний дараа: <span className="font-mono text-teal-800">{product.stock + addQuantity} ш</span></span>
               </div>
+
               <div>
-                <span className="text-slate-400 block">Шинэ 1ш Өртөг ₮:</span>
-                <span className="font-mono font-bold text-amber-300">{formatMNT(newCostMnt)}</span>
+                <label className="block text-xs font-extrabold text-gray-800 mb-1">
+                  Нэмж авах ширхэгийн тоо (Pieces) *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={addQuantity}
+                  onChange={(e) => setAddQuantity(parseInt(e.target.value) || 0)}
+                  className="w-full px-4 py-2.5 bg-white border border-teal-400 rounded-xl text-lg font-bold font-mono text-gray-900 focus:ring-2 focus:ring-teal-600 outline-none"
+                />
               </div>
             </div>
 
-            {costMntDiff !== 0 && (
-              <div className="pt-1 flex items-center justify-between text-[11px] border-t border-slate-800">
-                <span className="text-slate-400">1ш Өртгийн Зөрүү (Ханш/Үнийн хэлбэлзэл):</span>
-                <span className={`font-bold font-mono ${costMntDiff > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                  {costMntDiff > 0 ? `+${formatMNT(costMntDiff)} (Өссөн)` : `${formatMNT(costMntDiff)} (Буурсан)`}
-                </span>
+            {/* RMB Rate & Yuan Cost Fluctuation Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              
+              {/* Yuan Rate Input */}
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
+                <label className="block text-[11px] font-bold text-gray-700">
+                  Шинэ Юанийн Ханш (₮):
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  required
+                  value={yuanRate}
+                  onChange={(e) => setYuanRate(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg font-mono font-bold text-xs text-gray-900"
+                />
+                <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">
+                  <span>Өмнөх: {prevRate}₮</span>
+                  {rateDiff !== 0 && (
+                    <span className={`font-bold flex items-center gap-0.5 ${rateDiff > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      {rateDiff > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {rateDiff > 0 ? `+${rateDiff.toFixed(1)}₮` : `${rateDiff.toFixed(1)}₮`}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Yuan Cost Input */}
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
+                <label className="block text-[11px] font-bold text-gray-700">
+                  Шинэ Авсан Үнэ (¥ Юань):
+                </label>
+                <input
+                  type="text"
+                  placeholder="0.00"
+                  value={costYuanRaw}
+                  onChange={(e) => setCostYuanRaw(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg font-mono font-bold text-xs text-gray-900"
+                />
+                <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">
+                  <span>Өмнөх: ¥{prevCostYuan}</span>
+                  {costYuanDiff !== 0 && (
+                    <span className={`font-bold flex items-center gap-0.5 ${costYuanDiff > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      {costYuanDiff > 0 ? `+¥${costYuanDiff.toFixed(2)}` : `¥${costYuanDiff.toFixed(2)}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Direct MNT cost input if costYuan is 0 or yuanRate is 0 */}
+            {(costYuan === 0 || yuanRate === 0) && (
+              <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl space-y-1">
+                <label className="block text-xs font-bold text-amber-900">
+                  ₮ Төгрөгийн Өртөг Оруулах (Юань 0 үед шууд төгрөгөөр) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="10,000"
+                  value={formatComma(costMntInput || '')}
+                  onChange={(e) => setCostMntInput(parseDecimal(e.target.value))}
+                  className="w-full px-3.5 py-2 bg-white border border-amber-400 rounded-xl font-mono text-base font-extrabold text-amber-950 focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                />
               </div>
             )}
 
-            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs font-black text-amber-400 font-sans">
-              <span>Нийт Оруулж буй Татан авалтын Зардал:</span>
-              <span className="text-sm font-mono">{formatMNT(totalRestockExpenseMnt)}</span>
+            {/* Selling Price Input Field (Editable during Restock) */}
+            <div className="p-3.5 bg-rose-50/70 border border-rose-200 rounded-2xl space-y-1 font-sans">
+              <label className="block text-xs font-bold text-rose-950">
+                Нэгжийн Зарах Үнэ (₮) (Шаардлагатай бол засах):
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="12,500"
+                value={formatComma(priceMntInput || '')}
+                onChange={(e) => setPriceMntInput(parseDecimal(e.target.value))}
+                className="w-full px-3.5 py-2 bg-white border border-rose-300 rounded-xl font-mono text-base font-extrabold text-red-600 focus:ring-2 focus:ring-rose-500 shadow-2xs"
+              />
+              <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5 font-mono">
+                <span>Одоогийн зарах үнэ: {formatMNT(product.priceMnt)}</span>
+                {priceMntInput !== product.priceMnt && (
+                  <span className="font-bold text-rose-600">
+                    Шинэ зарах үнэ: {formatMNT(priceMntInput)}
+                  </span>
+                )}
+              </div>
             </div>
+
+            {/* FLUTTER & COST COMPARISON REPORT CARD */}
+            <div className="p-4 bg-slate-900 text-white rounded-2xl space-y-2 text-xs">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="text-teal-300 font-bold flex items-center gap-1">
+                  <Calculator className="w-3.5 h-3.5" />
+                  Өмнөх болон Шинэ Өртгийн Харьцуулалт:
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">Live calculation</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div>
+                  <span className="text-slate-400 block">Өмнөх 1ш Өртөг ₮:</span>
+                  <span className="font-mono font-bold text-slate-200">{formatMNT(prevCostMnt)}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Шинэ 1ш Өртөг ₮:</span>
+                  <span className="font-mono font-bold text-amber-300">{formatMNT(newCostMnt)}</span>
+                </div>
+              </div>
+
+              {costMntDiff !== 0 && (
+                <div className="pt-1 flex items-center justify-between text-[11px] border-t border-slate-800">
+                  <span className="text-slate-400">1ш Өртгийн Зөрүү (Ханш/Үнийн хэлбэлзэл):</span>
+                  <span className={`font-bold font-mono ${costMntDiff > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    {costMntDiff > 0 ? `+${formatMNT(costMntDiff)} (Өссөн)` : `${formatMNT(costMntDiff)} (Буурсан)`}
+                  </span>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs font-black text-amber-400 font-sans">
+                <span>Нийт Оруулж буй Татан авалтын Зардал:</span>
+                <span className="text-sm font-mono">{formatMNT(totalRestockExpenseMnt)}</span>
+              </div>
+            </div>
+
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2 pt-2">
+          {/* Action Buttons (Fixed Bottom) */}
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 shrink-0 bg-white">
             <button
               type="button"
               onClick={onClose}
