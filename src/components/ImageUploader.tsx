@@ -25,10 +25,11 @@ export default function ImageUploader({
   const [mode, setMode] = useState<'file' | 'url'>('file');
   const [urlInput, setUrlInput] = useState('');
 
-  // Normalize image list
-  const currentImages: string[] = multiple
-    ? (values || (value ? value.split(',').filter(Boolean) : []))
-    : (value ? [value] : []);
+  // Normalize image list and remove duplicates
+  const rawList = multiple
+    ? (values || (value ? value.split(',').map((s) => s.trim()).filter(Boolean) : []))
+    : (value ? [value.trim()] : []);
+  const currentImages: string[] = Array.from(new Set(rawList)).filter(Boolean);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -56,7 +57,8 @@ export default function ImageUploader({
 
       if (uploadedUrls.length > 0) {
         if (multiple && onChangeMultiple) {
-          onChangeMultiple([...currentImages, ...uploadedUrls]);
+          const uniqueCombined = Array.from(new Set([...currentImages, ...uploadedUrls]));
+          onChangeMultiple(uniqueCombined);
         } else if (onChange) {
           onChange(uploadedUrls[0]);
         }
@@ -76,7 +78,8 @@ export default function ImageUploader({
     if (!urlInput.trim()) return;
     const url = urlInput.trim();
     if (multiple && onChangeMultiple) {
-      onChangeMultiple([...currentImages, url]);
+      const uniqueCombined = Array.from(new Set([...currentImages, url]));
+      onChangeMultiple(uniqueCombined);
     } else if (onChange) {
       onChange(url);
     }
@@ -96,7 +99,7 @@ export default function ImageUploader({
     if (!multiple || indexToPrimary === 0) return;
     const item = currentImages[indexToPrimary];
     const rest = currentImages.filter((_, idx) => idx !== indexToPrimary);
-    const updated = [item, ...rest];
+    const updated = Array.from(new Set([item, ...rest]));
     if (onChangeMultiple) {
       onChangeMultiple(updated);
     }
@@ -106,7 +109,7 @@ export default function ImageUploader({
     <div className="space-y-3 font-sans">
       <div className="flex items-center justify-between">
         <label className="block text-xs font-bold text-gray-700">
-          {label} {multiple && <span className="text-[11px] text-gray-500 font-normal">(Олон зураг оруулж болно)</span>}
+          {label} {multiple && !label.includes('Олон') && <span className="text-[11px] text-gray-500 font-normal">(Олон зураг оруулж болно)</span>}
         </label>
         <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 bg-gray-100 p-0.5 rounded-lg border border-gray-200">
           <button

@@ -293,8 +293,11 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
               <ImageUploader
                 multiple={true}
                 value={formData.imageUrl}
-                onChangeMultiple={(urls) => setFormData((prev) => ({ ...prev, imageUrl: urls.join(',') }))}
-                label="Барааны Зургууд (Олон зураг оруулж болно)"
+                onChangeMultiple={(urls) => {
+                  const uniqueUrls = Array.from(new Set(urls.map((u) => u.trim()))).filter(Boolean);
+                  setFormData((prev) => ({ ...prev, imageUrl: uniqueUrls.join(',') }));
+                }}
+                label="Барааны Зургууд"
               />
             </div>
           </div>
