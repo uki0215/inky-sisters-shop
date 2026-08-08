@@ -10,12 +10,27 @@ interface RestockModalProps {
   onSuccess: () => void;
 }
 
+function parseDecimal(str: string | number): number {
+  if (typeof str === 'number') return str;
+  if (!str) return 0;
+  let clean = str.toString().trim();
+  if (clean.includes(',') && !clean.includes('.')) {
+    clean = clean.replace(',', '.');
+  } else {
+    clean = clean.replace(/,/g, '');
+  }
+  const val = parseFloat(clean);
+  return isNaN(val) ? 0 : val;
+}
+
 export default function RestockModal({ product, onClose, onSuccess }: RestockModalProps) {
   const [addQuantity, setAddQuantity] = useState<number>(10);
   const [yuanRate, setYuanRate] = useState<number>(product.yuanRate || 485);
-  const [costYuan, setCostYuan] = useState<number>(product.costYuan || 0);
+  const [costYuanRaw, setCostYuanRaw] = useState<string>((product.costYuan || 0).toString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const costYuan = parseDecimal(costYuanRaw);
 
   // Rate & Cost Fluctuation Comparisons
   const prevRate = product.yuanRate || 485;
@@ -64,7 +79,7 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-white border border-gray-200 rounded-3xl p-6 shadow-2xl text-gray-900 overflow-hidden transform transition-all animate-scaleUp space-y-4">
+      <div className="relative w-full max-w-lg bg-white border border-gray-200 rounded-3xl p-6 shadow-2xl text-gray-900 overflow-hidden transform transition-all animate-scaleUp space-y-4 font-sans">
         
         <button
           onClick={onClose}
@@ -146,11 +161,11 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
                 Шинэ Авсан Үнэ (¥ Юань) *
               </label>
               <input
-                type="number"
-                step="0.01"
+                type="text"
                 required
-                value={costYuan}
-                onChange={(e) => setCostYuan(parseFloat(e.target.value) || 0)}
+                placeholder="2.25"
+                value={costYuanRaw}
+                onChange={(e) => setCostYuanRaw(e.target.value)}
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg font-mono font-bold text-xs text-gray-900"
               />
               <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">

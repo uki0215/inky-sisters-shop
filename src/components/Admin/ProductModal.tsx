@@ -22,15 +22,24 @@ function formatComma(num: number | string): string {
   return parts.join('.');
 }
 
-function parseComma(str: string): number {
+function parseComma(str: string | number): number {
+  if (typeof str === 'number') return str;
   if (!str) return 0;
-  const clean = str.replace(/,/g, '');
-  return parseFloat(clean) || 0;
+  let clean = str.toString().trim();
+  if (clean.includes(',') && !clean.includes('.')) {
+    clean = clean.replace(',', '.');
+  } else {
+    clean = clean.replace(/,/g, '');
+  }
+  const val = parseFloat(clean);
+  return isNaN(val) ? 0 : val;
 }
 
 export default function ProductModal({ product, categories, onClose, onSave }: ProductModalProps) {
   const barcodeInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const [costYuanRaw, setCostYuanRaw] = useState<string>('0');
 
   const [formData, setFormData] = useState({
     barcode: '',
@@ -72,13 +81,16 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
             .slice(0, 16)
         : '';
 
+      const yuanCostVal = product.costYuan || 0;
+      setCostYuanRaw(yuanCostVal ? yuanCostVal.toString() : '0');
+
       setFormData({
         barcode: product.barcode || '',
         name: product.name || '',
         description: product.description || '',
         categoryId: product.categoryId || (categories[0]?.id || ''),
         imageUrl: product.imageUrl || '',
-        costYuan: product.costYuan || 0,
+        costYuan: yuanCostVal,
         yuanRate: product.yuanRate || 485,
         costMnt: product.costMnt || 0,
         priceMnt: product.priceMnt || 0,
@@ -93,6 +105,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
         isFeatured: product.isFeatured || false,
       });
     } else {
+      setCostYuanRaw('0');
       setFormData((prev) => ({
         ...prev,
         categoryId: categories[0]?.id || '',
@@ -101,8 +114,10 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
     }
   }, [product, categories]);
 
-  const calculatedCostMnt = (formData.costYuan > 0 && formData.yuanRate > 0)
-    ? Math.round(formData.costYuan * formData.yuanRate)
+  const parsedCostYuan = parseComma(costYuanRaw);
+
+  const calculatedCostMnt = (parsedCostYuan > 0 && formData.yuanRate > 0)
+    ? Math.round(parsedCostYuan * formData.yuanRate)
     : (formData.costMnt || 0);
 
   const totalUnitsFromBox = (formData.boxCount || 1) * (formData.unitsPerBox || 1);
@@ -137,6 +152,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
     const submitData = {
       ...formData,
       barcode: formData.barcode.trim(),
+      costYuan: parsedCostYuan,
       costMnt: calculatedCostMnt,
     };
 
@@ -295,9 +311,13 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                 <label className="text-gray-600 block mb-1">Авсан үнэ (¥):</label>
                 <input
                   type="text"
-                  placeholder="0"
-                  value={formatComma(formData.costYuan || '')}
-                  onChange={(e) => setFormData({ ...formData, costYuan: parseComma(e.target.value) })}
+                  placeholder="0.00"
+                  value={costYuanRaw}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setCostYuanRaw(raw);
+                    setFormData((prev) => ({ ...prev, costYuan: parseComma(raw) }));
+                  }}
                   className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl font-mono text-sm font-bold text-gray-900 focus:ring-2 focus:ring-teal-500 shadow-2xs"
                 />
               </div>
@@ -337,7 +357,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
             </div>
 
             {/* Direct MNT cost input if costYuan is 0 or yuanRate is 0 */}
-            {(formData.costYuan === 0 || formData.yuanRate === 0) && (
+            {(parsedCostYuan === 0 || formData.yuanRate === 0) && (
               <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl space-y-1">
                 <label className="block text-xs font-bold text-amber-900">
                   ₮ Төгрөгийн Өртөг Оруулах (Юань 0 үед шууд төгрөгөөр) *
