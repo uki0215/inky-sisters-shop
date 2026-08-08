@@ -53,13 +53,16 @@ export default function QuickViewModal({
   };
 
   // Financial calculations
-  const originalPrice = currentProduct.priceMnt;
-  const currentPrice = currentProduct.isDiscounted && currentProduct.discountPriceMnt
-    ? currentProduct.discountPriceMnt
-    : currentProduct.priceMnt;
-  const savings = currentProduct.isDiscounted && currentProduct.discountPriceMnt
-    ? originalPrice - currentProduct.discountPriceMnt
-    : 0;
+  const isDiscountExpired = currentProduct?.discountEndDate ? new Date() > new Date(currentProduct.discountEndDate) : false;
+  const hasDiscount = Boolean(
+    currentProduct?.isDiscounted &&
+    !isDiscountExpired &&
+    currentProduct?.discountPriceMnt &&
+    currentProduct.discountPriceMnt < currentProduct.priceMnt
+  );
+  const originalPrice = currentProduct?.priceMnt || 0;
+  const currentPrice = hasDiscount ? currentProduct.discountPriceMnt : (currentProduct?.priceMnt || 0);
+  const savings = hasDiscount ? originalPrice - currentProduct.discountPriceMnt : 0;
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -133,74 +136,68 @@ export default function QuickViewModal({
           </div>
         )}
 
-        {/* BREADCRUMB HEADER */}
-        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 pb-3 border-b border-gray-100 flex-wrap pr-8">
-          <span className="font-bold text-teal-800">Бараа бүтээгдэхүүн</span>
-          <ChevronRight className="w-3 h-3 text-gray-400" />
-          <span>{currentProduct.category?.name || 'Бичиг хэрэг'}</span>
-          <ChevronRight className="w-3 h-3 text-gray-400" />
-          <span className="font-semibold text-gray-900 truncate max-w-[200px]">
-            {currentProduct.name}
-          </span>
-        </div>
-
-        {/* SECTION: "ТАНД САНАЛ БОЛГОХ" (RECOMMENDED PRODUCTS CAROUSEL) */}
+        {/* TOP RECOMMENDED SLIDER SECTION */}
         {recommendedList.length > 0 && (
-          <div className="mb-6 bg-gray-50 p-3 sm:p-4 rounded-2xl border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-extrabold text-gray-900 text-xs sm:text-sm font-sans flex items-center gap-1">
-                <span>Танд санал болгох</span>
-              </h4>
-
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3 sm:p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-gray-800 font-sans flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-teal-600 inline-block" />
+                Танд санал болгох
+              </span>
               <div className="flex items-center gap-1">
                 <button
+                  type="button"
                   onClick={() => scrollRecommend('left')}
-                  className="p-1 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-teal-50 hover:text-teal-900 transition-colors"
+                  className="p-1 text-gray-500 hover:text-gray-900 bg-white border border-gray-200 rounded-lg shadow-2xs hover:bg-gray-100 transition-all"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => scrollRecommend('right')}
-                  className="p-1 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-teal-50 hover:text-teal-900 transition-colors"
+                  className="p-1 text-gray-500 hover:text-gray-900 bg-white border border-gray-200 rounded-lg shadow-2xs hover:bg-gray-100 transition-all"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Horizontal Scroll List */}
             <div
               ref={recommendScrollRef}
-              className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1 scroll-smooth"
+              className="flex items-center gap-2.5 overflow-x-auto scrollbar-none py-1 scroll-smooth"
             >
-              {recommendedList.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => handleSelectRecommend(item)}
-                  className="shrink-0 w-28 sm:w-36 bg-white border border-gray-200 rounded-xl p-2 cursor-pointer hover:border-teal-500 hover:shadow-md transition-all group"
-                >
-                  <div className="aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-1.5">
-                    <img
-                      src={item.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=300&auto=format&fit=crop&q=80'}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                  <h5 className="text-[11px] font-bold text-gray-900 line-clamp-1 group-hover:text-teal-700">
-                    {item.name}
-                  </h5>
-                  <div className="flex items-baseline gap-1 mt-0.5">
-                    <span className="text-xs font-extrabold text-red-600 font-sans">
-                      {formatMNT(item.discountPriceMnt || item.priceMnt)}
-                    </span>
-                    {item.isDiscounted && item.discountPriceMnt && (
-                      <span className="text-[9px] text-gray-400 line-through">
-                        {formatMNT(item.priceMnt)}
+              {recommendedList.map((item) => {
+                const itemDiscountExpired = item.discountEndDate ? new Date() > new Date(item.discountEndDate) : false;
+                const itemHasDiscount = Boolean(item.isDiscounted && !itemDiscountExpired && item.discountPriceMnt && item.discountPriceMnt < item.priceMnt);
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => handleSelectRecommend(item)}
+                    className="shrink-0 w-28 sm:w-36 bg-white border border-gray-200 rounded-xl p-2 cursor-pointer hover:border-teal-500 hover:shadow-md transition-all group"
+                  >
+                    <div className="aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-1.5">
+                      <img
+                        src={item.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=300&auto=format&fit=crop&q=80'}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                    <h5 className="text-[11px] font-bold text-gray-900 line-clamp-1 group-hover:text-teal-700">
+                      {item.name}
+                    </h5>
+                    <div className="flex items-baseline gap-1 mt-0.5">
+                      <span className={`text-xs font-extrabold font-sans ${itemHasDiscount ? 'text-red-600' : 'text-gray-900'}`}>
+                        {formatMNT(itemHasDiscount ? item.discountPriceMnt : item.priceMnt)}
                       </span>
-                    )}
+                      {itemHasDiscount && (
+                        <span className="text-[9px] text-gray-400 line-through">
+                          {formatMNT(item.priceMnt)}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -215,16 +212,26 @@ export default function QuickViewModal({
               alt={currentProduct.name}
               className={`w-full h-full object-cover ${isOutOfStock ? 'opacity-40 grayscale' : ''}`}
             />
+            {hasDiscount && currentProduct.discountPercent && (
+              <span className="absolute top-3 left-3 px-3 py-1 bg-red-600 text-white font-black text-xs rounded-xl shadow-md">
+                -{currentProduct.discountPercent}% ХЯМДРАЛ
+              </span>
+            )}
             {isOutOfStock && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/80 font-bold text-red-600 text-base uppercase shadow-inner">
-                Дууссан (Out of Stock)
+                Дууссан
               </div>
             )}
           </div>
 
-          {/* Details & Cart Action */}
+          {/* Product Details & Actions */}
           <div className="space-y-4">
             <div>
+              {currentProduct.category?.name && (
+                <span className="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-md border border-teal-200 inline-block mb-1">
+                  {currentProduct.category.name}
+                </span>
+              )}
               <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 font-sans leading-tight">
                 {currentProduct.name}
               </h2>
@@ -245,13 +252,15 @@ export default function QuickViewModal({
             <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
               <div className="flex items-baseline justify-between">
                 <div>
-                  <span className="text-xs font-bold text-gray-500 block uppercase">Хямдарсан үнэ</span>
+                  <span className="text-xs font-bold text-gray-500 block uppercase">
+                    {hasDiscount ? 'Хямдарсан үнэ' : 'Үнэ'}
+                  </span>
                   <div className="flex items-baseline gap-2 mt-0.5">
-                    <span className="text-2xl sm:text-3xl font-extrabold text-red-600 font-sans">
+                    <span className={`text-2xl sm:text-3xl font-extrabold font-sans ${hasDiscount ? 'text-red-600' : 'text-gray-900'}`}>
                       {formatMNT(currentPrice)}
                     </span>
 
-                    {currentProduct.isDiscounted && currentProduct.discountPercent && (
+                    {hasDiscount && currentProduct.discountPercent && (
                       <span className="px-2 py-0.5 bg-red-100 text-red-600 font-black text-xs rounded border border-red-200">
                         -{currentProduct.discountPercent}%
                       </span>
@@ -259,7 +268,7 @@ export default function QuickViewModal({
                   </div>
                 </div>
 
-                {currentProduct.isDiscounted && (
+                {hasDiscount && (
                   <div className="text-right">
                     <span className="text-xs font-bold text-gray-500 block uppercase">Анхны үнэ</span>
                     <span className="text-sm text-gray-400 line-through font-bold font-sans">
@@ -269,7 +278,7 @@ export default function QuickViewModal({
                 )}
               </div>
 
-              {savings > 0 && (
+              {hasDiscount && savings > 0 && (
                 <div className="pt-2 border-t border-gray-200 flex items-center justify-between text-xs font-bold text-red-600">
                   <span>Хэмнэлт:</span>
                   <span>{formatMNT(savings)}</span>
