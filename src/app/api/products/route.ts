@@ -32,11 +32,21 @@ export async function GET(request: Request) {
       where.isFeatured = true;
     }
 
-    const products = await db.product.findMany({
+    let products = await db.product.findMany({
       where,
       include: { category: true },
       orderBy: { createdAt: 'desc' },
     });
+
+    if (products.length === 0 && !search && !barcode) {
+      const { seedDefaultData } = await import('@/lib/seedHelper');
+      await seedDefaultData();
+      products = await db.product.findMany({
+        where,
+        include: { category: true },
+        orderBy: { createdAt: 'desc' },
+      });
+    }
 
     return NextResponse.json(products);
   } catch (error: any) {

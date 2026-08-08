@@ -36,6 +36,12 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const { action, resetPassword } = body;
 
+    if (action === 'SEED_DATA') {
+      const { seedDefaultData } = await import('@/lib/seedHelper');
+      const res = await seedDefaultData();
+      return NextResponse.json(res);
+    }
+
     if (action !== 'WIPE_ALL_DATA') {
       return NextResponse.json({ error: 'Баталгаажуулах утга буруу байна.' }, { status: 400 });
     }
@@ -58,41 +64,6 @@ export async function POST(request: Request) {
     const expectedResetPass = (admin.resetPassword && admin.resetPassword.trim()) ? admin.resetPassword.trim() : 'inky1234';
 
     if (!resetPassword || resetPassword.trim() !== expectedResetPass) {
-      return NextResponse.json(
-        { error: '🔒 Өгөгдөл арилгах тусгай нууц үг буруу байна!' },
-        { status: 400 }
-      );
-    }
-
-    const result = await performWipe();
-    return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const key = searchParams.get('key');
-
-    let admin = await db.adminUser.findUnique({ where: { id: 'admin' } });
-
-    if (!admin) {
-      admin = await db.adminUser.create({
-        data: {
-          id: 'admin',
-          username: 'inkysisters',
-          password: 'inkysisters',
-          resetPassword: 'inkysisters',
-          email: 'inkysisters1223@gmail.com',
-        },
-      });
-    }
-
-    const expectedResetPass = (admin.resetPassword && admin.resetPassword.trim()) ? admin.resetPassword.trim() : 'inky1234';
-
-    if (!key || key.trim() !== expectedResetPass) {
       return NextResponse.json(
         { error: '🔒 Өгөгдөл арилгах тусгай нууц үг буруу байна!' },
         { status: 400 }
