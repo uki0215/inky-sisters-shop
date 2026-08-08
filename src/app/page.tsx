@@ -76,7 +76,12 @@ function HomeContent() {
       }
       if (Array.isArray(dataCategories)) setCategories(dataCategories);
       if (dataPromo) setPromoBanner(dataPromo);
-      if (dataSettings) setSettings(dataSettings);
+      if (dataSettings) {
+        setSettings(dataSettings);
+        try {
+          localStorage.setItem('inky_cached_settings', JSON.stringify(dataSettings));
+        } catch (e) {}
+      }
       if (Array.isArray(dataSlides)) setHeroSlides(dataSlides);
       if (Array.isArray(dataCollections)) setFeaturedCollections(dataCollections);
       if (Array.isArray(dataBanks)) setBanksList(dataBanks);
@@ -89,6 +94,19 @@ function HomeContent() {
   };
 
   useEffect(() => {
+    // Scroll screen to the absolute top on page load
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch (e) {}
+
+    // Load cached settings immediately for instant 0ms logo & address rendering
+    try {
+      const cached = localStorage.getItem('inky_cached_settings');
+      if (cached) {
+        setSettings(JSON.parse(cached));
+      }
+    } catch (e) {}
+
     fetchData();
 
     // Cross-tab BroadcastChannel event listener

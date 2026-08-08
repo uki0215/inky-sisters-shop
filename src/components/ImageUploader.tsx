@@ -12,6 +12,57 @@ interface ImageUploaderProps {
   label?: string;
 }
 
+const compressImageFile = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const srcData = e.target?.result as string;
+      if (!srcData) {
+        resolve('');
+        return;
+      }
+      const img = document.createElement('img');
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 600;
+          let w = img.width || 600;
+          let h = img.height || 600;
+          if (w > h) {
+            if (w > MAX_SIZE) {
+              h = Math.round(h * (MAX_SIZE / w));
+              w = MAX_SIZE;
+            }
+          } else {
+            if (h > MAX_SIZE) {
+              w = Math.round(w * (MAX_SIZE / h));
+              h = MAX_SIZE;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, w, h);
+            const webp = canvas.toDataURL('image/webp', 0.8);
+            if (webp && webp.length > 50) {
+              resolve(webp);
+              return;
+            }
+          }
+          resolve(srcData);
+        } catch (err) {
+          resolve(srcData);
+        }
+      };
+      img.onerror = () => resolve(srcData);
+      img.src = srcData;
+    };
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function ImageUploader({
   value = '',
   onChange,
@@ -51,17 +102,9 @@ export default function ImageUploader({
     try {
       const uploadedUrls: string[] = [];
       for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const data = await res.json();
-        if (res.ok && data.url && data.url.length > 10) {
-          uploadedUrls.push(data.url);
+        const compressedUrl = await compressImageFile(file);
+        if (compressedUrl && compressedUrl.length > 20) {
+          uploadedUrls.push(compressedUrl);
         }
       }
 

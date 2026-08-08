@@ -109,7 +109,7 @@ export async function PUT(
         name: name || existing.name,
         description: description !== undefined ? description : existing.description,
         categoryId: categoryId || existing.categoryId,
-        imageUrl: imageUrl || existing.imageUrl,
+        imageUrl: imageUrl !== undefined ? imageUrl : existing.imageUrl,
         costYuan: costYuanVal,
         yuanRate: yuanRateVal,
         costMnt: costMntVal,
