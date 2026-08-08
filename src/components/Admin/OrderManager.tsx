@@ -292,18 +292,18 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
             <button
               onClick={() => setFilter('HAS_RETURN')}
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                filter === 'HAS_RETURN' ? 'bg-red-700 text-white shadow-xs font-extrabold' : 'text-red-700 hover:bg-red-50'
+                filter === 'HAS_RETURN' ? 'bg-teal-700 text-white shadow-xs font-extrabold' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <span>Буцаалттай ({orders.filter((o) => getOrderActionFlags(o).hasReturn).length})</span>
+              Буцаалт
             </button>
             <button
               onClick={() => setFilter('HAS_EDIT')}
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                filter === 'HAS_EDIT' ? 'bg-indigo-700 text-white shadow-xs font-extrabold' : 'text-indigo-800 hover:bg-indigo-50'
+                filter === 'HAS_EDIT' ? 'bg-teal-700 text-white shadow-xs font-extrabold' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <span>Засвартай ({orders.filter((o) => getOrderActionFlags(o).hasEdit).length})</span>
+              Засвар
             </button>
           </div>
 
@@ -380,12 +380,12 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                       {renderPaymentMethodBadge(order.paymentMethod)}
 
                       <span
-                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
                           order.paymentStatus === 'PAID'
-                            ? 'bg-teal-100 text-teal-900'
+                            ? 'bg-teal-100 text-teal-900 border-teal-200'
                             : order.paymentStatus === 'CANCELLED'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-amber-100 text-amber-900'
+                            ? 'bg-red-100 text-red-700 border-red-200'
+                            : 'bg-amber-100 text-amber-900 border-amber-200'
                         }`}
                       >
                         {order.paymentStatus === 'PAID'
@@ -396,14 +396,14 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                       </span>
 
                       {hasReturn && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 bg-red-50 text-red-800 rounded-full border border-red-200 shadow-2xs">
-                          <span>Буцаалттай</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-red-100 text-red-800 rounded-md border border-red-200">
+                          Буцаалттай
                         </span>
                       )}
 
                       {hasEdit && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 bg-indigo-50 text-indigo-800 rounded-full border border-indigo-200 shadow-2xs">
-                          <span>Засвартай</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md border border-indigo-200">
+                          Засвартай
                         </span>
                       )}
                     </div>
