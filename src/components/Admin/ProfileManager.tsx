@@ -63,7 +63,10 @@ export default function ProfileManager() {
         }),
       });
 
-      if (!res.ok) throw new Error('Дэлгүүрийн мэдээлэл хадгалахад алдаа гарлаа');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Дэлгүүрийн мэдээлэл хадгалахад алдаа гарлаа');
+      }
 
       setSettingsSuccess('✓ Дэлгүүрийн хаяг болон холбоо барих мэдээлэл амжилттай шинэчлэгдлээ!');
     } catch (err: any) {

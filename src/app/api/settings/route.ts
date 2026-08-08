@@ -126,8 +126,8 @@ export async function PUT(request: Request) {
     });
 
     return NextResponse.json(updated);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating settings:', error);
-    return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to update settings' }, { status: 500 });
   }
 }
