@@ -89,11 +89,16 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
     }
   };
 
-  const handleDeleteOrder = async (orderId: string) => {
-    if (!confirm('Энэ захиалгыг системээс бүрмөсөн устгах уу? (Буцаах боломжгүй)')) return;
+  const handleDeleteOrder = async (targetOrder: any) => {
+    const isPaid = targetOrder.paymentStatus === 'PAID';
+    const confirmMsg = isPaid
+      ? 'Баталгаажсан энэ захиалгыг устгах уу? (Зарагдсан захиалга тул агуулахын барааны үлдэгдэл өөрчлөгдөхгүй)'
+      : 'Төлөгдөөгүй энэ захиалгыг устгах уу? (Барааны үлдэгдэл буцаан агуулах руу нэмэгдэнэ)';
+
+    if (!confirm(confirmMsg)) return;
 
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const res = await fetch(`/api/orders/${targetOrder.id}`, {
         method: 'DELETE',
       });
 
@@ -417,8 +422,8 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                       </button>
                     )}
 
-                    {/* Cancel Order Icon Button */}
-                    {order.paymentStatus !== 'CANCELLED' && (
+                    {/* Cancel Order Icon Button (Shown only for pending/unpaid orders, hidden for PAID or CANCELLED) */}
+                    {order.paymentStatus !== 'PAID' && order.paymentStatus !== 'CANCELLED' && (
                       <button
                         type="button"
                         onClick={() => handleCancelOrder(order.id)}
@@ -432,7 +437,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                     {/* Delete Order Icon Button */}
                     <button
                       type="button"
-                      onClick={() => handleDeleteOrder(order.id)}
+                      onClick={() => handleDeleteOrder(order)}
                       className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 transition-all flex items-center justify-center shrink-0"
                       title="Захиалга бүрмөсөн устгах"
                     >

@@ -265,8 +265,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    // Restore stock if order was not cancelled
-    if (existing.paymentStatus !== 'CANCELLED') {
+    // Only restore stock if order was PENDING/UNPAID (not yet paid/sold and not cancelled)
+    if (existing.paymentStatus !== 'PAID' && existing.paymentStatus !== 'CANCELLED') {
       for (const item of existing.items) {
         await db.product.update({
           where: { id: item.productId },
