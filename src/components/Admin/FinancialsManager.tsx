@@ -639,6 +639,72 @@ export default function FinancialsManager() {
         )}
       </div>
 
+      {/* DELETED ORDERS AUDIT LOG TABLE */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-xs overflow-hidden space-y-4 p-6">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div>
+            <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-rose-600" />
+              🗑️ Устгагдсан Захиалгуудын Аудит Журнал ({(financialData.deletedLogs || []).length})
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5 font-sans">
+              Захиалгын жагсаалтаас устгагдсан бүх захиалгын түүх. Баталгаажсан (Төлөгдсөн) захиалгыг устгасан ч орлого/ашгийн тооцоо хасагдахгүй хадгалагдана.
+            </p>
+          </div>
+          <span className="text-xs font-mono font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+            Нийт устгагдсан: {(financialData.deletedLogs || []).length} захиалга
+          </span>
+        </div>
+
+        {(financialData.deletedLogs || []).length === 0 ? (
+          <div className="py-8 text-center text-xs text-gray-500 font-sans">
+            Одоогоор устгагдсан захиалгын бичилт байхгүй байна.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-600 uppercase font-mono border-b border-gray-200">
+                <tr>
+                  <th className="py-3 px-4">Устгасан Огноо</th>
+                  <th className="py-3 px-4">Захиалгын Төлөв</th>
+                  <th className="py-3 px-4">Дэлгэрэнгүй Мэдээлэл & Бараанууд</th>
+                  <th className="py-3 px-4 text-right">Захиалгын Дүн (₮)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 font-sans">
+                {(financialData.deletedLogs || []).map((log: any) => {
+                  const isPaid = log.type === 'PAID_ORDER_DELETED' || log.description?.includes('[Төлөв: Төлөгдсөн]');
+                  return (
+                    <tr key={log.id} className="hover:bg-gray-50/80 transition-colors">
+                      <td className="py-3.5 px-4 font-mono text-gray-500 whitespace-nowrap">
+                        {new Date(log.createdAt).toLocaleString('mn-MN')}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border font-extrabold text-[11px] ${
+                            isPaid
+                              ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                              : 'bg-gray-100 border-gray-300 text-gray-700'
+                          }`}
+                        >
+                          {isPaid ? '✅ Баталгаажсан (Төлөгдсөн)' : '⏳ Баталгаажаагүй'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 font-medium text-gray-900 leading-relaxed max-w-xl">
+                        {log.description}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-extrabold text-slate-900 font-mono text-sm whitespace-nowrap">
+                        {formatMNT(log.amountMnt)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

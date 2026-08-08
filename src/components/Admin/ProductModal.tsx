@@ -336,11 +336,11 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
               </div>
             </div>
 
-            {/* Direct MNT cost input if yuanRate is 0 */}
-            {formData.yuanRate === 0 && (
+            {/* Direct MNT cost input if costYuan is 0 or yuanRate is 0 */}
+            {(formData.costYuan === 0 || formData.yuanRate === 0) && (
               <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl space-y-1">
                 <label className="block text-xs font-bold text-amber-900">
-                  ₮ Төгрөгийн Өртөг Оруулах (Ханш 0 үед шууд төгрөөр) *
+                  ₮ Төгрөгийн Өртөг Оруулах (Юань 0 үед шууд төгрөгөөр) *
                 </label>
                 <input
                   type="text"

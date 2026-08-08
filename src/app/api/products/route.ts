@@ -85,9 +85,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const yuanRateVal = Number(yuanRate) || 485;
+    const yuanRateVal = Number(yuanRate) || 0;
     const costYuanVal = Number(costYuan) || 0;
-    const costMntVal = costYuanVal * yuanRateVal;
+    const costMntInput = Number(body.costMnt) || 0;
+    const costMntVal = (costYuanVal > 0 && yuanRateVal > 0)
+      ? costYuanVal * yuanRateVal
+      : costMntInput;
     
     // User / Admin sets the selling price (priceMnt)
     const priceMntVal = Number(priceMnt) || 0;

@@ -69,7 +69,10 @@ export async function PUT(
 
     const yuanRateVal = yuanRate !== undefined ? Number(yuanRate) : existing.yuanRate;
     const costYuanVal = costYuan !== undefined ? Number(costYuan) : existing.costYuan;
-    const costMntVal = costYuanVal * yuanRateVal;
+    const costMntInput = body.costMnt !== undefined ? Number(body.costMnt) : existing.costMnt;
+    const costMntVal = (costYuanVal > 0 && yuanRateVal > 0)
+      ? costYuanVal * yuanRateVal
+      : costMntInput;
 
     const priceMntVal = priceMnt !== undefined ? Number(priceMnt) : existing.priceMnt;
     const priceYuanVal = priceYuan !== undefined
