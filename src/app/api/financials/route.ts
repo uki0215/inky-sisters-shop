@@ -10,7 +10,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const paidOrders = allOrders.filter((o: any) => o.paymentStatus === 'PAID');
+    const paidOrders = allOrders.filter((o: any) => o.paymentStatus === 'PAID' && o.totalMnt > 0);
 
     // Fetch products WITH their full history (for lifetime batch cost calculation)
     const products = await db.product.findMany({

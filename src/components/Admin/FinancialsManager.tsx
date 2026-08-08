@@ -158,21 +158,56 @@ export default function FinancialsManager() {
     .filter((o: any) => o.paymentStatus === 'PAID' && !o.orderNumber?.startsWith('POS-') && !o.deliveryAddress?.includes('POS'))
     .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
 
-  const cashOrdersTotal = (financialData.orders || [])
+  // Payment Method Totals & Refund Deductions
+  const cashRefundLogs = (financialData.financialLogs || []).filter(
+    (l: any) => l.type === 'ORDER_REFUND' && (l.description?.includes('Бэлэн') || l.description?.includes('CASH'))
+  );
+  const cashRefundTotal = cashRefundLogs.reduce((acc: number, l: any) => acc + (l.amountMnt || 0), 0);
+  const rawCashTotal = (financialData.orders || [])
     .filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CASH')
     .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+  const cashOrdersTotal = Math.max(0, rawCashTotal - cashRefundTotal);
 
-  const transferOrdersTotal = (financialData.orders || [])
+  const cashPaidOrders = (financialData.orders || []).filter(
+    (o: any) => o.paymentStatus === 'PAID' && o.totalMnt > 0 && o.paymentMethod === 'CASH'
+  );
+  const cashOrdersCount = Math.max(0, cashPaidOrders.length - cashRefundLogs.length);
+
+  const transferRefundLogs = (financialData.financialLogs || []).filter(
+    (l: any) => l.type === 'ORDER_REFUND' && (l.description?.includes('Шилжүүлэг') || l.description?.includes('TRANSFER') || l.description?.includes('Данс'))
+  );
+  const transferRefundTotal = transferRefundLogs.reduce((acc: number, l: any) => acc + (l.amountMnt || 0), 0);
+  const rawTransferTotal = (financialData.orders || [])
     .filter((o: any) => o.paymentStatus === 'PAID' && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod))
     .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+  const transferOrdersTotal = Math.max(0, rawTransferTotal - transferRefundTotal);
 
-  const cardOrdersTotal = (financialData.orders || [])
+  const transferPaidOrders = (financialData.orders || []).filter(
+    (o: any) => o.paymentStatus === 'PAID' && o.totalMnt > 0 && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod)
+  );
+  const transferOrdersCount = Math.max(0, transferPaidOrders.length - transferRefundLogs.length);
+
+  const cardRefundLogs = (financialData.financialLogs || []).filter(
+    (l: any) => l.type === 'ORDER_REFUND' && (l.description?.includes('Карт') || l.description?.includes('CARD') || l.description?.includes('POS'))
+  );
+  const cardRefundTotal = cardRefundLogs.reduce((acc: number, l: any) => acc + (l.amountMnt || 0), 0);
+  const rawCardTotal = (financialData.orders || [])
     .filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CARD')
     .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+  const cardOrdersTotal = Math.max(0, rawCardTotal - cardRefundTotal);
+
+  const cardPaidOrders = (financialData.orders || []).filter(
+    (o: any) => o.paymentStatus === 'PAID' && o.totalMnt > 0 && o.paymentMethod === 'CARD'
+  );
+  const cardOrdersCount = Math.max(0, cardPaidOrders.length - cardRefundLogs.length);
 
   const creditOrdersTotal = (financialData.orders || [])
     .filter((o: any) => (o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID') && o.paymentStatus !== 'PAID')
     .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+
+  const creditOrdersCount = (financialData.orders || []).filter(
+    (o: any) => (o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID') && o.paymentStatus !== 'PAID' && o.totalMnt > 0
+  ).length;
 
   // EXCEL / CSV EXPORT GENERATOR
   const handleExportExcel = () => {
@@ -396,7 +431,7 @@ export default function FinancialsManager() {
                   Бэлнээр:
                 </span>
                 <span className="text-xs bg-emerald-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
-                  {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CASH').length || 0}
+                  {cashOrdersCount}
                 </span>
               </div>
               <span className="text-xl font-extrabold text-emerald-950 block font-sans mt-2">
@@ -422,7 +457,7 @@ export default function FinancialsManager() {
                   Шилжүүлгээр:
                 </span>
                 <span className="text-xs bg-teal-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
-                  {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod)).length || 0}
+                  {transferOrdersCount}
                 </span>
               </div>
               <span className="text-xl font-extrabold text-teal-950 block font-sans mt-2">
@@ -448,7 +483,7 @@ export default function FinancialsManager() {
                   Картаар (POS):
                 </span>
                 <span className="text-xs bg-purple-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
-                  {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CARD').length || 0}
+                  {cardOrdersCount}
                 </span>
               </div>
               <span className="text-xl font-extrabold text-purple-950 block font-sans mt-2">
@@ -474,7 +509,7 @@ export default function FinancialsManager() {
                   Зээлээр (Авлага):
                 </span>
                 <span className="text-xs bg-rose-200/80 px-2.5 py-0.5 rounded-full font-mono text-rose-950 font-bold">
-                  {financialData.orders?.filter((o: any) => (o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID') && o.paymentStatus !== 'PAID').length || 0}
+                  {creditOrdersCount}
                 </span>
               </div>
               <span className="text-xl font-extrabold text-rose-950 block font-sans mt-2">

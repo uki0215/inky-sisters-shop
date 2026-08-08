@@ -247,13 +247,15 @@ export async function PUT(
       // Log financial adjustment if total changed
       const totalDiff = newTotalMnt - existing.totalMnt;
       if (totalDiff !== 0) {
+        const pMethod = existing.paymentMethod || 'TRANSFER';
+        const pMethodLabel = pMethod === 'CASH' ? 'Бэлэн мөнгө' : pMethod === 'CARD' ? 'Карт POS' : 'Шилжүүлэг';
         await db.financialLog.create({
           data: {
             type: totalDiff < 0 ? 'ORDER_REFUND' : 'ORDER_ADJUSTMENT',
             amountMnt: Math.abs(totalDiff),
             description: totalDiff < 0
-              ? `Захиалгын буцаалт/засвар: ${existing.orderNumber} (-${Math.abs(totalDiff).toLocaleString()}₮)`
-              : `Захиалгын нэмэлт тооцоо: ${existing.orderNumber} (+${totalDiff.toLocaleString()}₮)`,
+              ? `Захиалгын буцаалт/засвар (${pMethodLabel}): ${existing.orderNumber} (-${Math.abs(totalDiff).toLocaleString()}₮)`
+              : `Захиалгын нэмэлт тооцоо (${pMethodLabel}): ${existing.orderNumber} (+${totalDiff.toLocaleString()}₮)`,
             referenceId: existing.id,
           },
         });
