@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
 
     const where: any = {};
-    if (status && status !== 'ALL') {
+    if (status && status !== 'ALL' && status !== 'HAS_RETURN' && status !== 'HAS_EDIT') {
       where.paymentStatus = status;
     }
 

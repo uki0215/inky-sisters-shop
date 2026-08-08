@@ -35,7 +35,7 @@ interface OrderManagerProps {
 
 export default function OrderManager({ products = [], onOrderUpdate }: OrderManagerProps) {
   const [orders, setOrders] = useState<any[]>([]);
-  const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED'>('ALL');
+  const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'HAS_RETURN' | 'HAS_EDIT'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
@@ -44,6 +44,13 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
   // Modals state
   const [isSalesReportOpen, setIsSalesReportOpen] = useState(false);
   const [selectedOrderForReturn, setSelectedOrderForReturn] = useState<any | null>(null);
+
+  const getOrderActionFlags = (order: any) => {
+    const note = order.returnNote || '';
+    const hasReturn = note.includes('Буцаасан') || note.includes('Буцаалт') || note.includes('ORDER_REFUND');
+    const hasEdit = note.includes('Засвар') || note.includes('Солисон') || note.includes('Тоо нэмсэн') || note.includes('Өөрчлөгдсөн') || note.includes('ORDER_EDIT');
+    return { hasReturn, hasEdit };
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -158,6 +165,14 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
     if (salesChannel === 'POS' && (!isPos || isCredit)) return false;
     if (salesChannel === 'CREDIT' && !isCredit) return false;
 
+    const { hasReturn, hasEdit } = getOrderActionFlags(order);
+
+    if (filter === 'PENDING_PAYMENT' && (order.paymentStatus === 'PAID' || order.paymentStatus === 'CANCELLED')) return false;
+    if (filter === 'PAID' && order.paymentStatus !== 'PAID') return false;
+    if (filter === 'CANCELLED' && order.paymentStatus !== 'CANCELLED') return false;
+    if (filter === 'HAS_RETURN' && !hasReturn) return false;
+    if (filter === 'HAS_EDIT' && !hasEdit) return false;
+
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     return (
@@ -197,9 +212,9 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
           <button
             type="button"
             onClick={() => setSalesChannel('ALL')}
-            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               salesChannel === 'ALL'
-                ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
+                ? 'bg-white text-gray-900 shadow-sm border border-gray-200 font-extrabold'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -210,9 +225,9 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
           <button
             type="button"
             onClick={() => setSalesChannel('ONLINE')}
-            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               salesChannel === 'ONLINE'
-                ? 'bg-teal-700 text-white shadow-md'
+                ? 'bg-teal-700 text-white shadow-md font-extrabold'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -223,7 +238,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
           <button
             type="button"
             onClick={() => setSalesChannel('POS')}
-            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               salesChannel === 'POS'
                 ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                 : 'text-gray-600 hover:text-gray-900'
@@ -236,7 +251,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
           <button
             type="button"
             onClick={() => setSalesChannel('CREDIT')}
-            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               salesChannel === 'CREDIT'
                 ? 'bg-rose-600 text-white shadow-md font-black'
                 : 'text-gray-600 hover:text-gray-900'
@@ -249,30 +264,48 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
 
         {/* Sub-Filter Buttons & Search */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-gray-100">
-          <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl border border-gray-200 text-xs font-bold w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-1 bg-gray-100 p-1 rounded-xl border border-gray-200 text-xs font-bold w-full sm:w-auto">
             <button
               onClick={() => setFilter('ALL')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                filter === 'ALL' ? 'bg-teal-700 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filter === 'ALL' ? 'bg-teal-700 text-white shadow-xs font-extrabold' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Бүгд
             </button>
             <button
               onClick={() => setFilter('PENDING_PAYMENT')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                filter === 'PENDING_PAYMENT' ? 'bg-amber-600 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filter === 'PENDING_PAYMENT' ? 'bg-amber-600 text-white shadow-xs font-extrabold' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Төлбөр хүлээгдэж буй
             </button>
             <button
               onClick={() => setFilter('PAID')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                filter === 'PAID' ? 'bg-teal-700 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filter === 'PAID' ? 'bg-teal-700 text-white shadow-xs font-extrabold' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Баталгаажсан
+            </button>
+            <button
+              onClick={() => setFilter('HAS_RETURN')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                filter === 'HAS_RETURN' ? 'bg-red-700 text-white shadow-xs font-extrabold' : 'text-red-700 hover:bg-red-50'
+              }`}
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>🔄 Буцаалттай ({orders.filter((o) => getOrderActionFlags(o).hasReturn).length})</span>
+            </button>
+            <button
+              onClick={() => setFilter('HAS_EDIT')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                filter === 'HAS_EDIT' ? 'bg-indigo-700 text-white shadow-xs font-extrabold' : 'text-indigo-800 hover:bg-indigo-50'
+              }`}
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+              <span>✏️ Засвартай ({orders.filter((o) => getOrderActionFlags(o).hasEdit).length})</span>
             </button>
           </div>
 
@@ -332,6 +365,8 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
             }
             const hasOrderDiscount = originalTotal > order.totalMnt;
 
+            const { hasReturn, hasEdit } = getOrderActionFlags(order);
+
             return (
               <div
                 key={order.id}
@@ -339,7 +374,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono font-extrabold text-teal-800 text-sm bg-teal-50 px-2.5 py-0.5 rounded-md border border-teal-200">
                         {order.orderNumber}
                       </span>
@@ -361,6 +396,20 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                           ? '✕ Цуцлагдсан'
                           : '⏳ Төлбөр Хүлээгдэж Буй'}
                       </span>
+
+                      {hasReturn && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 bg-red-50 text-red-800 rounded-full border border-red-200 shadow-2xs">
+                          <RotateCcw className="w-3 h-3 text-red-600" />
+                          <span>🔄 Буцаалттай</span>
+                        </span>
+                      )}
+
+                      {hasEdit && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 bg-indigo-50 text-indigo-800 rounded-full border border-indigo-200 shadow-2xs">
+                          <Edit2 className="w-3 h-3 text-indigo-600" />
+                          <span>✏️ Засвартай</span>
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-xs text-gray-600 mt-1.5 font-sans">
