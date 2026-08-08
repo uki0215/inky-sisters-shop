@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, Link as LinkIcon, Loader2, Check, X, AlertTriangle, Star, Plus } from 'lucide-react';
+import { Upload, Link as LinkIcon, Loader2, X, AlertTriangle, Plus } from 'lucide-react';
 
 interface ImageUploaderProps {
   value?: string;
@@ -25,9 +25,9 @@ const compressImageFile = (file: File): Promise<string> => {
       img.onload = () => {
         try {
           const canvas = document.createElement('canvas');
-          const MAX_SIZE = 600;
-          let w = img.width || 600;
-          let h = img.height || 600;
+          const MAX_SIZE = 800;
+          let w = img.width || 800;
+          let h = img.height || 800;
           if (w > h) {
             if (w > MAX_SIZE) {
               h = Math.round(h * (MAX_SIZE / w));
@@ -44,7 +44,7 @@ const compressImageFile = (file: File): Promise<string> => {
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0, w, h);
-            const webp = canvas.toDataURL('image/webp', 0.8);
+            const webp = canvas.toDataURL('image/webp', 0.85);
             if (webp && webp.length > 50) {
               resolve(webp);
               return;
@@ -76,10 +76,10 @@ export default function ImageUploader({
   const [mode, setMode] = useState<'file' | 'url'>('file');
   const [urlInput, setUrlInput] = useState('');
 
-  // Extract clean, unique list of image URLs
+  // Clean image list extraction
   const getImagesList = (): string[] => {
     let raw: string[] = [];
-    if (values && Array.isArray(values) && values.length > 0) {
+    if (multiple && values && Array.isArray(values) && values.length > 0) {
       raw = values;
     } else if (typeof value === 'string' && value.trim()) {
       raw = value.split(',').map((s) => s.trim()).filter(Boolean);
@@ -90,7 +90,7 @@ export default function ImageUploader({
   const currentImages = getImagesList();
 
   const uploadSingleFile = async (file: File): Promise<string | null> => {
-    // 1. Try server API /api/upload (which uploads to ImgBB CDN)
+    // 1. Try server API /api/upload (ImgBB CDN)
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -100,10 +100,10 @@ export default function ImageUploader({
         return data.url;
       }
     } catch (e) {
-      console.warn('Server upload route error, trying client CDN:', e);
+      console.warn('Server upload error:', e);
     }
 
-    // 2. Direct client-side ImgBB CDN upload fallback
+    // 2. Direct client ImgBB upload
     try {
       const compressedDataUrl = await compressImageFile(file);
       const base64Clean = compressedDataUrl.replace(/^data:image\/\w+;base64,/, '');
@@ -119,10 +119,10 @@ export default function ImageUploader({
         return data.data.display_url || data.data.url;
       }
     } catch (e) {
-      console.warn('Direct ImgBB upload error:', e);
+      console.warn('Direct ImgBB error:', e);
     }
 
-    // 3. Compressed WebP Data URL fallback
+    // 3. Fallback: compressed webp data URL
     return await compressImageFile(file);
   };
 
@@ -130,34 +130,30 @@ export default function ImageUploader({
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    // Reset input immediately to allow re-selecting and prevent duplicate events
     e.target.value = '';
-
     setUploading(true);
     setError(null);
 
     try {
-      const uploadedUrls: string[] = [];
-      for (const file of files) {
-        const url = await uploadSingleFile(file);
-        if (url && url.length > 10) {
-          uploadedUrls.push(url);
+      if (multiple) {
+        const uploadedUrls: string[] = [];
+        for (const file of files) {
+          const url = await uploadSingleFile(file);
+          if (url && url.length > 10) uploadedUrls.push(url);
         }
-      }
-
-      if (uploadedUrls.length > 0) {
-        if (multiple && onChangeMultiple) {
+        if (uploadedUrls.length > 0 && onChangeMultiple) {
           const combined = Array.from(new Set([...currentImages, ...uploadedUrls])).filter(Boolean);
           onChangeMultiple(combined);
-        } else if (onChange) {
-          onChange(uploadedUrls[0]);
         }
       } else {
-        setError('Зураг оруулахад алдаа гарлаа. Та дахин оролдоно уу.');
+        const url = await uploadSingleFile(files[0]);
+        if (url && onChange) {
+          onChange(url);
+        }
       }
     } catch (err: any) {
       console.error(err);
-      setError('Зургаа уншихад холболтын алдаа гарлаа.');
+      setError('Зургаа оруулахад алдаа гарлаа.');
     } finally {
       setUploading(false);
     }
@@ -180,17 +176,7 @@ export default function ImageUploader({
     if (multiple && onChangeMultiple) {
       onChangeMultiple(updated);
     } else if (onChange) {
-      onChange(updated[0] || '');
-    }
-  };
-
-  const handleSetPrimary = (indexToPrimary: number) => {
-    if (!multiple || indexToPrimary === 0) return;
-    const item = currentImages[indexToPrimary];
-    const rest = currentImages.filter((_, idx) => idx !== indexToPrimary);
-    const updated = Array.from(new Set([item, ...rest])).filter(Boolean);
-    if (onChangeMultiple) {
-      onChangeMultiple(updated);
+      onChange('');
     }
   };
 
@@ -198,7 +184,7 @@ export default function ImageUploader({
     <div className="space-y-3 font-sans">
       <div className="flex items-center justify-between">
         <label className="block text-xs font-bold text-gray-700">
-          {label} {multiple && !label.includes('Олон') && <span className="text-[11px] text-gray-500 font-normal">(Олон зураг оруулж болно)</span>}
+          {label}
         </label>
         <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 bg-gray-100 p-0.5 rounded-lg border border-gray-200">
           <button
@@ -248,7 +234,7 @@ export default function ImageUploader({
               <Upload className="w-6 h-6 text-gray-400 group-hover:text-teal-600 transition-colors" />
             )}
             <span className="text-xs font-bold text-gray-700 group-hover:text-teal-700">
-              {uploading ? 'Зургуудыг уншиж байна...' : (multiple ? 'Нэг болон олон зураг сонгож хуулах' : 'Компьютерээс зураг сонгож хуулах')}
+              {uploading ? 'Зургийг оруулан уншиж байна...' : 'Компьютерээс зураг сонгож хуулах'}
             </span>
             <span className="text-[10px] text-gray-400">
               PNG, JPG, WEBP (Дээд хэмжээ 10MB)
@@ -278,41 +264,23 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* Uploaded Gallery Grid */}
+      {/* Uploaded Single Image Preview or Gallery */}
       {currentImages.length > 0 && (
         <div className="space-y-1.5 pt-1">
           <span className="text-[11px] font-bold text-gray-600 block">
-            Сонгогдсон зургууд ({currentImages.length}):
+            Сонгогдсон зураг:
           </span>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          <div className="flex flex-wrap gap-2.5">
             {currentImages.map((imgUrl, idx) => (
               <div
                 key={`${imgUrl.slice(0, 30)}_${idx}`}
-                className={`relative aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 group shadow-xs ${
-                  idx === 0 ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-gray-200'
-                }`}
+                className="relative w-28 h-28 rounded-xl overflow-hidden bg-gray-100 border-2 border-teal-500 ring-2 ring-teal-500/20 group shadow-xs"
               >
                 <img
                   src={imgUrl}
-                  alt={`Product Image ${idx + 1}`}
+                  alt="Product Image"
                   className="w-full h-full object-cover"
                 />
-
-                {/* Primary Thumbnail Badge */}
-                {idx === 0 ? (
-                  <span className="absolute top-1 left-1 bg-teal-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-md flex items-center gap-0.5">
-                    <Star className="w-2.5 h-2.5 fill-current" /> Үндсэн
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleSetPrimary(idx)}
-                    className="absolute top-1 left-1 bg-black/60 hover:bg-teal-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-                    title="Үндсэн зураг болгох"
-                  >
-                    Үндсэн болгох
-                  </button>
-                )}
 
                 {/* Remove Button */}
                 <button
@@ -321,7 +289,7 @@ export default function ImageUploader({
                   className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full shadow-md transition-all"
                   title="Зураг устгах"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}
