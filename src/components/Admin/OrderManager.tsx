@@ -142,7 +142,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
       case 'CREDIT':
         return (
           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-rose-100 text-rose-900 rounded-md border border-rose-300">
-            <Clock className="w-3 h-3 text-rose-700" /> ⏳ Зээлээр (Дараа төлбөрт)
+            <Clock className="w-3 h-3 text-rose-700" /> Зээлээр (Дараа төлбөрт)
           </span>
         );
       default:
@@ -189,7 +189,8 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-extrabold text-gray-900 font-sans flex items-center gap-2">
-              📦 Борлуулалт &amp; Захиалгын Удирдлага
+              <Layers className="w-5 h-5 text-teal-700" />
+              <span>Борлуулалт &amp; Захиалгын Удирдлага</span>
             </h3>
             <p className="text-xs text-gray-500 mt-0.5 font-sans">
               Онлайн захиалгууд, кассын борлуулалт болон зээлийн авлагыг шүүн харах, төлбөр баталгаажуулах
@@ -232,7 +233,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
             }`}
           >
             <ShoppingBag className="w-4 h-4 text-teal-300" />
-            <span>🛍️ Онлайн Захиалгууд ({orders.filter((o) => !o.orderNumber?.startsWith('POS-')).length})</span>
+            <span>Онлайн Захиалгууд ({orders.filter((o) => !o.orderNumber?.startsWith('POS-')).length})</span>
           </button>
 
           <button
@@ -245,7 +246,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
             }`}
           >
             <ShoppingCart className="w-4 h-4 text-amber-950" />
-            <span>🏪 Касс ({orders.filter((o) => o.orderNumber?.startsWith('POS-') && o.paymentMethod !== 'CREDIT').length})</span>
+            <span>Касс ({orders.filter((o) => o.orderNumber?.startsWith('POS-') && o.paymentMethod !== 'CREDIT').length})</span>
           </button>
 
           <button
@@ -258,7 +259,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
             }`}
           >
             <Clock className="w-4 h-4 text-rose-200" />
-            <span>⏳ Зээлээр / Авлага ({orders.filter((o) => o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID').length})</span>
+            <span>Зээлээр / Авлага ({orders.filter((o) => o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID').length})</span>
           </button>
         </div>
 

@@ -383,7 +383,7 @@ export default function PosManager({ products = [], categories = [], bundles = [
         <div>
           <div className="flex items-center gap-2 text-teal-400 font-mono font-bold text-xs uppercase tracking-wider">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping inline-block" />
-            <span>🟢 USB Бар код уншигч &amp; Касс бэлэн</span>
+            <span>USB Бар код уншигч &amp; Касс бэлэн</span>
           </div>
         </div>
 

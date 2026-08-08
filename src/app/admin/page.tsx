@@ -641,7 +641,7 @@ export default function AdminPage() {
             >
               <div className="flex items-center gap-2.5">
                 <ShoppingBag className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20" />
-                <span className="font-sans text-xs">🛒 Касс</span>
+                <span className="font-sans text-xs">Касс</span>
               </div>
               <ChevronRight className="w-4 h-4 text-amber-400" />
             </button>

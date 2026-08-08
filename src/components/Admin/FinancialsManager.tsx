@@ -512,11 +512,11 @@ export default function FinancialsManager() {
           </div>
           <div className="pt-2 border-t border-gray-100 grid grid-cols-2 gap-1 text-[11px] font-mono">
             <div>
-              <span className="text-gray-400 block font-sans text-[10px]">🏪 Кассаар:</span>
+              <span className="text-gray-400 block font-sans text-[10px]">Кассаар:</span>
               <span className="font-bold text-amber-900">{formatMNT(posSalesTotal)}</span>
             </div>
             <div>
-              <span className="text-gray-400 block font-sans text-[10px]">🛍️ Онлайнаар:</span>
+              <span className="text-gray-400 block font-sans text-[10px]">Онлайнаар:</span>
               <span className="font-bold text-teal-800">{formatMNT(onlineSalesTotal)}</span>
             </div>
           </div>
@@ -585,12 +585,12 @@ export default function FinancialsManager() {
               onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })}
               className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:bg-white"
             >
-              <option value="Түрээс">🏢 Түрээсийн төлбөр</option>
-              <option value="Ус">💧 Усны мөнгө</option>
-              <option value="Тог">⚡ Тог / Цахилгаан</option>
-              <option value="Интернэт">🌐 Интернэт / Нэхэмжлэх</option>
-              <option value="Хоолны мөнгө">🍲 Хоолны мөнгө</option>
-              <option value="Бусад зардал">📦 Бусад зардал</option>
+              <option value="Түрээс">Түрээсийн төлбөр</option>
+              <option value="Ус">Усны мөнгө</option>
+              <option value="Тог">Тог / Цахилгаан</option>
+              <option value="Интернэт">Интернэт / Нэхэмжлэх</option>
+              <option value="Хоолны мөнгө">Хоолны мөнгө</option>
+              <option value="Бусад зардал">Бусад зардал</option>
             </select>
           </div>
 
