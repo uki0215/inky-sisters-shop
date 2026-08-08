@@ -129,6 +129,7 @@ model OrderItem {
   productName String
   barcode     String
   priceMnt    Float
+  costMnt     Float?   // авсан өртөг ₮ (тухайн үеийн өртөг)
   quantity    Int
 }
 

@@ -40,13 +40,16 @@ export async function GET() {
       .reduce((sum: number, o: any) => sum + o.totalMnt, 0);
 
     // Compute Cost of Goods Sold (COGS)
+    // Uses item.costMnt (unit cost locked at purchase/checkout time) if available,
+    // otherwise falls back to current product cost for historical compatibility.
     let totalCogsMnt = 0;
     paidOrders.forEach((order: any) => {
       order.items.forEach((item: any) => {
         const prod = item.product;
-        const costPerUnit = (prod?.costYuan && prod.costYuan > 0 && prod?.yuanRate && prod.yuanRate > 0)
+        const fallbackCost = (prod?.costYuan && prod.costYuan > 0 && prod?.yuanRate && prod.yuanRate > 0)
           ? prod.costYuan * prod.yuanRate
           : (prod?.costMnt || 0);
+        const costPerUnit = (item.costMnt !== null && item.costMnt !== undefined) ? item.costMnt : fallbackCost;
         totalCogsMnt += costPerUnit * item.quantity;
       });
     });
@@ -56,21 +59,8 @@ export async function GET() {
 
     // Compute Inventory Values:
     // 1. Current In-Stock Inventory Metrics
-    // 2. Lifetime Total Acquired Inventory Metrics (NEVER DECREASES when goods are sold)
     let currentInventoryCostMnt = 0;
     let currentInventorySaleValueMnt = 0;
-
-    let totalPurchasedCostMnt = 0;
-    let totalPurchasedSaleValueMnt = 0;
-
-    const soldQtyMap: Record<string, number> = {};
-    paidOrders.forEach((order: any) => {
-      order.items.forEach((item: any) => {
-        if (item.productId) {
-          soldQtyMap[item.productId] = (soldQtyMap[item.productId] || 0) + item.quantity;
-        }
-      });
-    });
 
     products.forEach((p: any) => {
       const unitCost = (p.costYuan && p.costYuan > 0 && p.yuanRate && p.yuanRate > 0)
@@ -79,18 +69,19 @@ export async function GET() {
 
       const sellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
 
-      const soldQty = soldQtyMap[p.id] || 0;
-      const totalUnitsAcquired = (p.stock || 0) + soldQty;
-
       // Current stock metrics
       currentInventoryCostMnt += unitCost * (p.stock || 0);
       currentInventorySaleValueMnt += sellingPrice * (p.stock || 0);
-
-      // Lifetime total acquired stock metrics (NEVER DECREASE)
-      totalPurchasedCostMnt += unitCost * totalUnitsAcquired;
-      totalPurchasedSaleValueMnt += sellingPrice * totalUnitsAcquired;
     });
 
+    // 2. Lifetime Total Acquired Inventory Metrics (NEVER DECREASES when goods are sold or when cost changes)
+    // Lifetime Cost = (Historical COGS of all sold items) + (Cost of current remaining in-stock items)
+    const totalPurchasedCostMnt = totalCogsMnt + currentInventoryCostMnt;
+    
+    // Lifetime Sale Value = (Total Revenue from all paid sales) + (Potential sale value of current in-stock items)
+    const totalPurchasedSaleValueMnt = totalIncomeMnt + currentInventorySaleValueMnt;
+
+    // Lifetime Potential Gross Profit = Lifetime Sale Value - Lifetime Cost
     const currentInventoryPotentialProfitMnt = currentInventorySaleValueMnt - currentInventoryCostMnt;
     const totalPurchasedPotentialProfitMnt = totalPurchasedSaleValueMnt - totalPurchasedCostMnt;
 

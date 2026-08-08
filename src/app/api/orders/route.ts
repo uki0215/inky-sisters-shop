@@ -105,6 +105,7 @@ export async function POST(request: Request) {
             const p = bItem.product;
             const hasProdDiscount = p.isDiscounted && p.discountPriceMnt;
             const unitPrice = hasProdDiscount ? p.discountPriceMnt : p.priceMnt;
+            const unitCost = (p.costYuan > 0 && p.yuanRate > 0) ? p.costYuan * p.yuanRate : (p.costMnt || 0);
 
             let descText = `   └─ [Багцын Бараа] ${p.name} (${bItem.quantity}ш)`;
             if (hasProdDiscount) {
@@ -118,6 +119,7 @@ export async function POST(request: Request) {
               productName: descText,
               barcode: p.barcode || `SUB-${bItem.productId.slice(0, 8)}`,
               priceMnt: unitPrice,
+              costMnt: unitCost,
               quantity: requiredQty,
             });
 
@@ -141,6 +143,8 @@ export async function POST(request: Request) {
           ? product.discountPriceMnt
           : product.priceMnt;
 
+        const unitCost = (product.costYuan > 0 && product.yuanRate > 0) ? product.costYuan * product.yuanRate : (product.costMnt || 0);
+
         totalMnt += itemPrice * item.quantity;
 
         orderItemsData.push({
@@ -148,6 +152,7 @@ export async function POST(request: Request) {
           productName: product.name,
           barcode: product.barcode,
           priceMnt: itemPrice,
+          costMnt: unitCost,
           quantity: item.quantity,
         });
 

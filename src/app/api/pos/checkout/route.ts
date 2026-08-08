@@ -78,6 +78,8 @@ export async function POST(request: Request) {
           );
         }
 
+        const unitCost = (product.costYuan > 0 && product.yuanRate > 0) ? product.costYuan * product.yuanRate : (product.costMnt || 0);
+
         totalMnt += item.priceMnt * item.quantity;
 
         orderItemsData.push({
@@ -85,6 +87,7 @@ export async function POST(request: Request) {
           productName: product.name,
           barcode: product.barcode,
           priceMnt: item.priceMnt,
+          costMnt: unitCost,
           quantity: item.quantity,
         });
 
