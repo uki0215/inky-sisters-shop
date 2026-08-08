@@ -1636,57 +1636,23 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-2 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
               <button
                 type="button"
-                disabled={resetModalLoading}
-                onClick={async () => {
-                  setResetModalLoading(true);
-                  setResetModalError(null);
-                  try {
-                    const res = await fetch('/api/admin/reset-db', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: 'SEED_DATA' }),
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                      alert('✅ Жишээ дата амжилттай сэргээгдлээ!');
-                      setIsResetModalOpen(false);
-                      fetchAdminData();
-                    } else {
-                      setResetModalError(data.error || 'Сэргээхэд алдаа гарлаа.');
-                    }
-                  } catch (e: any) {
-                    setResetModalError(e.message);
-                  } finally {
-                    setResetModalLoading(false);
-                  }
-                }}
-                className="px-3.5 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+                onClick={() => setIsResetModalOpen(false)}
+                className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-all"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Жишээ дата сэргээх</span>
+                Цуцлах
               </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsResetModalOpen(false)}
-                  className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-all"
-                >
-                  Цуцлах
-                </button>
-                <button
-                  type="button"
-                  disabled={resetModalLoading || !resetModalPassInput}
-                  onClick={handleDbResetConfirm}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>{resetModalLoading ? 'Цэвэрлэж байна...' : 'Бүх өгөгдлийг 0 болгох'}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                disabled={resetModalLoading || !resetModalPassInput}
+                onClick={handleDbResetConfirm}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{resetModalLoading ? 'Цэвэрлэж байна...' : 'Бүх өгөгдлийг 0 болгох'}</span>
+              </button>
             </div>
           </div>
         </div>

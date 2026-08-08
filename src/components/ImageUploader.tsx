@@ -12,45 +12,6 @@ interface ImageUploaderProps {
   label?: string;
 }
 
-const compressImageFile = (file: File): Promise<string> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_SIZE = 800;
-        let w = img.width;
-        let h = img.height;
-        if (w > h) {
-          if (w > MAX_SIZE) {
-            h *= MAX_SIZE / w;
-            w = MAX_SIZE;
-          }
-        } else {
-          if (h > MAX_SIZE) {
-            w *= MAX_SIZE / h;
-            h = MAX_SIZE;
-          }
-        }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', 0.8));
-        } else {
-          resolve(e.target?.result as string);
-        }
-      };
-      img.onerror = () => resolve(e.target?.result as string);
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = () => resolve('');
-    reader.readAsDataURL(file);
-  });
-};
-
 export default function ImageUploader({
   value = '',
   onChange,
@@ -64,15 +25,25 @@ export default function ImageUploader({
   const [mode, setMode] = useState<'file' | 'url'>('file');
   const [urlInput, setUrlInput] = useState('');
 
-  // Normalize image list and remove duplicates
-  const rawList = multiple
-    ? (values || (value ? value.split(',').map((s) => s.trim()).filter(Boolean) : []))
-    : (value ? [value.trim()] : []);
-  const currentImages: string[] = Array.from(new Set(rawList)).filter(Boolean);
+  // Extract clean, unique list of image URLs
+  const getImagesList = (): string[] => {
+    let raw: string[] = [];
+    if (values && Array.isArray(values) && values.length > 0) {
+      raw = values;
+    } else if (typeof value === 'string' && value.trim()) {
+      raw = value.split(',').map((s) => s.trim()).filter(Boolean);
+    }
+    return Array.from(new Set(raw)).filter((url) => url && url.length > 5);
+  };
+
+  const currentImages = getImagesList();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
+
+    // Reset input immediately to allow re-selecting and prevent duplicate events
+    e.target.value = '';
 
     setUploading(true);
     setError(null);
@@ -80,16 +51,24 @@ export default function ImageUploader({
     try {
       const uploadedUrls: string[] = [];
       for (const file of files) {
-        const compressedUrl = await compressImageFile(file);
-        if (compressedUrl) {
-          uploadedUrls.push(compressedUrl);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (res.ok && data.url && data.url.length > 10) {
+          uploadedUrls.push(data.url);
         }
       }
 
       if (uploadedUrls.length > 0) {
         if (multiple && onChangeMultiple) {
-          const uniqueCombined = Array.from(new Set([...currentImages, ...uploadedUrls]));
-          onChangeMultiple(uniqueCombined);
+          const combined = Array.from(new Set([...currentImages, ...uploadedUrls])).filter(Boolean);
+          onChangeMultiple(combined);
         } else if (onChange) {
           onChange(uploadedUrls[0]);
         }
@@ -98,10 +77,9 @@ export default function ImageUploader({
       }
     } catch (err: any) {
       console.error(err);
-      setError(err?.message || 'Зургаа уншихад холболтын алдаа гарлаа.');
+      setError('Зургаа уншихад холболтын алдаа гарлаа.');
     } finally {
       setUploading(false);
-      e.target.value = '';
     }
   };
 
@@ -109,8 +87,8 @@ export default function ImageUploader({
     if (!urlInput.trim()) return;
     const url = urlInput.trim();
     if (multiple && onChangeMultiple) {
-      const uniqueCombined = Array.from(new Set([...currentImages, url]));
-      onChangeMultiple(uniqueCombined);
+      const combined = Array.from(new Set([...currentImages, url])).filter(Boolean);
+      onChangeMultiple(combined);
     } else if (onChange) {
       onChange(url);
     }
@@ -130,7 +108,7 @@ export default function ImageUploader({
     if (!multiple || indexToPrimary === 0) return;
     const item = currentImages[indexToPrimary];
     const rest = currentImages.filter((_, idx) => idx !== indexToPrimary);
-    const updated = Array.from(new Set([item, ...rest]));
+    const updated = Array.from(new Set([item, ...rest])).filter(Boolean);
     if (onChangeMultiple) {
       onChangeMultiple(updated);
     }
@@ -229,7 +207,7 @@ export default function ImageUploader({
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
             {currentImages.map((imgUrl, idx) => (
               <div
-                key={idx}
+                key={`${imgUrl.slice(0, 30)}_${idx}`}
                 className={`relative aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 group shadow-xs ${
                   idx === 0 ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-gray-200'
                 }`}
@@ -237,9 +215,6 @@ export default function ImageUploader({
                 <img
                   src={imgUrl}
                   alt={`Product Image ${idx + 1}`}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=300&auto=format&fit=crop&q=80';
-                  }}
                   className="w-full h-full object-cover"
                 />
 

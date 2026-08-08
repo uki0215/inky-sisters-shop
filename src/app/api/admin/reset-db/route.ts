@@ -36,12 +36,6 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const { action, resetPassword } = body;
 
-    if (action === 'SEED_DATA') {
-      const { seedDefaultData } = await import('@/lib/seedHelper');
-      const res = await seedDefaultData();
-      return NextResponse.json(res);
-    }
-
     if (action !== 'WIPE_ALL_DATA') {
       return NextResponse.json({ error: 'Баталгаажуулах утга буруу байна.' }, { status: 400 });
     }
