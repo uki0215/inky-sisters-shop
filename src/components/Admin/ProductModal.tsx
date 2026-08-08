@@ -291,9 +291,22 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
 
             <div>
               <ImageUploader
-                value={formData.imageUrl}
-                onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
-                label="Барааны Зураг"
+                multiple
+                values={formData.imageUrl
+                  ? formData.imageUrl.split(',').map((s: string) => s.trim()).filter((s: string) => s.startsWith('http') || s.startsWith('data:image/') || s.startsWith('/'))
+                  : []}
+                onChangeMultiple={(urls) => setFormData((prev) => ({ ...prev, imageUrl: urls.join(',') }))}
+                onChange={(url) => {
+                  // keep first image in sync when using single onChange
+                  setFormData((prev) => {
+                    const existing = prev.imageUrl
+                      ? prev.imageUrl.split(',').map((s: string) => s.trim()).filter((s: string) => s.startsWith('http') || s.startsWith('data:image/') || s.startsWith('/'))
+                      : [];
+                    if (!url) return { ...prev, imageUrl: existing.slice(1).join(',') };
+                    return prev;
+                  });
+                }}
+                label="Барааны Зурагнууд"
               />
             </div>
           </div>
