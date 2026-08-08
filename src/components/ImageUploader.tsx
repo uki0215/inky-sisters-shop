@@ -89,43 +89,6 @@ export default function ImageUploader({
 
   const currentImages = getImagesList();
 
-  const uploadSingleFile = async (file: File): Promise<string | null> => {
-    // 1. Try server API /api/upload (ImgBB CDN)
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (res.ok && data.url && data.url.length > 10) {
-        return data.url;
-      }
-    } catch (e) {
-      console.warn('Server upload error:', e);
-    }
-
-    // 2. Direct client ImgBB upload
-    try {
-      const compressedDataUrl = await compressImageFile(file);
-      const base64Clean = compressedDataUrl.replace(/^data:image\/\w+;base64,/, '');
-      const imgbbForm = new FormData();
-      imgbbForm.append('image', base64Clean);
-
-      const res = await fetch('https://api.imgbb.com/1/upload?key=6d02737556a31b2b619786270f736899', {
-        method: 'POST',
-        body: imgbbForm,
-      });
-      const data = await res.json();
-      if (res.ok && (data?.data?.display_url || data?.data?.url)) {
-        return data.data.display_url || data.data.url;
-      }
-    } catch (e) {
-      console.warn('Direct ImgBB error:', e);
-    }
-
-    // 3. Fallback: compressed webp data URL
-    return await compressImageFile(file);
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -135,21 +98,21 @@ export default function ImageUploader({
     setError(null);
 
     try {
-      if (multiple) {
-        const uploadedUrls: string[] = [];
-        for (const file of files) {
-          const url = await uploadSingleFile(file);
-          if (url && url.length > 10) uploadedUrls.push(url);
-        }
-        if (uploadedUrls.length > 0 && onChangeMultiple) {
-          const combined = Array.from(new Set([...currentImages, ...uploadedUrls])).filter(Boolean);
-          onChangeMultiple(combined);
-        }
+      const file = files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.url) {
+        if (onChange) onChange(data.url);
       } else {
-        const url = await uploadSingleFile(files[0]);
-        if (url && onChange) {
-          onChange(url);
-        }
+        const fallbackUrl = await compressImageFile(file);
+        if (onChange) onChange(fallbackUrl);
       }
     } catch (err: any) {
       console.error(err);
