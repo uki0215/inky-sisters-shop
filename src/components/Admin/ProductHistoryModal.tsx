@@ -136,13 +136,14 @@ export default function ProductHistoryModal({ product, onClose }: ProductHistory
             { id: 'RESTOCK', label: '📦 Орлого' },
             { id: 'PRICE_CHANGE', label: '💰 Үнэ' },
             { id: 'ORDER_RETURN', label: '🔄 Буцаалт' },
+            { id: 'ORDER_EDIT', label: '✏️ Засвар' },
             { id: 'ORDER_SWAP', label: '⇄ Солилт' },
           ].map((f) => (
             <button
               key={f.id}
               type="button"
               onClick={() => setTypeFilter(f.id)}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                 typeFilter === f.id
                   ? 'bg-teal-700 text-white shadow-xs font-extrabold'
                   : 'text-gray-600 hover:text-gray-900'
@@ -207,6 +208,19 @@ export default function ProductHistoryModal({ product, onClose }: ProductHistory
                       {item.addedStock && (
                         <span className="px-2.5 py-1 bg-teal-50 text-teal-800 border border-teal-200 rounded-lg font-bold">
                           Буцааж агуулахад оруулсан: <span className="font-extrabold">+{item.addedStock} ш</span>
+                        </span>
+                      )}
+                    </>
+                  ) : item.changeType === 'ORDER_EDIT' ? (
+                    <>
+                      {item.addedStock !== null && item.addedStock !== undefined && (
+                        <span className="px-2.5 py-1 bg-indigo-50 text-indigo-800 border border-indigo-200 rounded-lg font-bold">
+                          Засварласан тоо: <span className="font-extrabold">{item.addedStock > 0 ? `+${item.addedStock}` : item.addedStock} ш</span>
+                        </span>
+                      )}
+                      {item.newStock !== null && item.newStock !== undefined && (
+                        <span className="px-2.5 py-1 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg font-bold">
+                          Шинэ үлдэгдэл: <span className="font-extrabold">{item.newStock} ш</span>
                         </span>
                       )}
                     </>
