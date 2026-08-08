@@ -1243,6 +1243,44 @@ export default function AdminPage() {
                   </button>
                 </form>
               </div>
+
+              {/* DANGER ZONE: DATABASE RESET TO 0 */}
+              <div className="bg-red-50 border border-red-200 p-6 rounded-2xl space-y-4">
+                <div className="flex items-center gap-2 text-red-700 font-extrabold text-sm uppercase">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                  <span>⚠️ АЮУЛТАЙ БҮС: ӨГӨГДЛИЙН БААЗЫГ 0 БОЛГОХ (DB RESET)</span>
+                </div>
+                <p className="text-xs text-red-600 leading-relaxed font-sans">
+                  Энэхүү үйлдлийг хийснээр системд байгаа бүх туршилтын захиалга, борлуулалтын санхүү, зардал, бараа, багц болон түүхүүд бүрэн арилж 0 болно.
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (confirm('⚠️ АНХААРУУЛГА: Та системд байгаа бүх туршилтын өгөгдөл, бараа, захиалга, санхүүг бүрэн арилгаж 0 болгохдоо итгэлтэй байна уу?')) {
+                      try {
+                        const res = await fetch('/api/admin/reset-db', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'WIPE_ALL_DATA' }),
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                          alert('✅ ' + data.message);
+                          fetchAdminData();
+                        } else {
+                          alert('❌ Алдаа: ' + data.error);
+                        }
+                      } catch (e: any) {
+                        alert('❌ Алдаа гарлаа: ' + e.message);
+                      }
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Бүх өгөгдлийг арилгаж 0 болгох (DB Reset)</span>
+                </button>
+              </div>
             </div>
           )}
 
