@@ -178,19 +178,69 @@ export default function PosManager({ products = [], categories = [], bundles = [
     });
   };
 
+  const playScanBeep = () => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1400, ctx.currentTime);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.09);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.09);
+    } catch (e) {}
+  };
+
+  // Auto-focus barcode input when POS opens
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      barcodeInputRef.current?.focus();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Hardware or manual barcode scan listener handler
   const handleBarcodeScanned = (code: string) => {
     const cleanCode = code.trim();
     if (!cleanCode) return;
 
-    const matched = products.find((p) => p.barcode.toLowerCase() === cleanCode.toLowerCase());
-    if (matched) {
-      handleAddToCart(matched);
+    // Search product by barcode
+    const matchedProduct = products.find(
+      (p) => p.barcode && p.barcode.trim().toLowerCase() === cleanCode.toLowerCase()
+    );
+
+    if (matchedProduct) {
+      handleAddToCart(matchedProduct);
+      playScanBeep();
       setManualBarcode('');
-    } else {
-      setErrorMsg(`Бар код олдсонгүй: "${cleanCode}"`);
-      setTimeout(() => setErrorMsg(null), 4000);
+      setSearchQuery('');
+      setErrorMsg(null);
+      return;
     }
+
+    // Search bundle by barcode
+    const matchedBundle = (bundles || []).find(
+      (b) =>
+        (b.barcode && b.barcode.trim().toLowerCase() === cleanCode.toLowerCase()) ||
+        `bdl-${b.id.slice(-4).toLowerCase()}` === cleanCode.toLowerCase()
+    );
+
+    if (matchedBundle) {
+      handleAddBundleToCart(matchedBundle);
+      playScanBeep();
+      setManualBarcode('');
+      setSearchQuery('');
+      setErrorMsg(null);
+      return;
+    }
+
+    setErrorMsg(`Бар код олдсонгүй: "${cleanCode}"`);
+    setTimeout(() => setErrorMsg(null), 4000);
   };
 
   const handleManualBarcodeSubmit = (e: React.FormEvent) => {

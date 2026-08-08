@@ -53,6 +53,20 @@ export async function PUT(
       isFeatured,
     } = body;
 
+    if (barcode && barcode.trim() !== '') {
+      const cleanBarcode = barcode.trim();
+      const existingBarcodeProduct = await db.product.findUnique({
+        where: { barcode: cleanBarcode },
+      });
+
+      if (existingBarcodeProduct && existingBarcodeProduct.id !== existing.id) {
+        return NextResponse.json(
+          { error: `"${cleanBarcode}" бар код дээр "${existingBarcodeProduct.name}" бараа аль хэдийн бүртгэгдсэн байна!` },
+          { status: 400 }
+        );
+      }
+    }
+
     const yuanRateVal = yuanRate !== undefined ? Number(yuanRate) : existing.yuanRate;
     const costYuanVal = costYuan !== undefined ? Number(costYuan) : existing.costYuan;
     const costMntVal = costYuanVal * yuanRateVal;
@@ -151,6 +165,13 @@ export async function PUT(
 
     return NextResponse.json(updated);
   } catch (error: any) {
+    console.error('Update product error:', error);
+    if (error.code === 'P2002' && error.meta?.target?.includes('barcode')) {
+      return NextResponse.json(
+        { error: 'Энэ бар код аль хэдийн өөр бараан дээр бүртгэгдсэн байна!' },
+        { status: 400 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

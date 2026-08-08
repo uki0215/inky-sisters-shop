@@ -17,9 +17,12 @@ import {
   ChevronDown,
   ChevronUp,
   Gift,
+  Barcode,
+  RefreshCw,
 } from 'lucide-react';
-import { formatMNT } from '@/lib/utils';
+import { formatMNT, generateBarcode } from '@/lib/utils';
 import ImageUploader from '@/components/ImageUploader';
+import BarcodeRenderer from '@/components/BarcodeRenderer';
 
 export default function BundleManager() {
   const [bundles, setBundles] = useState<any[]>([]);
@@ -32,12 +35,16 @@ export default function BundleManager() {
   const [settingsSaved, setSettingsSaved] = useState(false);
 
   // Form states
+  const [barcode, setBarcode] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [discountPercent, setDiscountPercent] = useState<number | string>(10);
   const [isActive, setIsActive] = useState(true);
   const [selectedItems, setSelectedItems] = useState<{ productId: string; quantity: number }[]>([]);
+  
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   
   // Product Search Dropdown inside form
   const [productSearch, setProductSearch] = useState('');
@@ -96,25 +103,8 @@ export default function BundleManager() {
     fetchData();
   }, []);
 
-  const handleFileUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    setUploadingImage(true);
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.url) {
-        setImageUrl(data.url);
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Зураг хуулахад алдаа гарлаа.');
-    } finally {
-      setUploadingImage(false);
-    }
+  const handleGenerateBarcode = () => {
+    setBarcode(generateBarcode());
   };
 
   const handleAddItemToBundle = (product: any) => {
@@ -161,6 +151,7 @@ export default function BundleManager() {
 
     try {
       const payload = {
+        barcode: barcode.trim() || null,
         name,
         description,
         imageUrl,
@@ -197,6 +188,7 @@ export default function BundleManager() {
   };
 
   const resetForm = () => {
+    setBarcode('');
     setName('');
     setDescription('');
     setImageUrl('');
@@ -209,6 +201,7 @@ export default function BundleManager() {
 
   const handleEditClick = (bundle: any) => {
     setEditingBundleId(bundle.id);
+    setBarcode(bundle.barcode || '');
     setName(bundle.name);
     setDescription(bundle.description || '');
     setImageUrl(bundle.imageUrl || '');
@@ -336,11 +329,53 @@ export default function BundleManager() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Column 1: Basic Info & Image */}
             <div className="space-y-4">
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
+                <label className="block text-xs font-bold text-teal-800 flex items-center gap-1.5">
+                  <Barcode className="w-4 h-4" />
+                  Багцын Бар Код (Barcode Scanner-аар уншуулах эсвэл Авто үүсгэх)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    ref={barcodeInputRef}
+                    type="text"
+                    placeholder="Багцын бар код уншуулах..."
+                    value={barcode}
+                    onChange={(e) => setBarcode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        nameInputRef.current?.focus();
+                      }
+                    }}
+                    className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg text-xs font-mono text-gray-900 focus:ring-2 focus:ring-teal-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGenerateBarcode}
+                    className="px-3.5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-lg border border-gray-300 flex items-center gap-1 transition-all"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Шинэ Код
+                  </button>
+                </div>
+
+                {barcode && (
+                  <div className="pt-2">
+                    <BarcodeRenderer
+                      value={barcode}
+                      productName={name || 'Шинэ Багц'}
+                      priceMnt={computedBundlePriceMnt}
+                    />
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1">
                   Багцын Нэр *
                 </label>
                 <input
+                  ref={nameInputRef}
                   type="text"
                   placeholder="d.g. Сургуулийн Бэлтгэл Иж Бүрэн Багц"
                   value={name}
@@ -630,6 +665,11 @@ export default function BundleManager() {
                       </div>
 
                       <h4 className="font-extrabold text-gray-900 text-sm mt-1 truncate font-sans">{bundle.name}</h4>
+                      {bundle.barcode && (
+                        <span className="font-mono text-[10px] text-teal-800 font-bold bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200 inline-block mt-0.5">
+                          🏷️ #{bundle.barcode}
+                        </span>
+                      )}
                       {bundle.description && (
                         <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{bundle.description}</p>
                       )}

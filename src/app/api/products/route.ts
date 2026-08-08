@@ -66,9 +66,23 @@ export async function POST(request: Request) {
       isFeatured,
     } = body;
 
-    // Generate Barcode if missing or requested auto
+    // Validate Barcode (Require explicit or scanned barcode)
     if (!barcode || barcode.trim() === '') {
-      barcode = generateBarcode();
+      return NextResponse.json({ error: 'Бар код оруулна уу.' }, { status: 400 });
+    }
+
+    const cleanBarcode = barcode.trim();
+
+    // Check if barcode is already assigned to another product
+    const existingBarcodeProduct = await db.product.findUnique({
+      where: { barcode: cleanBarcode },
+    });
+
+    if (existingBarcodeProduct) {
+      return NextResponse.json(
+        { error: `"${cleanBarcode}" бар код дээр "${existingBarcodeProduct.name}" бараа аль хэдийн бүртгэгдсэн байна!` },
+        { status: 400 }
+      );
     }
 
     const yuanRateVal = Number(yuanRate) || 485;
@@ -92,7 +106,7 @@ export async function POST(request: Request) {
 
     const product = await db.product.create({
       data: {
-        barcode,
+        barcode: cleanBarcode,
         name,
         description: description || '',
         categoryId,
@@ -141,7 +155,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json(product, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating product:', error);
+    console.error('Create product error:', error);
+    if (error.code === 'P2002' && error.meta?.target?.includes('barcode')) {
+      return NextResponse.json(
+        { error: 'Энэ бар код аль хэдийн өөр бараан дээр бүртгэгдсэн байна!' },
+        { status: 400 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -29,10 +31,28 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, description, imageUrl, items, discountPercent, isActive } = body;
+    const { barcode, name, description, imageUrl, items, discountPercent, isActive } = body;
 
     if (!name || name.trim() === '') {
       return NextResponse.json({ error: 'Багцын нэр шаардлагатай' }, { status: 400 });
+    }
+
+    let cleanBarcode = barcode?.trim() || null;
+    if (cleanBarcode) {
+      const existingProduct = await db.product.findUnique({ where: { barcode: cleanBarcode } });
+      if (existingProduct) {
+        return NextResponse.json(
+          { error: `"${cleanBarcode}" бар код дээр "${existingProduct.name}" бараа аль хэдийн бүртгэгдсэн байна!` },
+          { status: 400 }
+        );
+      }
+      const existingBundle = await db.productBundle.findUnique({ where: { barcode: cleanBarcode } });
+      if (existingBundle) {
+        return NextResponse.json(
+          { error: `"${cleanBarcode}" бар код дээр "${existingBundle.name}" багц аль хэдийн бүртгэгдсэн байна!` },
+          { status: 400 }
+        );
+      }
     }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -59,6 +79,7 @@ export async function POST(request: Request) {
 
     const newBundle = await db.productBundle.create({
       data: {
+        barcode: cleanBarcode,
         name,
         description: description || null,
         imageUrl: imageUrl || null,

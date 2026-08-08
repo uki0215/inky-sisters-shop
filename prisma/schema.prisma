@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("PRISMA_DATABASE_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Category {
@@ -59,6 +59,7 @@ model Product {
 
 model ProductBundle {
   id               String       @id @default(uuid())
+  barcode          String?      @unique
   name             String
   description      String?
   imageUrl         String?

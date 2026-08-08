@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { formatMNT, formatYuan } from '@/lib/utils';
+import BarcodeRenderer from '@/components/BarcodeRenderer';
 import { X, Package, Tag, Edit, Plus, DollarSign, TrendingUp, Barcode, Layers, Percent, CheckCircle2, History } from 'lucide-react';
 
 interface ProductDetailModalProps {
@@ -73,6 +74,17 @@ export default function ProductDetailModal({
             )}
           </div>
         </div>
+
+        {/* Visual Barcode & Printable Sticker */}
+        {product.barcode && (
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-2xl">
+            <BarcodeRenderer
+              value={product.barcode}
+              productName={product.name}
+              priceMnt={priceMnt}
+            />
+          </div>
+        )}
 
         {/* 1. FINANCIALS & RMB (YUAN) COST BREAKDOWN GRID */}
         <div className="space-y-3">

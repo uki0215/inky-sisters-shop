@@ -415,15 +415,17 @@ export default function AdminPage() {
   return (
     <div className="flex min-h-screen bg-gray-100 text-gray-900 font-sans selection:bg-teal-700 selection:text-white">
       
-      {/* Hardware Barcode Scanner Listener */}
-      <BarcodeListener onScan={handleBarcodeScan} />
+      {/* Hardware Barcode Scanner Listener for Products Tab */}
+      {activeTab === 'products' && (
+        <BarcodeListener onScan={handleBarcodeScan} />
+      )}
 
       {/* LEFT SIDEBAR NAVIGATION */}
-      <aside className="w-64 bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between p-4 shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60">
+      <aside className="w-64 bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between p-4 shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden">
         
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin">
           {/* Brand Header */}
-          <div className="flex items-center gap-3 px-2 py-3 border-b border-slate-700/50">
+          <div className="flex items-center gap-3 px-2 py-2.5 border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10">
             <img src={settings.logoUrl || '/logo.svg'} alt="Inky Sisters Logo" className="w-10 h-10 object-contain bg-white rounded-lg p-1" />
             <div>
               <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans">
@@ -436,18 +438,18 @@ export default function AdminPage() {
           </div>
 
           {/* Navigation Items List */}
-          <nav className="space-y-1.5">
+          <nav className="space-y-1">
             {/* IN-STORE POS TAB - VERY TOP OF SIDEBAR */}
             <button
               onClick={() => setActiveTab('pos')}
-              className={`w-full flex items-center justify-between p-3.5 rounded-2xl font-black text-xs transition-all shadow-lg mb-3 ${
+              className={`w-full flex items-center justify-between p-3 rounded-2xl font-black text-xs transition-all shadow-lg mb-2 ${
                 activeTab === 'pos'
                   ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 text-slate-950 ring-2 ring-amber-300 shadow-amber-500/20'
                   : 'bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 border border-amber-400/30'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <ShoppingBag className="w-5 h-5 text-amber-400 fill-amber-400/20" />
+                <ShoppingBag className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20" />
                 <span className="font-sans text-xs">🛒 Касс</span>
               </div>
               <ChevronRight className="w-4 h-4 text-amber-400" />
@@ -455,13 +457,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('financials')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'financials'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 <span>Санхүүгийн Тайлан</span>
               </div>
@@ -470,13 +472,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('products')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'products'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Package className="w-4 h-4 text-amber-400" />
                 <span>Барааны Бүртгэл</span>
               </div>
@@ -485,13 +487,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('orders')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'orders'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <ShoppingBag className="w-4 h-4 text-teal-300" />
                 <span>Захиалга Тулгах</span>
               </div>
@@ -504,13 +506,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('bundles')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'bundles'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Gift className="w-4 h-4 text-purple-400" />
                 <span>Иж Бүрэн Багцууд</span>
               </div>
@@ -519,13 +521,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('categories')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'categories'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Layers className="w-4 h-4 text-sky-400" />
                 <span>Ангилалууд</span>
               </div>
@@ -534,13 +536,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('banks')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'banks'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <QrCode className="w-4 h-4 text-emerald-300" />
                 <span>Банкны QR</span>
               </div>
@@ -549,13 +551,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('promotions')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'promotions'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Sparkles className="w-4 h-4 text-pink-400" />
                 <span>Промошн & Слайд</span>
               </div>
@@ -564,13 +566,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('collections')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'collections'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Layers className="w-4 h-4 text-amber-400" />
                 <span>Онцлох Цуглуулга</span>
               </div>
@@ -579,13 +581,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'settings'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Settings className="w-4 h-4 text-purple-400" />
                 <span>Тохиргоо</span>
               </div>
@@ -594,13 +596,13 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('profile')}
-              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                 activeTab === 'profile'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <User className="w-4 h-4 text-amber-300" />
                 <span>Профайл & Нууц үг</span>
               </div>
@@ -610,10 +612,10 @@ export default function AdminPage() {
         </div>
 
         {/* Bottom Logout & Back Links */}
-        <div className="pt-4 border-t border-slate-700/60 space-y-2">
+        <div className="pt-3 mt-2 border-t border-slate-700/60 space-y-2 shrink-0 bg-slate-800 z-10">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-950/60 hover:bg-red-900 text-red-200 font-bold text-xs rounded-xl transition-all border border-red-800/50"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-red-950/60 hover:bg-red-900 text-red-200 font-bold text-xs rounded-xl transition-all border border-red-800/50"
           >
             <LogOut className="w-4 h-4" />
             <span>Системээс гарах (Logout)</span>
@@ -621,7 +623,7 @@ export default function AdminPage() {
 
           <Link
             href="/"
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-700/60 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-600/60"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-700/60 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-600/60"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Сайт руу буцах</span>

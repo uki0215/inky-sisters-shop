@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ImageUploader from '@/components/ImageUploader';
+import BarcodeRenderer from '@/components/BarcodeRenderer';
 import { generateBarcode, formatMNT, formatYuan } from '@/lib/utils';
 import { X, Barcode, Calculator, Save, RefreshCw, Clock } from 'lucide-react';
 
@@ -13,6 +14,9 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, categories, onClose, onSave }: ProductModalProps) {
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     barcode: '',
     name: '',
@@ -35,6 +39,14 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Auto-focus the barcode input on open
+    const timer = setTimeout(() => {
+      barcodeInputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (product) {
@@ -67,7 +79,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
       setFormData((prev) => ({
         ...prev,
         categoryId: categories[0]?.id || '',
-        barcode: generateBarcode(),
+        barcode: '',
       }));
     }
   }, [product, categories]);
@@ -88,6 +100,12 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.barcode || !formData.barcode.trim()) {
+      setError('Бар код оруулна уу (уншуулах эсвэл "Шинэ Код" товчийг дарна уу).');
+      return;
+    }
+
     if (!formData.name || !formData.categoryId) {
       setError('Нэр болон Ангиллыг сонгоно уу.');
       return;
@@ -96,6 +114,11 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
     setLoading(true);
     setError(null);
 
+    const submitData = {
+      ...formData,
+      barcode: formData.barcode.trim(),
+    };
+
     try {
       const url = product ? `/api/products/${product.id}` : '/api/products';
       const method = product ? 'PUT' : 'POST';
@@ -103,7 +126,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       const data = await res.json();
@@ -154,11 +177,17 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
             </label>
             <div className="flex gap-2">
               <input
+                ref={barcodeInputRef}
                 type="text"
-                required
                 placeholder="Бар код уншуулах..."
                 value={formData.barcode}
                 onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    nameInputRef.current?.focus();
+                  }
+                }}
                 className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg text-sm font-mono text-gray-900 focus:ring-2 focus:ring-teal-500"
               />
               <button
@@ -170,12 +199,23 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                 Шинэ Код
               </button>
             </div>
+
+            {formData.barcode && (
+              <div className="pt-2">
+                <BarcodeRenderer
+                  value={formData.barcode}
+                  productName={formData.name || 'Шинэ Бараа'}
+                  priceMnt={formData.priceMnt}
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Барааны Нэр *</label>
               <input
+                ref={nameInputRef}
                 type="text"
                 required
                 placeholder="Pastel Gel Pen Set"

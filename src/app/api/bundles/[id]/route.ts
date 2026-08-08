@@ -38,7 +38,7 @@ export async function PATCH(
     const resolvedParams = await params;
     const bundleId = resolvedParams.id;
     const body = await request.json();
-    const { name, description, imageUrl, items, discountPercent, isActive } = body;
+    const { barcode, name, description, imageUrl, items, discountPercent, isActive } = body;
 
     const existing = await db.productBundle.findUnique({
       where: { id: bundleId },
@@ -50,6 +50,27 @@ export async function PATCH(
     }
 
     const updateData: any = {};
+    if (barcode !== undefined) {
+      const cleanBarcode = barcode ? barcode.trim() : null;
+      if (cleanBarcode) {
+        const existingProduct = await db.product.findUnique({ where: { barcode: cleanBarcode } });
+        if (existingProduct) {
+          return NextResponse.json(
+            { error: `"${cleanBarcode}" бар код дээр "${existingProduct.name}" бараа аль хэдийн бүртгэгдсэн байна!` },
+            { status: 400 }
+          );
+        }
+        const existingBundle = await db.productBundle.findUnique({ where: { barcode: cleanBarcode } });
+        if (existingBundle && existingBundle.id !== bundleId) {
+          return NextResponse.json(
+            { error: `"${cleanBarcode}" бар код дээр "${existingBundle.name}" багц аль хэдийн бүртгэгдсэн байна!` },
+            { status: 400 }
+          );
+        }
+      }
+      updateData.barcode = cleanBarcode;
+    }
+
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl;

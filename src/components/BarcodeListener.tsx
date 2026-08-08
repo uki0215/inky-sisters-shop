@@ -24,12 +24,13 @@ export default function BarcodeListener({ onScan }: BarcodeListenerProps) {
 
       // Barcode scanners input characters very rapidly (< 50ms per key)
       if (e.key === 'Enter') {
-        if (barcodeBufferRef.current.length >= 6) {
-          onScan(barcodeBufferRef.current);
+        const scannedCode = barcodeBufferRef.current.trim();
+        if (scannedCode.length >= 1) {
+          onScan(scannedCode);
         }
         barcodeBufferRef.current = '';
       } else if (e.key.length === 1) {
-        if (timeDiff > 100) {
+        if (timeDiff > 120) {
           // Reset buffer if delay is too long (human typing)
           barcodeBufferRef.current = e.key;
         } else {
