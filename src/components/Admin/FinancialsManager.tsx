@@ -276,7 +276,7 @@ export default function FinancialsManager() {
           <div>
             <h3 className="text-base font-black text-amber-950 font-sans flex items-center gap-2">
               <Landmark className="w-5 h-5 text-amber-700" />
-              🏛️ Нийт Татан Авалтын Нэгдсэн Тооцоо (Огт Хасагдахгүй Түүхэн Дүн)
+              Нийт Татан Авалтын Нэгдсэн Тооцоо (Огт Хасагдахгүй Түүхэн Дүн)
             </h3>
             <p className="text-xs text-amber-800/90 mt-0.5 font-sans">
               Дэлгүүрт худалдан авч оруулсан БҮХ барааны өртөг, зарах үнэ ба боломжит ашгийн нийт дүн. Бараа зарагдахад БАГАСАХГҮЙ.
@@ -340,7 +340,7 @@ export default function FinancialsManager() {
           <div>
             <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
               <Package className="w-5 h-5 text-teal-700" />
-              📦 Одоогийн Агуулахын Үлдэгдэл Барааны Тооцоо
+              Одоогийн Агуулахын Үлдэгдэл Барааны Тооцоо
             </h3>
             <p className="text-xs text-gray-500 mt-0.5 font-sans">
               Яг одоо агуулахад бэлэн байгаа үлдэгдэл барааны өртөг, зарах дүн ба үлдсэн боломжит ашиг.
@@ -724,7 +724,7 @@ export default function FinancialsManager() {
           <div>
             <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-rose-600" />
-              🗑️ Устгагдсан Захиалгуудын Аудит Журнал ({(financialData.deletedLogs || []).length})
+              Устгагдсан Захиалгуудын Аудит Журнал ({(financialData.deletedLogs || []).length})
             </h3>
             <p className="text-xs text-gray-500 mt-0.5 font-sans">
               Захиалгын жагсаалтаас устгагдсан бүх захиалгын түүх. Баталгаажсан (Төлөгдсөн) захиалгыг устгасан ч орлого/ашгийн тооцоо хасагдахгүй хадгалагдана.

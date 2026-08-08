@@ -165,7 +165,7 @@ export default function CategoryManager() {
       <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4 font-sans">
         <div>
           <h3 className="text-lg font-extrabold text-gray-900 font-sans flex items-center gap-2">
-            🏷️ Дэлгүүрийн Үндсэн ба Дэд Ангилал (Sub-Categories)
+            Дэлгүүрийн Үндсэн ба Дэд Ангилал (Sub-Categories)
           </h3>
           <p className="text-xs text-gray-500 mt-0.5 font-sans">
             Үндсэн ангилал эсвэл түүний доторх Дэд ангилуудыг нэмж, нэрийг засах, зураг солин удирдах.

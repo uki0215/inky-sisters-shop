@@ -192,7 +192,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
           </button>
 
           <h3 className="text-xl font-bold text-gray-900 mb-1 font-sans">
-            {product ? '✏️ Барааны Мэдээлэл Засах' : '➕ Шинэ Бараа Бүртгэх (Бар код & Юанийн Тооцоо)'}
+            {product ? 'Барааны Мэдээлэл Засах' : 'Шинэ Бараа Бүртгэх (Бар код & Юанийн Тооцоо)'}
           </h3>
           <p className="text-xs text-gray-500">
             Бар кодоор уншуулах эсвэл шинээр код үүсгэн бүртгэнэ үү. Авсан өртгийг Юаниар эсвэл шууд Төгрөгөөр оруулах боломжтой.
@@ -392,7 +392,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white border border-gray-200 rounded-xl">
             <div>
               <label className="block text-xs font-bold text-teal-900 mb-1">
-                💰 Нэгжийн зарах үнэ (₮) *
+                Нэгжийн зарах үнэ (₮) *
               </label>
               <input
                 type="text"
@@ -406,7 +406,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
 
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">
-                📦 Нийт Үлдэгдэл Тоо Ширхэг *
+                Нийт Үлдэгдэл Тоо Ширхэг *
               </label>
               <input
                 type="text"
@@ -429,7 +429,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                   onChange={(e) => setFormData({ ...formData, isDiscounted: e.target.checked })}
                   className="w-4 h-4 rounded accent-red-500"
                 />
-                🏷️ Хямдралтай бараа болгох
+                Хямдралтай бараа болгох
               </label>
             </div>
 
@@ -438,7 +438,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="text-gray-700 font-bold block mb-1">
-                      📉 Хямдралын хувь (%):
+                      Хямдралын хувь (%):
                     </label>
                     <input
                       type="text"
@@ -459,7 +459,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
 
                   <div>
                     <label className="text-gray-700 font-bold block mb-1">
-                      🏷️ Эцсийн Хямдарсан Үнэ (₮):
+                      Эцсийн Хямдарсан Үнэ (₮):
                     </label>
                     <input
                       type="text"
