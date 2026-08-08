@@ -12,6 +12,45 @@ interface ImageUploaderProps {
   label?: string;
 }
 
+const compressImageFile = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) {
+          if (w > MAX_SIZE) {
+            h *= MAX_SIZE / w;
+            w = MAX_SIZE;
+          }
+        } else {
+          if (h > MAX_SIZE) {
+            w *= MAX_SIZE / h;
+            h = MAX_SIZE;
+          }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        } else {
+          resolve(e.target?.result as string);
+        }
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function ImageUploader({
   value = '',
   onChange,
@@ -41,17 +80,9 @@ export default function ImageUploader({
     try {
       const uploadedUrls: string[] = [];
       for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const data = await res.json();
-        if (res.ok && data.url) {
-          uploadedUrls.push(data.url);
+        const compressedUrl = await compressImageFile(file);
+        if (compressedUrl) {
+          uploadedUrls.push(compressedUrl);
         }
       }
 
@@ -63,11 +94,11 @@ export default function ImageUploader({
           onChange(uploadedUrls[0]);
         }
       } else {
-        setError('Зураг хуулахад алдаа гарлаа.');
+        setError('Зураг уншихад алдаа гарлаа.');
       }
     } catch (err: any) {
       console.error(err);
-      setError(err?.message || 'Зургаа хуулахад холболтын алдаа гарлаа.');
+      setError(err?.message || 'Зургаа уншихад холболтын алдаа гарлаа.');
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -159,7 +190,7 @@ export default function ImageUploader({
               <Upload className="w-6 h-6 text-gray-400 group-hover:text-teal-600 transition-colors" />
             )}
             <span className="text-xs font-bold text-gray-700 group-hover:text-teal-700">
-              {uploading ? 'Зургуудыг хуулж байна...' : (multiple ? 'Нэг болон олон зураг сонгож хуулах' : 'Компьютерээс зураг сонгож хуулах')}
+              {uploading ? 'Зургуудыг уншиж байна...' : (multiple ? 'Нэг болон олон зураг сонгож хуулах' : 'Компьютерээс зураг сонгож хуулах')}
             </span>
             <span className="text-[10px] text-gray-400">
               PNG, JPG, WEBP (Дээд хэмжээ 10MB)
@@ -206,6 +237,9 @@ export default function ImageUploader({
                 <img
                   src={imgUrl}
                   alt={`Product Image ${idx + 1}`}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=300&auto=format&fit=crop&q=80';
+                  }}
                   className="w-full h-full object-cover"
                 />
 
