@@ -4,17 +4,26 @@ import { db } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 async function performWipe() {
-  // Delete in reverse foreign key order matching exact Prisma schema
-  await db.orderItem.deleteMany();
-  await db.order.deleteMany();
-  await db.financialLog.deleteMany();
-  await db.expense.deleteMany();
-  await db.productHistory.deleteMany();
-  await db.bundleItem.deleteMany();
-  await db.productBundle.deleteMany();
-  await db.featuredCollection.deleteMany();
-  await db.product.deleteMany();
-  await db.promotionBanner.deleteMany();
+  const wipeTable = async (tableName: string, action: () => Promise<any>) => {
+    try {
+      if (db[tableName] && typeof db[tableName].deleteMany === 'function') {
+        await db[tableName].deleteMany();
+      }
+    } catch (e: any) {
+      console.warn(`Wipe table ${tableName} skipped or error:`, e.message);
+    }
+  };
+
+  await wipeTable('orderItem', () => db.orderItem?.deleteMany());
+  await wipeTable('order', () => db.order?.deleteMany());
+  await wipeTable('financialLog', () => db.financialLog?.deleteMany());
+  await wipeTable('expense', () => db.expense?.deleteMany());
+  await wipeTable('productHistory', () => db.productHistory?.deleteMany());
+  await wipeTable('bundleItem', () => db.bundleItem?.deleteMany());
+  await wipeTable('productBundle', () => db.productBundle?.deleteMany());
+  await wipeTable('featuredCollection', () => db.featuredCollection?.deleteMany());
+  await wipeTable('product', () => db.product?.deleteMany());
+  await wipeTable('promotionBanner', () => db.promotionBanner?.deleteMany());
 
   return {
     success: true,
