@@ -139,11 +139,15 @@ export async function PUT(
       changes.push(`Зарах үнэ: ${existing.priceMnt.toLocaleString()}₮ -> ${priceMntVal.toLocaleString()}₮`);
     }
 
-    if (costYuanVal !== existing.costYuan) {
+    if (costMntVal !== existing.costMnt) {
+      changes.push(`1ш өртөг: ${existing.costMnt.toLocaleString()}₮ -> ${costMntVal.toLocaleString()}₮`);
+    }
+
+    if (costYuanVal !== existing.costYuan && costYuanVal > 0) {
       changes.push(`Авсан үнэ (¥): ¥${existing.costYuan} -> ¥${costYuanVal}`);
     }
 
-    if (yuanRateVal !== existing.yuanRate) {
+    if (yuanRateVal !== existing.yuanRate && yuanRateVal > 0) {
       changes.push(`Юанийн ханш: ${existing.yuanRate}₮ -> ${yuanRateVal}₮`);
     }
 

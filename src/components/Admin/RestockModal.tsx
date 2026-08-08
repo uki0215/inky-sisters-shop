@@ -37,6 +37,7 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
   const [yuanRate, setYuanRate] = useState<number>(product.yuanRate || 0);
   const [costYuanRaw, setCostYuanRaw] = useState<string>((product.costYuan || 0).toString());
   const [costMntInput, setCostMntInput] = useState<number>(product.costMnt || 0);
+  const [priceMntInput, setPriceMntInput] = useState<number>(product.priceMnt || 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,6 +72,7 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
           yuanRate: Number(yuanRate),
           costYuan: Number(costYuan),
           costMnt: Number(newCostMnt),
+          priceMnt: Number(priceMntInput),
         }),
       });
 
@@ -89,7 +91,7 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn font-sans">
       <div className="relative w-full max-w-lg bg-white border border-gray-200 rounded-3xl p-6 shadow-2xl text-gray-900 overflow-hidden transform transition-all animate-scaleUp space-y-4 font-sans">
         
         <button
@@ -205,6 +207,29 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
               />
             </div>
           )}
+
+          {/* Selling Price Input Field (Editable during Restock) */}
+          <div className="p-3.5 bg-rose-50/70 border border-rose-200 rounded-2xl space-y-1 font-sans">
+            <label className="block text-xs font-bold text-rose-950">
+              Нэгжийн Зарах Үнэ (₮) (Шаардлагатай бол засах):
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="12,500"
+              value={formatComma(priceMntInput || '')}
+              onChange={(e) => setPriceMntInput(parseDecimal(e.target.value))}
+              className="w-full px-3.5 py-2 bg-white border border-rose-300 rounded-xl font-mono text-base font-extrabold text-red-600 focus:ring-2 focus:ring-rose-500 shadow-2xs"
+            />
+            <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5 font-mono">
+              <span>Одоогийн зарах үнэ: {formatMNT(product.priceMnt)}</span>
+              {priceMntInput !== product.priceMnt && (
+                <span className="font-bold text-rose-600">
+                  Шинэ зарах үнэ: {formatMNT(priceMntInput)}
+                </span>
+              )}
+            </div>
+          </div>
 
           {/* FLUTTER & COST COMPARISON REPORT CARD */}
           <div className="p-4 bg-slate-900 text-white rounded-2xl space-y-2 text-xs">
