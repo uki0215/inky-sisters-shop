@@ -279,9 +279,15 @@ export async function DELETE(
       }
     }
 
-    // Clean up associated financial log entries for complete financial audit integrity
-    await db.financialLog.deleteMany({
-      where: { referenceId: params.id },
+    // Create permanent audit log entry for deleted order
+    const itemSummary = existing.items.map((i: any) => `${i.productName} (${i.quantity}ш)`).join(', ');
+    await db.financialLog.create({
+      data: {
+        type: 'ORDER_DELETED',
+        amountMnt: existing.totalMnt,
+        description: `🗑️ Захиалга Устгагдсан: Код: ${existing.orderNumber} | Захиалагч: ${existing.customerName} (${existing.customerPhone}) | Дүн: ${existing.totalMnt.toLocaleString()}₮ [Төлөв: ${existing.paymentStatus === 'PAID' ? 'Төлөгдсөн' : 'Төлөгдөөгүй'}] | Бараа: ${itemSummary}`,
+        referenceId: `DELETED_${existing.id}`,
+      },
     });
 
     await db.order.delete({

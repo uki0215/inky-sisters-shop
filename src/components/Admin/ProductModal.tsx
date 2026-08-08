@@ -13,6 +13,21 @@ interface ProductModalProps {
   onSave: () => void;
 }
 
+function formatComma(num: number | string): string {
+  if (num === '' || num === undefined || num === null) return '';
+  const s = num.toString().replace(/[^0-9.]/g, '');
+  if (!s) return '';
+  const parts = s.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
+function parseComma(str: string): number {
+  if (!str) return 0;
+  const clean = str.replace(/,/g, '');
+  return parseFloat(clean) || 0;
+}
+
 export default function ProductModal({ product, categories, onClose, onSave }: ProductModalProps) {
   const barcodeInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -25,6 +40,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
     imageUrl: '',
     costYuan: 0,
     yuanRate: 485,
+    costMnt: 0,
     priceMnt: 0,
     priceYuan: 0,
     boxCount: 1,
@@ -64,6 +80,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
         imageUrl: product.imageUrl || '',
         costYuan: product.costYuan || 0,
         yuanRate: product.yuanRate || 485,
+        costMnt: product.costMnt || 0,
         priceMnt: product.priceMnt || 0,
         priceYuan: product.priceYuan || 0,
         boxCount: product.boxCount || 1,
@@ -84,7 +101,10 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
     }
   }, [product, categories]);
 
-  const calculatedCostMnt = (formData.costYuan || 0) * (formData.yuanRate || 485);
+  const calculatedCostMnt = (formData.costYuan > 0 && formData.yuanRate > 0)
+    ? Math.round(formData.costYuan * formData.yuanRate)
+    : (formData.costMnt || 0);
+
   const totalUnitsFromBox = (formData.boxCount || 1) * (formData.unitsPerBox || 1);
 
   const handleGenerateBarcode = () => {
@@ -117,6 +137,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
     const submitData = {
       ...formData,
       barcode: formData.barcode.trim(),
+      costMnt: calculatedCostMnt,
     };
 
     try {
@@ -158,7 +179,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
             {product ? '✏️ Барааны Мэдээлэл Засах' : '➕ Шинэ Бараа Бүртгэх (Бар код & Юанийн Тооцоо)'}
           </h3>
           <p className="text-xs text-gray-500">
-            Бар кодоор уншуулах эсвэл шинээр код үүсгэн бүртгэнэ үү. Авсан өртгийг Юаниар бодон, Зарах үнийг админ тохируулна.
+            Бар кодоор уншуулах эсвэл шинээр код үүсгэн бүртгэнэ үү. Авсан өртгийг Юаниар эсвэл шууд Төгрөгөөр оруулах боломжтой.
           </p>
 
           {error && (
@@ -170,7 +191,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
 
         {/* Scrollable Form Content */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-          <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-xl space-y-2">
+          <div className="p-3.5 bg-teal-50/60 border border-teal-200 rounded-xl space-y-2">
             <label className="block text-xs font-bold text-teal-800 flex items-center gap-1.5">
               <Barcode className="w-4 h-4" />
               Бар Код (Barcode Scanner-аар уншуулах эсвэл Авто үүсгэх)
@@ -188,12 +209,12 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                     nameInputRef.current?.focus();
                   }
                 }}
-                className="flex-1 px-3.5 py-2 bg-white border border-gray-300 rounded-lg text-sm font-mono text-gray-900 focus:ring-2 focus:ring-teal-500"
+                className="flex-1 px-3.5 py-2.5 bg-white border border-teal-300 rounded-xl text-base font-mono font-extrabold text-teal-950 focus:ring-2 focus:ring-teal-500 shadow-2xs"
               />
               <button
                 type="button"
                 onClick={handleGenerateBarcode}
-                className="px-3.5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-lg border border-gray-300 flex items-center gap-1 transition-all"
+                className="px-3.5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-xl border border-gray-300 flex items-center gap-1 transition-all shrink-0"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Шинэ Код
@@ -221,7 +242,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                 placeholder="Pastel Gel Pen Set"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white"
+                className="w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-xl text-sm font-bold text-gray-900 focus:ring-2 focus:ring-teal-500 shadow-2xs"
               />
             </div>
 
@@ -231,7 +252,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
               <select
                 value={formData.categoryId}
                 onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-sm font-bold text-gray-900 focus:ring-2 focus:ring-teal-500"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -241,7 +262,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
               </select>
             </div>
 
-            {/* SEPARATE DIV FOR DESCRIPTION (Single Line Input) */}
+            {/* SEPARATE DIV FOR DESCRIPTION */}
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
               <label className="block text-xs font-bold text-gray-700 mb-1">Барааны Тайлбар</label>
               <input
@@ -249,7 +270,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                 placeholder="Богино тайлбар бичих..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-lg text-xs text-gray-900 focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3.5 py-2 bg-white border border-gray-300 rounded-xl text-xs font-medium text-gray-900 focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -262,66 +283,85 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
             </div>
           </div>
 
-          {/* YUAN CALCULATOR */}
+          {/* YUAN CALCULATOR & COST IN MNT */}
           <div className="p-4 bg-gray-50 border border-teal-200 rounded-xl space-y-3">
             <h4 className="text-xs font-bold text-teal-800 flex items-center gap-1.5 uppercase">
               <Calculator className="w-4 h-4" />
-              Юанийн Өртөг & Ханшийн Тооцоолуур
+              Өртөг & Ханшийн Тооцоолуур (Юань / Төгрөг)
             </h4>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>
                 <label className="text-gray-600 block mb-1">Авсан үнэ (¥):</label>
                 <input
-                  type="number"
-                  step="0.1"
-                  value={formData.costYuan}
-                  onChange={(e) => setFormData({ ...formData, costYuan: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-2.5 py-1.5 bg-white border border-gray-300 rounded font-mono text-sm"
+                  type="text"
+                  placeholder="0"
+                  value={formatComma(formData.costYuan || '')}
+                  onChange={(e) => setFormData({ ...formData, costYuan: parseComma(e.target.value) })}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl font-mono text-sm font-bold text-gray-900 focus:ring-2 focus:ring-teal-500 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="text-gray-600 block mb-1">Ханш (₮):</label>
+                <label className="text-gray-600 block mb-1">Ханш (₮) (0 бол төгрөгөөр):</label>
                 <input
-                  type="number"
-                  value={formData.yuanRate}
-                  onChange={(e) => setFormData({ ...formData, yuanRate: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-2.5 py-1.5 bg-white border border-gray-300 rounded font-mono text-sm"
+                  type="text"
+                  placeholder="485"
+                  value={formatComma(formData.yuanRate || '')}
+                  onChange={(e) => setFormData({ ...formData, yuanRate: parseComma(e.target.value) })}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl font-mono text-sm font-bold text-gray-900 focus:ring-2 focus:ring-teal-500 shadow-2xs"
                 />
               </div>
 
               <div>
                 <label className="text-gray-600 block mb-1">Хайрцагны тоо:</label>
                 <input
-                  type="number"
-                  value={formData.boxCount}
-                  onChange={(e) => setFormData({ ...formData, boxCount: parseInt(e.target.value) || 1 })}
-                  className="w-full px-2.5 py-1.5 bg-white border border-gray-300 rounded font-mono text-sm"
+                  type="text"
+                  placeholder="1"
+                  value={formatComma(formData.boxCount || '')}
+                  onChange={(e) => setFormData({ ...formData, boxCount: parseComma(e.target.value) || 1 })}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl font-mono text-sm font-bold text-gray-900 focus:ring-2 focus:ring-teal-500 shadow-2xs"
                 />
               </div>
 
               <div>
                 <label className="text-gray-600 block mb-1">Хайрцаг доторх:</label>
                 <input
-                  type="number"
-                  value={formData.unitsPerBox}
-                  onChange={(e) => setFormData({ ...formData, unitsPerBox: parseInt(e.target.value) || 1 })}
-                  className="w-full px-2.5 py-1.5 bg-white border border-gray-300 rounded font-mono text-sm"
+                  type="text"
+                  placeholder="1"
+                  value={formatComma(formData.unitsPerBox || '')}
+                  onChange={(e) => setFormData({ ...formData, unitsPerBox: parseComma(e.target.value) || 1 })}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl font-mono text-sm font-bold text-gray-900 focus:ring-2 focus:ring-teal-500 shadow-2xs"
                 />
               </div>
             </div>
 
+            {/* Direct MNT cost input if yuanRate is 0 */}
+            {formData.yuanRate === 0 && (
+              <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl space-y-1">
+                <label className="block text-xs font-bold text-amber-900">
+                  ₮ Төгрөгийн Өртөг Оруулах (Ханш 0 үед шууд төгрөөр) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="10,000"
+                  value={formatComma(formData.costMnt || '')}
+                  onChange={(e) => setFormData({ ...formData, costMnt: parseComma(e.target.value) })}
+                  className="w-full px-3.5 py-2 bg-white border border-amber-400 rounded-xl font-mono text-base font-extrabold text-amber-950 focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                />
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200 text-xs">
-              <div className="p-2 bg-white rounded border border-gray-200">
+              <div className="p-2.5 bg-white rounded-xl border border-gray-200">
                 <span className="text-gray-500 block text-[11px]">1 ширхэг авсан өртөг (₮):</span>
-                <span className="font-mono font-bold text-amber-700 text-sm">
+                <span className="font-mono font-black text-amber-700 text-base block">
                   {formatMNT(calculatedCostMnt)}
                 </span>
               </div>
-              <div className="p-2 bg-white rounded border border-gray-200">
+              <div className="p-2.5 bg-white rounded-xl border border-gray-200">
                 <span className="text-gray-500 block text-[11px]">Нийт Нийлүүлсэн Тоо:</span>
-                <span className="font-mono font-bold text-teal-800 text-sm">
+                <span className="font-mono font-black text-teal-800 text-base block">
                   {totalUnitsFromBox} ширхэг
                 </span>
               </div>
@@ -335,12 +375,12 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                 💰 Нэгжийн зарах үнэ (₮) *
               </label>
               <input
-                type="number"
+                type="text"
                 required
-                placeholder="12500"
-                value={formData.priceMnt}
-                onChange={(e) => setFormData({ ...formData, priceMnt: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2 bg-gray-50 border border-teal-500 rounded-lg text-base font-extrabold text-red-600 focus:bg-white"
+                placeholder="12,500"
+                value={formatComma(formData.priceMnt || '')}
+                onChange={(e) => setFormData({ ...formData, priceMnt: parseComma(e.target.value) })}
+                className="w-full px-3.5 py-2 bg-teal-50/50 border border-teal-500 rounded-xl text-lg font-black font-mono text-red-600 focus:bg-white focus:ring-2 focus:ring-teal-500 shadow-2xs"
               />
             </div>
 
@@ -349,11 +389,12 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                 📦 Нийт Үлдэгдэл Тоо Ширхэг *
               </label>
               <input
-                type="number"
+                type="text"
                 required
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base font-bold font-mono text-gray-900"
+                placeholder="100"
+                value={formatComma(formData.stock || '')}
+                onChange={(e) => setFormData({ ...formData, stock: parseComma(e.target.value) })}
+                className="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl text-lg font-bold font-mono text-gray-900 focus:ring-2 focus:ring-teal-500 shadow-2xs"
               />
             </div>
           </div>
@@ -380,12 +421,11 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                       📉 Хямдралын хувь (%):
                     </label>
                     <input
-                      type="number"
-                      min="0"
-                      max="100"
+                      type="text"
+                      placeholder="15"
                       value={formData.discountPercent || ''}
                       onChange={(e) => {
-                        const pct = parseFloat(e.target.value) || 0;
+                        const pct = parseComma(e.target.value);
                         const discPrice = Math.round(formData.priceMnt * (1 - pct / 100));
                         setFormData({
                           ...formData,
@@ -393,8 +433,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                           discountPriceMnt: discPrice,
                         });
                       }}
-                      className="w-full px-3 py-2 bg-white border border-rose-300 rounded-lg font-mono font-bold text-rose-900 text-sm focus:ring-2 focus:ring-rose-500"
-                      placeholder="15"
+                      className="w-full px-3 py-2 bg-white border border-rose-300 rounded-xl font-mono font-bold text-rose-900 text-sm focus:ring-2 focus:ring-rose-500 shadow-2xs"
                     />
                   </div>
 
@@ -403,10 +442,11 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                       🏷️ Эцсийн Хямдарсан Үнэ (₮):
                     </label>
                     <input
-                      type="number"
-                      value={formData.discountPriceMnt || ''}
+                      type="text"
+                      placeholder="10,500"
+                      value={formatComma(formData.discountPriceMnt || '')}
                       onChange={(e) => {
-                        const dPrice = parseFloat(e.target.value) || 0;
+                        const dPrice = parseComma(e.target.value);
                         const pct = formData.priceMnt > 0 ? Math.round(((formData.priceMnt - dPrice) / formData.priceMnt) * 100) : 0;
                         setFormData({
                           ...formData,
@@ -414,8 +454,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
                           discountPercent: Math.max(0, pct),
                         });
                       }}
-                      className="w-full px-3 py-2 bg-white border border-rose-400 rounded-lg font-mono font-black text-red-600 text-sm focus:ring-2 focus:ring-rose-500"
-                      placeholder="10500"
+                      className="w-full px-3 py-2 bg-white border border-rose-400 rounded-xl font-mono font-black text-red-600 text-sm focus:ring-2 focus:ring-rose-500 shadow-2xs"
                     />
                   </div>
                 </div>

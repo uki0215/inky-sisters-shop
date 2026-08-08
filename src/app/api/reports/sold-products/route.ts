@@ -68,6 +68,18 @@ export async function GET(request: Request) {
       totalProfitMnt: reportList.reduce((acc, curr) => acc + curr.totalProfitMnt, 0),
     };
 
+    // Fetch deleted orders logs
+    const deletedLogs = await db.financialLog.findMany({
+      where: {
+        OR: [
+          { type: 'ORDER_DELETED' },
+          { description: { contains: 'Устгагдсан' } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+
     if (exportCsv) {
       // Build CSV with UTF-8 BOM byte for native Mongolian support in Excel
       const headers = ['Барааны Код (Barcode)', 'Барааны Нэр', 'Зарагдсан Тоо (Ширхэг)', 'Нэгж Үнэ (₮)', 'Нийт Борлуулалт (₮)', 'Нэгж Өртөг (₮)', 'Нийт Өртөг (₮)', 'Нийт Ашиг (₮)'];
@@ -91,6 +103,17 @@ export async function GET(request: Request) {
       // Append summary line
       csvContent += `\n"НИЙТ ДҮН","","${summary.totalSoldQty} ш","","${summary.totalRevenueMnt}₮","","${summary.totalCostMnt}₮","${summary.totalProfitMnt}₮"\n`;
 
+      // Append Deleted Orders Section in Excel
+      if (deletedLogs.length > 0) {
+        csvContent += `\n\n"=== УСТГАГДСАН ЗАХИАЛГУУДЫН ТҮҮХ ЖУРНАЛ (DELETED ORDERS LOG) ==="\n`;
+        csvContent += `"Огноо Цаг","Устгагдсан Захиалгын Дэлгэрэнгүй Мэдээлэл","Хамаарах Дүн (₮)"\n`;
+        deletedLogs.forEach((log: any) => {
+          const dateStr = new Date(log.createdAt).toLocaleString('mn-MN');
+          const cleanDesc = (log.description || '').replace(/"/g, '""');
+          csvContent += `"${dateStr}",""${cleanDesc}"","${log.amountMnt || 0}₮"\n`;
+        });
+      }
+
       return new Response(csvContent, {
         status: 200,
         headers: {
@@ -104,6 +127,7 @@ export async function GET(request: Request) {
       summary,
       items: reportList,
       rawItems: orderItems,
+      deletedLogs,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

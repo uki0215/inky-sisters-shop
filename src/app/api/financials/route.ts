@@ -25,7 +25,12 @@ export async function GET() {
     let totalCogsMnt = 0;
     activeOrders.forEach((order: any) => {
       order.items.forEach((item: any) => {
-        const costPerUnit = item.product?.costMnt || 0;
+        const prod = item.product;
+        const costPerUnit = (prod?.costMnt && prod.costMnt > 0)
+          ? prod.costMnt
+          : (prod?.costYuan && prod.costYuan > 0 && prod?.yuanRate && prod.yuanRate > 0)
+            ? prod.costYuan * prod.yuanRate
+            : (prod?.costMnt || 0);
         totalCogsMnt += costPerUnit * item.quantity;
       });
     });
@@ -37,13 +42,20 @@ export async function GET() {
     let currentInventoryCostMnt = 0;
     let currentInventorySaleValueMnt = 0;
     products.forEach((p: any) => {
-      currentInventoryCostMnt += (p.costMnt || 0) * p.stock;
+      const unitCost = (p.costMnt && p.costMnt > 0)
+        ? p.costMnt
+        : (p.costYuan && p.costYuan > 0 && p.yuanRate && p.yuanRate > 0)
+          ? p.costYuan * p.yuanRate
+          : (p.costMnt || 0);
+
+      currentInventoryCostMnt += unitCost * (p.stock || 0);
       const sellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
-      currentInventorySaleValueMnt += sellingPrice * p.stock;
+      currentInventorySaleValueMnt += sellingPrice * (p.stock || 0);
     });
 
     const currentInventoryPotentialProfitMnt = currentInventorySaleValueMnt - currentInventoryCostMnt;
     const pendingOrdersCount = allOrders.filter((o: any) => o.paymentStatus === 'PENDING_PAYMENT').length;
+    const deletedLogs = financialLogs.filter((l: any) => l.type === 'ORDER_DELETED' || l.description?.includes('Устгагдсан'));
 
     return NextResponse.json({
       paidSales: totalIncomeMnt,
@@ -60,6 +72,7 @@ export async function GET() {
       outOfStockCount: products.filter((p: any) => p.stock === 0).length,
       orders: allOrders,
       financialLogs,
+      deletedLogs,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
