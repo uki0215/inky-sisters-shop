@@ -323,7 +323,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
               </div>
 
               <div>
-                <label className="text-gray-600 block mb-1">Ханш (₮) (0 бол төгрөгөөр):</label>
+                <label className="text-gray-600 block mb-1">Ханш (₮):</label>
                 <input
                   type="text"
                   placeholder="485"
