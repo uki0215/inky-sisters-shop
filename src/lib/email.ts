@@ -107,3 +107,57 @@ export async function sendOrderConfirmationEmail({
     return { success: false, error: error.message };
   }
 }
+
+export async function sendResetPasswordEmail({ to, resetPassword }: { to: string; resetPassword: string }) {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    console.log(`[EMAIL NOTICE] Reset password email to ${to} skipped - SMTP credentials missing.`);
+    return { success: false, reason: 'SMTP credentials not configured in .env' };
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    const htmlContent = `
+      <div style="font-family: 'Manrope', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #fee2e2; border-radius: 16px; padding: 28px; background-color: #ffffff;">
+        <h2 style="color: #dc2626; margin-top: 0; font-size: 20px;">Inky Sisters — Өгөгдлийн бааз цэвэрлэх тусгай нууц үг</h2>
+        <p style="font-size: 14px; color: #334155;">Сайн байна уу, Админ?</p>
+        <p style="font-size: 13px; color: #475569;">Та өгөгдлийн баазыг 0 болгох (DB Reset) тусгай нууц үгээ сэргээх хүсэлт илгээлээ. Таны нууц үг доорх байдалтай байна:</p>
+        
+        <div style="background-color: #fef2f2; border: 2px dashed #fca5a5; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center;">
+          <span style="font-size: 12px; color: #991b1b; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 6px;">DB Reset Нууц үг:</span>
+          <span style="font-family: monospace; font-size: 24px; font-weight: bold; color: #7f1d1d; letter-spacing: 2px;">${resetPassword}</span>
+        </div>
+
+        <p style="font-size: 12px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+          Хэрэв та энэхүү хүсэлтийг явуулаагүй бол энэ и-мэйлийг хайхрахгүй өнгөрүүлж болно.<br/>
+          <strong>Inky Sisters Админ Аюулгүй Байдлын Систем</strong>
+        </p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"Inky Sisters Admin" <${smtpUser}>`,
+      to,
+      subject: `[Inky Sisters] 🔐 DB Reset тусгай нууц үг сэргээх`,
+      html: htmlContent,
+    });
+
+    console.log(`[EMAIL SUCCESS] DB Reset Password email sent to ${to}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error('[EMAIL ERROR] Failed to send DB reset password email:', error);
+    return { success: false, error: error.message };
+  }
+}

@@ -34,10 +34,21 @@ async function performWipe() {
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { action } = body;
+    const { action, resetPassword } = body;
 
     if (action !== 'WIPE_ALL_DATA') {
       return NextResponse.json({ error: 'Баталгаажуулах утга буруу байна.' }, { status: 400 });
+    }
+
+    // Verify DB Reset Password
+    let admin = await db.adminUser.findUnique({ where: { id: 'admin' } });
+    const expectedResetPass = admin?.resetPassword || 'inky1234';
+
+    if (!resetPassword || resetPassword.trim() !== expectedResetPass) {
+      return NextResponse.json(
+        { error: '🔒 Өгөгдөл арилгах тусгай нууц үг буруу байна!' },
+        { status: 400 }
+      );
     }
 
     const result = await performWipe();
@@ -52,9 +63,12 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');
 
-    if (key !== 'RESET_NOW') {
+    let admin = await db.adminUser.findUnique({ where: { id: 'admin' } });
+    const expectedResetPass = admin?.resetPassword || 'inky1234';
+
+    if (key !== expectedResetPass && key !== 'RESET_NOW') {
       return NextResponse.json(
-        { error: 'Өгөгдлийг арилгахын тулд ?key=RESET_NOW параметрийг илгээнэ үү.' },
+        { error: 'Өгөгдлийг арилгахын тулд зөв ?key=НУУЦ_ҮГ параметрийг илгээнэ үү.' },
         { status: 400 }
       );
     }

@@ -233,10 +233,12 @@ model HeroSlide {
 }
 
 model AdminUser {
-  id        String   @id @default("admin")
-  username  String   @default("inkysisters")
-  password  String   @default("inkysisters")
-  updatedAt DateTime @updatedAt
+  id            String   @id @default("admin")
+  username      String   @default("inkysisters")
+  password      String   @default("inkysisters")
+  resetPassword String   @default("inky1234")
+  email         String   @default("uki.0215@gmail.com")
+  updatedAt     DateTime @updatedAt
 }
 
 model Expense {

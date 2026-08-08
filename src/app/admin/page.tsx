@@ -79,6 +79,14 @@ export default function AdminPage() {
   const [selectedProductForDetail, setSelectedProductForDetail] = useState<any | null>(null);
   const [selectedProductForHistory, setSelectedProductForHistory] = useState<any | null>(null);
 
+  // DB Reset Security Modal
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resetModalPassInput, setResetModalPassInput] = useState('');
+  const [resetModalError, setResetModalError] = useState<string | null>(null);
+  const [resetModalLoading, setResetModalLoading] = useState(false);
+  const [forgotEmailNotice, setForgotEmailNotice] = useState<string | null>(null);
+  const [forgotEmailLoading, setForgotEmailLoading] = useState(false);
+
   // Real-time Notification States
   const [ordersList, setOrdersList] = useState<any[]>([]);
   const knownOrderIdsRef = React.useRef<Set<string>>(new Set());
@@ -205,6 +213,41 @@ export default function AdminPage() {
       console.error('Failed to save read notifications to localStorage', e);
     }
     setNewOrderToast(null);
+  };
+
+  const handleDbResetConfirm = async () => {
+    if (!resetModalPassInput) {
+      setResetModalError('Өгөгдөл арилгах тусгай нууц үгээ оруулна уу.');
+      return;
+    }
+
+    setResetModalLoading(true);
+    setResetModalError(null);
+
+    try {
+      const res = await fetch('/api/admin/reset-db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'WIPE_ALL_DATA',
+          resetPassword: resetModalPassInput,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert('✅ ' + data.message);
+        setIsResetModalOpen(false);
+        setResetModalPassInput('');
+        fetchAdminData();
+      } else {
+        setResetModalError(data.error || '🔒 Өгөгдөл арилгах нууц үг буруу байна.');
+      }
+    } catch (e: any) {
+      setResetModalError('Алдаа гарлаа: ' + e.message);
+    } finally {
+      setResetModalLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -1255,25 +1298,11 @@ export default function AdminPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={async () => {
-                    if (confirm('⚠️ АНХААРУУЛГА: Та системд байгаа бүх туршилтын өгөгдөл, бараа, захиалга, санхүүг бүрэн арилгаж 0 болгохдоо итгэлтэй байна уу?')) {
-                      try {
-                        const res = await fetch('/api/admin/reset-db', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'WIPE_ALL_DATA' }),
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                          alert('✅ ' + data.message);
-                          fetchAdminData();
-                        } else {
-                          alert('❌ Алдаа: ' + data.error);
-                        }
-                      } catch (e: any) {
-                        alert('❌ Алдаа гарлаа: ' + e.message);
-                      }
-                    }
+                  onClick={() => {
+                    setResetModalPassInput('');
+                    setResetModalError(null);
+                    setForgotEmailNotice(null);
+                    setIsResetModalOpen(true);
                   }}
                   className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                 >
@@ -1372,6 +1401,115 @@ export default function AdminPage() {
           >
             Захиалга Шалгах &amp; Баталгаажуулах
           </button>
+        </div>
+      )}
+
+      {/* DB Reset Confirmation Security Modal */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-red-200 space-y-5 font-sans relative">
+            <button
+              onClick={() => setIsResetModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 text-red-600 border-b border-red-100 pb-3">
+              <div className="w-10 h-10 bg-red-100 rounded-2xl flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-gray-900">Өгөгдлийн Бааз Арилгах (DB Reset)</h3>
+                <p className="text-xs text-red-600 font-bold">Аюулгүй байдлын тусгай нууц үг шаардлагатай</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Анхаар! Энэхүү үйлдлийг хийснээр бүх бараа, захиалга, санхүүгийн түүхүүд 0 болж устгагдана. Өгөгдөл арилгах тусгай нууц үгээ оруулна уу:
+            </p>
+
+            {resetModalError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <span>{resetModalError}</span>
+              </div>
+            )}
+
+            {forgotEmailNotice && (
+              <div className="p-3 bg-teal-50 border border-teal-200 text-teal-800 text-xs font-bold rounded-xl flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-teal-700 shrink-0" />
+                <span>{forgotEmailNotice}</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold text-gray-800">
+                🔒 Өгөгдөл Арилгах Нууц Үг (Reset Password):
+              </label>
+              <input
+                type="password"
+                autoFocus
+                placeholder="••••••••"
+                value={resetModalPassInput}
+                onChange={(e) => setResetModalPassInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleDbResetConfirm();
+                  }
+                }}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl font-mono text-sm font-bold text-gray-900 focus:bg-white focus:ring-2 focus:ring-red-500"
+              />
+
+              <div className="pt-1 flex justify-between items-center text-xs">
+                <button
+                  type="button"
+                  disabled={forgotEmailLoading}
+                  onClick={async () => {
+                    setForgotEmailLoading(true);
+                    setResetModalError(null);
+                    setForgotEmailNotice(null);
+                    try {
+                      const res = await fetch('/api/admin/forgot-reset-password', { method: 'POST' });
+                      const data = await res.json();
+                      if (res.ok) {
+                        setForgotEmailNotice(data.message);
+                      } else {
+                        setResetModalError(data.error || 'И-мэйл илгээхэд алдаа гарлаа.');
+                      }
+                    } catch (err: any) {
+                      setResetModalError(err.message);
+                    } finally {
+                      setForgotEmailLoading(false);
+                    }
+                  }}
+                  className="text-teal-700 hover:text-teal-900 font-extrabold underline flex items-center gap-1 transition-all"
+                >
+                  <Key className="w-3.5 h-3.5" />
+                  <span>{forgotEmailLoading ? 'Илгээж байна...' : '🔑 Нууц үгээ мартсан уу? И-мэйлээр авах'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setIsResetModalOpen(false)}
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-all"
+              >
+                Цуцлах
+              </button>
+              <button
+                type="button"
+                disabled={resetModalLoading || !resetModalPassInput}
+                onClick={handleDbResetConfirm}
+                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{resetModalLoading ? 'Цэвэрлэж байна...' : 'Бүх өгөгдлийг 0 болгох'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
