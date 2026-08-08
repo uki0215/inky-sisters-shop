@@ -79,19 +79,55 @@ export async function GET() {
     let currentInventorySaleValueMnt = 0;
 
     products.forEach((p: any) => {
-      // ── Current inventory (latest cost & price) ──
+      // ── Current unit cost & price ──
       const currentUnitCost = (p.costYuan && p.costYuan > 0 && p.yuanRate && p.yuanRate > 0)
         ? p.costYuan * p.yuanRate
         : (p.costMnt || 0);
       const currentSellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
-      currentInventoryCostMnt     += currentUnitCost       * (p.stock || 0);
-      currentInventorySaleValueMnt += currentSellingPrice   * (p.stock || 0);
-
-      // ── Lifetime batches from ProductHistory ──
+      
       const restockEvents = (p.history || []).filter(
         (h: any) => h.changeType === 'INITIAL' || h.changeType === 'RESTOCK'
       );
 
+      // ── 1. Calculate Current Inventory Cost using FIFO batch valuation ──
+      let productRemainingCost = 0;
+      let remainingQtyToAllocate = p.stock || 0;
+
+      if (restockEvents.length > 0 && remainingQtyToAllocate > 0) {
+        // Allocate remaining stock starting from newest batch to oldest batch (FIFO: oldest items sold first)
+        const reverseBatches = [...restockEvents].reverse();
+        for (const b of reverseBatches) {
+          if (remainingQtyToAllocate <= 0) break;
+          const qty = b.addedStock || 0;
+          if (qty <= 0) continue;
+
+          let batchUnitCost: number;
+          if (b.newCostMnt !== null && b.newCostMnt !== undefined && b.newCostMnt > 0) {
+            batchUnitCost = b.newCostMnt;
+          } else if (b.newCostYuan && b.newCostYuan > 0 && b.newYuanRate && b.newYuanRate > 0) {
+            batchUnitCost = b.newCostYuan * b.newYuanRate;
+          } else {
+            batchUnitCost = currentUnitCost;
+          }
+
+          const qtyFromThisBatch = Math.min(remainingQtyToAllocate, qty);
+          productRemainingCost += qtyFromThisBatch * batchUnitCost;
+          remainingQtyToAllocate -= qtyFromThisBatch;
+        }
+
+        // If remaining stock exceeds logged restock batches (e.g. manual stock edit), value remaining at currentUnitCost
+        if (remainingQtyToAllocate > 0) {
+          productRemainingCost += remainingQtyToAllocate * currentUnitCost;
+        }
+      } else {
+        // Fallback for products without restock history
+        productRemainingCost = currentUnitCost * (p.stock || 0);
+      }
+
+      currentInventoryCostMnt     += productRemainingCost;
+      currentInventorySaleValueMnt += currentSellingPrice * (p.stock || 0);
+
+      // ── Lifetime batches from ProductHistory ──
       let cumulativeHistoryCostMnt      = 0;
       let cumulativeHistorySaleValueMnt = 0;
 
@@ -103,13 +139,10 @@ export async function GET() {
           // Unit cost at the time of this batch
           let batchUnitCost: number;
           if (h.newCostMnt !== null && h.newCostMnt !== undefined && h.newCostMnt > 0) {
-            // Stored directly (new batches going forward)
             batchUnitCost = h.newCostMnt;
           } else if (h.newCostYuan && h.newCostYuan > 0 && h.newYuanRate && h.newYuanRate > 0) {
-            // Derive from yuan × rate
             batchUnitCost = h.newCostYuan * h.newYuanRate;
           } else {
-            // Fallback: use current product cost (for legacy records without newCostMnt)
             batchUnitCost = currentUnitCost;
           }
 
@@ -126,12 +159,9 @@ export async function GET() {
         const currentStock = p.stock || 0;
 
         if (totalHistoryStock > 0 && currentStock > 0) {
-          // Find the average historical sale price for the remaining stock portion
-          // and replace it with the current sale price
           const avgHistoricalSalePrice = cumulativeHistorySaleValueMnt / totalHistoryStock;
           const remainingHistoricalSaleValue = avgHistoricalSalePrice * currentStock;
           const remainingCurrentSaleValue    = currentSellingPrice     * currentStock;
-          // Adjust: subtract old valuation of remaining portion, add current price valuation
           cumulativeHistorySaleValueMnt = cumulativeHistorySaleValueMnt
             - remainingHistoricalSaleValue
             + remainingCurrentSaleValue;
@@ -140,7 +170,6 @@ export async function GET() {
         totalPurchasedCostMnt      += cumulativeHistoryCostMnt;
         totalPurchasedSaleValueMnt += cumulativeHistorySaleValueMnt;
       } else {
-        // No history at all — fall back to COGS + current inventory (legacy products)
         totalPurchasedCostMnt      += currentUnitCost     * (p.stock || 0);
         totalPurchasedSaleValueMnt += currentSellingPrice * (p.stock || 0);
       }
