@@ -1,7 +1,20 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Tag, ChevronRight, Layers, FolderPlus, Image as ImageIcon, Upload, Loader2, Check } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  Tag,
+  ChevronRight,
+  Layers,
+  FolderPlus,
+  Image as ImageIcon,
+  Upload,
+  Loader2,
+  Check,
+  Edit,
+  X,
+} from 'lucide-react';
 
 export default function CategoryManager() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -11,6 +24,13 @@ export default function CategoryManager() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Edit Category Modal State
+  const [editingCategory, setEditingCategory] = useState<any | null>(null);
+  const [editCatName, setEditCatName] = useState('');
+  const [editParentId, setEditParentId] = useState<string>('');
+  const [editImageUrl, setEditImageUrl] = useState<string>('');
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -28,6 +48,44 @@ export default function CategoryManager() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const openEditModal = (cat: any) => {
+    setEditingCategory(cat);
+    setEditCatName(cat.name || '');
+    setEditParentId(cat.parentId || '');
+    setEditImageUrl(cat.imageUrl || '');
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategory || !editCatName.trim()) return;
+
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/categories/${editingCategory.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editCatName.trim(),
+          parentId: editParentId || null,
+          imageUrl: editImageUrl || null,
+        }),
+      });
+
+      if (res.ok) {
+        setEditingCategory(null);
+        fetchCategories();
+      } else {
+        const data = await res.json();
+        alert('Алдаа: ' + (data.error || 'Ангилал засахад алдаа гарлаа'));
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Алдаа гарлаа: ' + err.message);
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const handleFileUpload = async (file: File, catId?: string) => {
     const formData = new FormData();
@@ -48,6 +106,8 @@ export default function CategoryManager() {
             body: JSON.stringify({ imageUrl: data.url }),
           });
           fetchCategories();
+        } else if (editingCategory) {
+          setEditImageUrl(data.url);
         } else {
           setNewCatImageUrl(data.url);
         }
@@ -102,13 +162,13 @@ export default function CategoryManager() {
   return (
     <div className="space-y-6">
       {/* Category Creation Form */}
-      <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4">
+      <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs space-y-4 font-sans">
         <div>
           <h3 className="text-lg font-extrabold text-gray-900 font-sans flex items-center gap-2">
             🏷️ Дэлгүүрийн Үндсэн ба Дэд Ангилал (Sub-Categories)
           </h3>
           <p className="text-xs text-gray-500 mt-0.5 font-sans">
-            Үндсэн ангилал эсвэл түүний доторх Дэд ангилуудыг нэмж удирдах. Зураг хуулж болно.
+            Үндсэн ангилал эсвэл түүний доторх Дэд ангилуудыг нэмж, нэрийг засах, зураг солин удирдах.
           </p>
         </div>
 
@@ -210,7 +270,7 @@ export default function CategoryManager() {
       {loading ? (
         <div className="text-center py-10 text-xs text-gray-500 font-bold">Ангилалуудыг уншиж байна...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
           {parentCategories.map((parentCat) => {
             const children = categories.filter((c) => c.parentId === parentCat.id);
 
@@ -234,7 +294,9 @@ export default function CategoryManager() {
                     </div>
 
                     <div>
-                      <h4 className="font-black text-gray-900 text-sm font-sans">{parentCat.name}</h4>
+                      <h4 className="font-black text-gray-900 text-sm font-sans flex items-center gap-1.5">
+                        <span>{parentCat.name}</span>
+                      </h4>
                       <span className="text-[11px] font-mono text-gray-500 block">
                         {children.length} Дэд ангилалтай ({parentCat._count?.products || 0} Бараатай)
                       </span>
@@ -256,13 +318,24 @@ export default function CategoryManager() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDeleteCategory(parentCat.id)}
-                    className="p-1.5 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                    title="Ангилал устгах"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEditModal(parentCat)}
+                      className="p-1.5 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors rounded-lg flex items-center gap-1 text-xs font-bold"
+                      title="Ангиллын нэр / төрөл засах"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>Засах</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteCategory(parentCat.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                      title="Ангилал устгах"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Subcategories List */}
@@ -286,6 +359,15 @@ export default function CategoryManager() {
                         </div>
 
                         <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => openEditModal(subCat)}
+                            className="px-2 py-1 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-md font-bold text-[11px] flex items-center gap-1 transition-all"
+                            title="Дэд ангилал засах"
+                          >
+                            <Edit className="w-3 h-3" />
+                            <span>Засах</span>
+                          </button>
+                          
                           <label className="text-[10px] text-teal-700 font-bold hover:underline cursor-pointer">
                             Зураг
                             <input
@@ -313,6 +395,130 @@ export default function CategoryManager() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Category Edit Modal */}
+      {editingCategory && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200 font-sans">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-200 space-y-5 relative">
+            <button
+              onClick={() => setEditingCategory(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
+              <div className="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center shrink-0 border border-amber-200">
+                <Edit className="w-5 h-5 text-amber-700" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-base text-gray-900">Ангилал Засах</h3>
+                <p className="text-xs text-gray-500 font-medium">Ангиллын нэр, харьяалал ба зургийг шинэчлэх</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Ангиллын Нэр *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editCatName}
+                  onChange={(e) => setEditCatName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:bg-white focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Эцэг Ангилал (Төрөл):
+                </label>
+                <select
+                  value={editParentId}
+                  onChange={(e) => setEditParentId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold text-gray-900 focus:bg-white focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="">📁 Үндсэн Ангилал болгох</option>
+                  {categories
+                    .filter((c) => !c.parentId && c.id !== editingCategory.id)
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        ↳ Дэд ангилал болгох: {p.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Ангиллын Зураг:
+                </label>
+                <div className="space-y-2">
+                  {editImageUrl && (
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 border border-gray-200 rounded-xl">
+                      <img src={editImageUrl} alt="Preview" className="w-12 h-12 object-cover rounded-lg border border-gray-300" />
+                      <button
+                        type="button"
+                        onClick={() => setEditImageUrl('')}
+                        className="text-xs text-red-600 hover:underline font-bold"
+                      >
+                        Зураг арилгах
+                      </button>
+                    </div>
+                  )}
+
+                  <label className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl text-xs font-extrabold text-gray-700 cursor-pointer transition-all">
+                    <Upload className="w-4 h-4 text-teal-700" />
+                    <span>{uploadingImage ? 'Хуулж байна...' : 'Шинэ Зураг Хуулж Сонгох'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          setUploadingImage(true);
+                          try {
+                            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                            const data = await res.json();
+                            if (data.url) setEditImageUrl(data.url);
+                          } catch (err) {
+                            alert('Зураг хуулахад алдаа гарлаа');
+                          } finally {
+                            setUploadingImage(false);
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingCategory(null)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-all"
+                >
+                  Цуцлах
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{savingEdit ? 'Хадгалж байна...' : 'Шинэчлэн Хадгалах'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

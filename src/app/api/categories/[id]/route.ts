@@ -79,3 +79,10 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> | { id: string } }
+) {
+  return PATCH(request, { params });
+}
