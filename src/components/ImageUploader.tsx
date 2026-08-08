@@ -6,9 +6,6 @@ import { Upload, Link as LinkIcon, Loader2, X, AlertTriangle, Plus } from 'lucid
 interface ImageUploaderProps {
   value?: string;
   onChange?: (url: string) => void;
-  values?: string[];
-  onChangeMultiple?: (urls: string[]) => void;
-  multiple?: boolean;
   label?: string;
 }
 
@@ -66,9 +63,6 @@ const compressImageFile = (file: File): Promise<string> => {
 export default function ImageUploader({
   value = '',
   onChange,
-  values,
-  onChangeMultiple,
-  multiple = false,
   label = 'Барааны Зураг',
 }: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
@@ -76,18 +70,7 @@ export default function ImageUploader({
   const [mode, setMode] = useState<'file' | 'url'>('file');
   const [urlInput, setUrlInput] = useState('');
 
-  // Clean image list extraction
-  const getImagesList = (): string[] => {
-    let raw: string[] = [];
-    if (multiple && values && Array.isArray(values) && values.length > 0) {
-      raw = values;
-    } else if (typeof value === 'string' && value.trim()) {
-      raw = value.split(',').map((s) => s.trim()).filter(Boolean);
-    }
-    return Array.from(new Set(raw)).filter((url) => url && url.length > 5);
-  };
-
-  const currentImages = getImagesList();
+  const currentImageUrl = typeof value === 'string' ? value.trim() : '';
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -125,22 +108,12 @@ export default function ImageUploader({
   const handleAddUrl = () => {
     if (!urlInput.trim()) return;
     const url = urlInput.trim();
-    if (multiple && onChangeMultiple) {
-      const combined = Array.from(new Set([...currentImages, url])).filter(Boolean);
-      onChangeMultiple(combined);
-    } else if (onChange) {
-      onChange(url);
-    }
+    if (onChange) onChange(url);
     setUrlInput('');
   };
 
-  const handleRemoveImage = (indexToRemove: number) => {
-    const updated = currentImages.filter((_, idx) => idx !== indexToRemove);
-    if (multiple && onChangeMultiple) {
-      onChangeMultiple(updated);
-    } else if (onChange) {
-      onChange('');
-    }
+  const handleRemoveImage = () => {
+    if (onChange) onChange('');
   };
 
   return (
@@ -184,7 +157,6 @@ export default function ImageUploader({
           <input
             type="file"
             accept="image/*"
-            multiple={multiple}
             onChange={handleFileChange}
             disabled={uploading}
             className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
@@ -227,35 +199,28 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* Uploaded Single Image Preview or Gallery */}
-      {currentImages.length > 0 && (
+      {/* Uploaded Single Image Preview */}
+      {currentImageUrl && (
         <div className="space-y-1.5 pt-1">
           <span className="text-[11px] font-bold text-gray-600 block">
             Сонгогдсон зураг:
           </span>
-          <div className="flex flex-wrap gap-2.5">
-            {currentImages.map((imgUrl, idx) => (
-              <div
-                key={`${imgUrl.slice(0, 30)}_${idx}`}
-                className="relative w-28 h-28 rounded-xl overflow-hidden bg-gray-100 border-2 border-teal-500 ring-2 ring-teal-500/20 group shadow-xs"
-              >
-                <img
-                  src={imgUrl}
-                  alt="Product Image"
-                  className="w-full h-full object-cover"
-                />
+          <div className="relative w-28 h-28 rounded-xl overflow-hidden bg-gray-100 border-2 border-teal-500 ring-2 ring-teal-500/20 group shadow-xs">
+            <img
+              src={currentImageUrl}
+              alt="Product Image"
+              className="w-full h-full object-cover"
+            />
 
-                {/* Remove Button */}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(idx)}
-                  className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full shadow-md transition-all"
-                  title="Зураг устгах"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
+            {/* Remove Button */}
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full shadow-md transition-all"
+              title="Зураг устгах"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       )}
