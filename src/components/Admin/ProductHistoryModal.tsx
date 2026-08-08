@@ -191,30 +191,52 @@ export default function ProductHistoryModal({ product, onClose }: ProductHistory
                 </p>
 
                 {/* Details Breakdown */}
-                <div className="flex flex-wrap gap-4 text-[11px] text-gray-600 pt-1 border-t border-gray-100">
-                  {item.oldPriceMnt !== null && item.newPriceMnt !== null && (
-                    <div>
-                      <span className="text-gray-400">Зарах үнэ: </span>
-                      <span className="font-semibold text-gray-800">{formatMNT(item.oldPriceMnt)} → {formatMNT(item.newPriceMnt)}</span>
-                    </div>
-                  )}
-                  {item.oldCostYuan !== null && item.newCostYuan !== null && (
-                    <div>
-                      <span className="text-gray-400">Авсан (¥): </span>
-                      <span className="font-semibold text-teal-800">¥{item.oldCostYuan} → ¥{item.newCostYuan}</span>
-                    </div>
-                  )}
-                  {item.oldYuanRate !== null && item.newYuanRate !== null && (
-                    <div>
-                      <span className="text-gray-400">Ханш: </span>
-                      <span className="font-semibold text-gray-800">{item.oldYuanRate}₮ → {item.newYuanRate}₮</span>
-                    </div>
-                  )}
-                  {item.addedStock && (
-                    <div>
-                      <span className="text-gray-400">Нэмсэн үлдэгдэл: </span>
-                      <span className="font-extrabold text-teal-700">+{item.addedStock} ш</span>
-                    </div>
+                <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-600 pt-1 border-t border-gray-100">
+                  {item.changeType === 'ORDER_RETURN' ? (
+                    <>
+                      {item.newCostMnt !== null && item.newCostMnt !== undefined && item.newCostMnt > 0 && (
+                        <span className="px-2.5 py-1 bg-red-50 text-red-800 border border-red-200 rounded-lg font-bold">
+                          Анх авсан нэгж өртөг: <span className="font-extrabold">{formatMNT(item.newCostMnt)}</span>
+                        </span>
+                      )}
+                      {item.newPriceMnt !== null && item.newPriceMnt !== undefined && item.newPriceMnt > 0 && (
+                        <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg font-bold">
+                          Борлуулсан нэгж үнэ: <span className="font-extrabold">{formatMNT(item.newPriceMnt)}</span>
+                        </span>
+                      )}
+                      {item.addedStock && (
+                        <span className="px-2.5 py-1 bg-teal-50 text-teal-800 border border-teal-200 rounded-lg font-bold">
+                          Буцааж агуулахад оруулсан: <span className="font-extrabold">+{item.addedStock} ш</span>
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {item.oldPriceMnt !== null && item.newPriceMnt !== null && (
+                        <div>
+                          <span className="text-gray-400">Зарах үнэ: </span>
+                          <span className="font-semibold text-gray-800">{formatMNT(item.oldPriceMnt)} → {formatMNT(item.newPriceMnt)}</span>
+                        </div>
+                      )}
+                      {item.oldCostYuan !== null && item.newCostYuan !== null && (
+                        <div>
+                          <span className="text-gray-400">Авсан (¥): </span>
+                          <span className="font-semibold text-teal-800">¥{item.oldCostYuan} → ¥{item.newCostYuan}</span>
+                        </div>
+                      )}
+                      {item.oldYuanRate !== null && item.newYuanRate !== null && (
+                        <div>
+                          <span className="text-gray-400">Ханш: </span>
+                          <span className="font-semibold text-gray-800">{item.oldYuanRate}₮ → {item.newYuanRate}₮</span>
+                        </div>
+                      )}
+                      {item.addedStock && (
+                        <div>
+                          <span className="text-gray-400">Нэмсэн үлдэгдэл: </span>
+                          <span className="font-extrabold text-teal-700">+{item.addedStock} ш</span>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

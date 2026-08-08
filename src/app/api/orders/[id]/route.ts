@@ -61,14 +61,15 @@ export async function PUT(
             ? item.costMnt
             : (item.product?.costYuan && item.product?.yuanRate ? item.product.costYuan * item.product.yuanRate : (item.product?.costMnt || 0));
 
-          // Log Product History with original cost
+          // Log Product History with original cost and price
           try {
             await db.productHistory.create({
               data: {
                 productId: item.productId,
                 changeType: 'ORDER_RETURN',
-                description: `Захиалга цуцлагдсан буцаалт (${existing.orderNumber}): +${item.quantity} ш (Анх авсан нэгж өртөг: ${itemCostUnit.toLocaleString()}₮)`,
+                description: `Захиалга цуцлагдсан буцаалт (${existing.orderNumber}): +${item.quantity} ш (Авсан өртөг: ${itemCostUnit.toLocaleString()}₮, Зарсан үнэ: ${item.priceMnt.toLocaleString()}₮)`,
                 newCostMnt: itemCostUnit,
+                newPriceMnt: item.priceMnt,
                 addedStock: item.quantity,
                 newStock: updatedProd.stock,
                 note: `Захиалга цуцлалт: ${existing.customerName} | Анх авсан өртгөөр (${itemCostUnit.toLocaleString()}₮) агуулахад буцааж оруулав`,
@@ -114,14 +115,15 @@ export async function PUT(
             `❌ Буцаасан: "${oldItem.productName}" (${oldItem.quantity} ш) - Зарсан үнэ: ${Math.round(oldItem.quantity * oldItem.priceMnt).toLocaleString()}₮ | Авсан өртөг: ${Math.round(oldItem.quantity * originalUnitCost).toLocaleString()}₮`
           );
 
-          // Record Product History with original purchase cost
+          // Record Product History with original purchase cost and price
           try {
             await db.productHistory.create({
               data: {
                 productId: oldItem.productId,
                 changeType: 'ORDER_RETURN',
-                description: `Захиалга буцаалт (${existing.orderNumber}): +${oldItem.quantity} ш (Анх авсан нэгж өртөг: ${originalUnitCost.toLocaleString()}₮)`,
+                description: `Захиалга буцаалт (${existing.orderNumber}): +${oldItem.quantity} ш (Авсан өртөг: ${originalUnitCost.toLocaleString()}₮, Зарсан үнэ: ${oldItem.priceMnt.toLocaleString()}₮)`,
                 newCostMnt: originalUnitCost,
+                newPriceMnt: oldItem.priceMnt,
                 addedStock: oldItem.quantity,
                 newStock: updatedProd.stock,
                 note: `Захиалагч: ${existing.customerName} | Анх авсан өртгөөр (${originalUnitCost.toLocaleString()}₮) буцааж агуулахад оруулав`,
@@ -145,14 +147,15 @@ export async function PUT(
                 `🔻 Тоо хассан (Буцаасан): "${oldItem.productName}" (${oldItem.quantity} ш ➔ ${matchingNewItem.quantity} ш, буцаасан ${returnedQty} ш - Авсан өртөг: ${Math.round(returnedQty * originalUnitCost).toLocaleString()}₮)`
               );
 
-              // Log partial return with original purchase cost
+              // Log partial return with original purchase cost and price
               try {
                 await db.productHistory.create({
                   data: {
                     productId: oldItem.productId,
                     changeType: 'ORDER_RETURN',
-                    description: `Захиалга хэсэгчлэн буцаалт (${existing.orderNumber}): +${returnedQty} ш (Анх авсан нэгж өртөг: ${originalUnitCost.toLocaleString()}₮)`,
+                    description: `Захиалга хэсэгчлэн буцаалт (${existing.orderNumber}): +${returnedQty} ш (Авсан өртөг: ${originalUnitCost.toLocaleString()}₮, Зарсан үнэ: ${oldItem.priceMnt.toLocaleString()}₮)`,
                     newCostMnt: originalUnitCost,
+                    newPriceMnt: oldItem.priceMnt,
                     addedStock: returnedQty,
                     newStock: updatedProd.stock,
                     note: `Захиалагч: ${existing.customerName} | Анх авсан өртгөөр (${originalUnitCost.toLocaleString()}₮) буцааж агуулахад оруулав`,
