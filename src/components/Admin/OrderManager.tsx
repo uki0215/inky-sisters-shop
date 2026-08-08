@@ -291,21 +291,19 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
             </button>
             <button
               onClick={() => setFilter('HAS_RETURN')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 filter === 'HAS_RETURN' ? 'bg-red-700 text-white shadow-xs font-extrabold' : 'text-red-700 hover:bg-red-50'
               }`}
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>🔄 Буцаалттай ({orders.filter((o) => getOrderActionFlags(o).hasReturn).length})</span>
+              <span>Буцаалттай ({orders.filter((o) => getOrderActionFlags(o).hasReturn).length})</span>
             </button>
             <button
               onClick={() => setFilter('HAS_EDIT')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 filter === 'HAS_EDIT' ? 'bg-indigo-700 text-white shadow-xs font-extrabold' : 'text-indigo-800 hover:bg-indigo-50'
               }`}
             >
-              <Edit2 className="w-3.5 h-3.5" />
-              <span>✏️ Засвартай ({orders.filter((o) => getOrderActionFlags(o).hasEdit).length})</span>
+              <span>Засвартай ({orders.filter((o) => getOrderActionFlags(o).hasEdit).length})</span>
             </button>
           </div>
 
@@ -399,15 +397,13 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
 
                       {hasReturn && (
                         <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 bg-red-50 text-red-800 rounded-full border border-red-200 shadow-2xs">
-                          <RotateCcw className="w-3 h-3 text-red-600" />
-                          <span>🔄 Буцаалттай</span>
+                          <span>Буцаалттай</span>
                         </span>
                       )}
 
                       {hasEdit && (
                         <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 bg-indigo-50 text-indigo-800 rounded-full border border-indigo-200 shadow-2xs">
-                          <Edit2 className="w-3 h-3 text-indigo-600" />
-                          <span>✏️ Засвартай</span>
+                          <span>Засвартай</span>
                         </span>
                       )}
                     </div>
@@ -451,14 +447,14 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                       );
                     })()}
 
-                    {/* Order Edit & Return Button */}
+                    {/* Order Edit & Return Icon Button */}
                     <button
+                      type="button"
                       onClick={() => setSelectedOrderForReturn(order)}
-                      className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold text-xs rounded-xl border border-amber-200 flex items-center gap-1.5 transition-all"
+                      className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-200 transition-all flex items-center justify-center shrink-0"
                       title="Захиалга Засах / Буцаалт хийх"
                     >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Буцаалт / Засах</span>
+                      <RotateCcw className="w-4 h-4 text-amber-700" />
                     </button>
 
                     {(order.paymentStatus === 'PENDING_PAYMENT' || order.paymentStatus === 'UNPAID' || order.paymentMethod === 'CREDIT') && order.paymentStatus !== 'PAID' && (
