@@ -89,6 +89,43 @@ export default function ImageUploader({
 
   const currentImages = getImagesList();
 
+  const uploadSingleFile = async (file: File): Promise<string | null> => {
+    // 1. Try server API /api/upload (which uploads to ImgBB CDN)
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (res.ok && data.url && data.url.length > 10) {
+        return data.url;
+      }
+    } catch (e) {
+      console.warn('Server upload route error, trying client CDN:', e);
+    }
+
+    // 2. Direct client-side ImgBB CDN upload fallback
+    try {
+      const compressedDataUrl = await compressImageFile(file);
+      const base64Clean = compressedDataUrl.replace(/^data:image\/\w+;base64,/, '');
+      const imgbbForm = new FormData();
+      imgbbForm.append('image', base64Clean);
+
+      const res = await fetch('https://api.imgbb.com/1/upload?key=6d02737556a31b2b619786270f736899', {
+        method: 'POST',
+        body: imgbbForm,
+      });
+      const data = await res.json();
+      if (res.ok && (data?.data?.display_url || data?.data?.url)) {
+        return data.data.display_url || data.data.url;
+      }
+    } catch (e) {
+      console.warn('Direct ImgBB upload error:', e);
+    }
+
+    // 3. Compressed WebP Data URL fallback
+    return await compressImageFile(file);
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -102,9 +139,9 @@ export default function ImageUploader({
     try {
       const uploadedUrls: string[] = [];
       for (const file of files) {
-        const compressedUrl = await compressImageFile(file);
-        if (compressedUrl && compressedUrl.length > 20) {
-          uploadedUrls.push(compressedUrl);
+        const url = await uploadSingleFile(file);
+        if (url && url.length > 10) {
+          uploadedUrls.push(url);
         }
       }
 
@@ -116,7 +153,7 @@ export default function ImageUploader({
           onChange(uploadedUrls[0]);
         }
       } else {
-        setError('Зураг уншихад алдаа гарлаа.');
+        setError('Зураг оруулахад алдаа гарлаа. Та дахин оролдоно уу.');
       }
     } catch (err: any) {
       console.error(err);
