@@ -25,6 +25,7 @@ import {
   ShoppingCart,
   Layers,
   Clock,
+  Trash2,
 } from 'lucide-react';
 
 interface OrderManagerProps {
@@ -86,6 +87,30 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('Энэ захиалгыг системээс бүрмөсөн устгах уу? (Буцаах боломжгүй)')) return;
+
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setNotificationMsg('✓ Захиалга амжилттай устгагдлаа!');
+        setTimeout(() => setNotificationMsg(null), 4000);
+        fetchOrders();
+        if (onOrderUpdate) onOrderUpdate();
+      }
+    } catch (e) {
+      console.error('Failed to delete order', e);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm('Энэ захиалгыг цуцлах уу? (Барааны үлдэгдэл буцаан нэмэгдэнэ)')) return;
+    handleUpdateStatus(orderId, 'CANCELLED');
   };
 
   const renderPaymentMethodBadge = (method?: string) => {
@@ -391,6 +416,28 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                         <span>✓ Төлбөр Төлөгдсөн (Авлага хаах)</span>
                       </button>
                     )}
+
+                    {/* Cancel Order Icon Button */}
+                    {order.paymentStatus !== 'CANCELLED' && (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelOrder(order.id)}
+                        className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl border border-amber-200 transition-all flex items-center justify-center shrink-0"
+                        title="Захиалга цуцлах"
+                      >
+                        <XCircle className="w-4 h-4 text-amber-700" />
+                      </button>
+                    )}
+
+                    {/* Delete Order Icon Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteOrder(order.id)}
+                      className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 transition-all flex items-center justify-center shrink-0"
+                      title="Захиалга бүрмөсөн устгах"
+                    >
+                      <Trash2 className="w-4 h-4 text-rose-600" />
+                    </button>
 
                     <button
                       onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}

@@ -250,3 +250,41 @@ export async function PUT(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const existing = await db.order.findUnique({
+      where: { id: params.id },
+      include: { items: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    // Restore stock if order was not cancelled
+    if (existing.paymentStatus !== 'CANCELLED') {
+      for (const item of existing.items) {
+        await db.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
+    }
+
+    await db.order.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ success: true, message: 'Захиалга амжилттай устгагдлаа' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
