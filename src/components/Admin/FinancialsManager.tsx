@@ -251,10 +251,10 @@ export default function FinancialsManager() {
         <div>
           <h2 className="text-xl font-extrabold text-gray-900 font-sans flex items-center gap-2">
             <PieChart className="w-6 h-6 text-teal-700" />
-            Санхүүгийн Тайлан & Урсгал Зардлын Удирдлага
+            Санхүүгийн Хяналт &amp; Урсгал Зардал
           </h2>
           <p className="text-xs text-gray-500 mt-0.5 font-sans">
-            Орлого, Борлуулалтын ашиг болон Урсгал зардлыг (Түрээс, Ус, Тог, Хоол г.м) тооцоолон **Цэвэр ашиг**-ийг Excel-ээр татна.
+            Орлого, ашиг болон урсгал зардлыг тооцоолон цэвэр ашгийг хянаж, тайлан татах.
           </p>
         </div>
 
@@ -298,10 +298,10 @@ export default function FinancialsManager() {
           <div>
             <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2 group-hover:text-teal-700 transition-colors">
               <Package className="w-5 h-5 text-teal-700" />
-              Одоогийн Агуулахын Үлдэгдэл Барааны Тооцоо
+              Агуулахын Үлдэгдэл
             </h3>
             <p className="text-xs text-gray-500 mt-0.5 font-sans">
-              Яг одоо агуулахад бэлэн байгаа үлдэгдэл барааны өртөг, зарах дүн ба үлдсэн боломжит ашиг.
+              Бэлэн байгаа барааны өртөг, зарах дүн ба боломжит ашиг.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -324,13 +324,13 @@ export default function FinancialsManager() {
             <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
               <span className="text-xs text-gray-500 font-bold flex items-center gap-1.5 uppercase">
                 <Package className="w-4 h-4 text-slate-600" />
-                Үлдэгдэл Барааны Өртөг:
+                Үлдэгдлийн Өртөг:
               </span>
               <span className="text-xl font-extrabold text-gray-900 block font-sans">
                 {formatMNT(financialData.currentInventoryCostMnt || 0)}
               </span>
               <span className="text-[11px] text-gray-500 block">
-                Одоо агуулахад байгаа үлдэгдэл барааны татан авалтын өртөг
+                Татан авалтын нийт өртөг
               </span>
             </div>
 
@@ -338,13 +338,13 @@ export default function FinancialsManager() {
             <div className="p-4 bg-teal-50/70 border border-teal-200 rounded-xl space-y-1">
               <span className="text-xs text-teal-900 font-bold flex items-center gap-1.5 uppercase">
                 <Tag className="w-4 h-4 text-teal-700" />
-                Үлдэгдэл Зарах Боломжит Дүн:
+                Зарах Боломжит Дүн:
               </span>
               <span className="text-xl font-extrabold text-teal-950 block font-sans">
                 {formatMNT(financialData.currentInventorySaleValueMnt || 0)}
               </span>
               <span className="text-[11px] text-teal-800 block">
-                Үлдэгдэл бүрэн зарагдвал олох орлого
+                Бүрэн зарагдвал олох орлого
               </span>
             </div>
 
@@ -352,13 +352,13 @@ export default function FinancialsManager() {
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
               <span className="text-xs text-emerald-900 font-bold flex items-center gap-1.5 uppercase">
                 <Sparkles className="w-4 h-4 text-emerald-700" />
-                Үлдэгдэл Барааны Боломжит Ашиг:
+                Боломжит Ашиг:
               </span>
               <span className="text-xl font-extrabold text-emerald-800 block font-sans">
                 {formatMNT(financialData.currentInventoryPotentialProfitMnt || 0)}
               </span>
               <span className="text-[11px] text-emerald-800 block">
-                Үлдэгдэл зарах дүнгээс өртгийг хассан үлдсэн боломжит ашиг
+                Өртөг хассан цэвэр ашиг
               </span>
             </div>
           </div>
@@ -374,10 +374,10 @@ export default function FinancialsManager() {
           <div>
             <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2 group-hover:text-teal-700 transition-colors">
               <CreditCard className="w-5 h-5 text-teal-700" />
-              Төлбөрийн Хэлбэрийн Орлого (Бэлэн мөнгө / Дансны Шилжүүлэг / Карт)
+              Төлбөрийн Орлого
             </h3>
             <p className="text-xs text-gray-500 mt-0.5 font-sans">
-              Кассын бэлэн мөнгө, дансны шилжүүлэг болон карт уншуулсан орлогын тус тусын тооцоо
+              Бэлэн, шилжүүлэг, карт болон зээлийн тооцоо.
             </p>
           </div>
           <button
@@ -403,7 +403,7 @@ export default function FinancialsManager() {
               <div className="flex items-center justify-between text-xs font-extrabold text-emerald-900 uppercase">
                 <span className="flex items-center gap-1.5">
                   <Banknote className="w-4 h-4 text-emerald-700" />
-                  Бэлнээр:
+                  Бэлэн мөнгө
                 </span>
                 <span className="text-xs bg-emerald-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
                   {cashOrdersCount}
@@ -413,7 +413,7 @@ export default function FinancialsManager() {
                 {formatMNT(cashOrdersTotal)}
               </span>
               <span className="text-[11px] text-emerald-800 block mt-0.5">
-                Кассанд бэлэн мөнгөөр тушаагдсан орлого
+                Бэлнээр тушаагдсан орлого
               </span>
             </div>
 
@@ -429,7 +429,7 @@ export default function FinancialsManager() {
               <div className="flex items-center justify-between text-xs font-extrabold text-teal-900 uppercase">
                 <span className="flex items-center gap-1.5">
                   <Landmark className="w-4 h-4 text-teal-700" />
-                  Шилжүүлгээр:
+                  Дансны Шилжүүлэг
                 </span>
                 <span className="text-xs bg-teal-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
                   {transferOrdersCount}
@@ -439,7 +439,7 @@ export default function FinancialsManager() {
                 {formatMNT(transferOrdersTotal)}
               </span>
               <span className="text-[11px] text-teal-800 block mt-0.5">
-                Дансаар болон QR шилжүүлгээр орсон орлого
+                Данс болон QR орлого
               </span>
             </div>
 
@@ -455,7 +455,7 @@ export default function FinancialsManager() {
               <div className="flex items-center justify-between text-xs font-extrabold text-purple-900 uppercase">
                 <span className="flex items-center gap-1.5">
                   <CreditCard className="w-4 h-4 text-purple-700" />
-                  Картаар (POS):
+                  Карт (POS)
                 </span>
                 <span className="text-xs bg-purple-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
                   {cardOrdersCount}
@@ -465,7 +465,7 @@ export default function FinancialsManager() {
                 {formatMNT(cardOrdersTotal)}
               </span>
               <span className="text-[11px] text-purple-800 block mt-0.5">
-                Банкны Пос терминал картаар уншуулсан орлого
+                Пос терминалын орлого
               </span>
             </div>
 
@@ -481,7 +481,7 @@ export default function FinancialsManager() {
               <div className="flex items-center justify-between text-xs font-extrabold text-rose-900 uppercase">
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-rose-700" />
-                  Зээлээр (Авлага):
+                  Зээл / Авлага
                 </span>
                 <span className="text-xs bg-rose-200/80 px-2.5 py-0.5 rounded-full font-mono text-rose-950 font-bold">
                   {creditOrdersCount}
@@ -491,7 +491,7 @@ export default function FinancialsManager() {
                 {formatMNT(creditOrdersTotal)}
               </span>
               <span className="text-[11px] text-rose-800 block mt-0.5">
-                Зээлээр авсан дараа төлбөрт авлагын дүн
+                Дараа төлбөрт авлага
               </span>
             </div>
           </div>
@@ -504,7 +504,7 @@ export default function FinancialsManager() {
         {/* Card 1: Total Sales (With POS vs Online Breakdown) */}
         <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase">
-            <span>Нийт Борлуулалтын Орлого</span>
+            <span>Нийт Борлуулалт</span>
             <TrendingUp className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl font-black text-gray-900 font-sans">
@@ -525,28 +525,28 @@ export default function FinancialsManager() {
         {/* Card 2: Gross Profit */}
         <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase">
-            <span>Борлуулалтын Үндсэн Ашиг</span>
+            <span>Үндсэн Ашиг</span>
             <ArrowUpCircle className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-700 font-sans">
             {formatMNT(grossProfit)}
           </div>
           <span className="text-[11px] text-gray-400 block">
-            Барааны өртөг хассан үндсэн ашиг
+            Өртөг хассан ашиг
           </span>
         </div>
 
         {/* Card 3: Total Operating Expenses */}
         <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase">
-            <span>Нийт Урсгал Зардал</span>
+            <span>Урсгал Зардал</span>
             <ArrowDownCircle className="w-4 h-4 text-rose-600" />
           </div>
           <div className="text-2xl font-black text-rose-600 font-sans">
             -{formatMNT(totalOperatingExpenses)}
           </div>
           <span className="text-[11px] text-gray-400 block">
-            Түрээс, Ус, Тог, Хоол, Нэхэмжлэх
+            Түрээс, тог, ус, бусад
           </span>
         </div>
 
@@ -557,14 +557,14 @@ export default function FinancialsManager() {
             : 'bg-gradient-to-br from-rose-950 to-slate-900 text-white border-rose-800'
         }`}>
           <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-teal-200">
-            <span>ЦЭВЭР АШИГ (Net Profit)</span>
+            <span>Цэвэр Ашиг (Net)</span>
             <DollarSign className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black font-sans text-amber-300">
             {formatMNT(netProfit)}
           </div>
           <span className="text-[11px] text-teal-100/80 block">
-            Үндсэн ашгаас Урсгал зардлыг хассан цэвэр дүн
+            Үндсэн ашгаас зардлыг хассан дүн
           </span>
         </div>
 
@@ -574,7 +574,7 @@ export default function FinancialsManager() {
       <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xs space-y-4">
         <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
           <Plus className="w-4 h-4 text-teal-700" />
-          Шинэ Урсгал Зардал Шинээр Оруулж Бүртгэх
+          Урсгал Зардал Бүртгэх
         </h3>
 
         <form onSubmit={handleAddExpense} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
@@ -635,7 +635,7 @@ export default function FinancialsManager() {
       <div className="bg-white border border-gray-200 rounded-2xl shadow-xs overflow-hidden space-y-4 p-6">
         <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <h3 className="text-base font-extrabold text-gray-900 font-sans">
-            Урсгал Зардлын Бүртгэлийн Түүх ({expenses.length})
+            Урсгал Зардлын Түүх ({expenses.length})
           </h3>
           <span className="text-xs font-mono font-bold text-rose-600">
             Нийт зардал: -{formatMNT(totalOperatingExpenses)}
@@ -703,14 +703,14 @@ export default function FinancialsManager() {
           <div>
             <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-rose-600" />
-              Устгагдсан Захиалгуудын Аудит Журнал ({(financialData.deletedLogs || []).length})
+              Устгагдсан Захиалгууд ({(financialData.deletedLogs || []).length})
             </h3>
             <p className="text-xs text-gray-500 mt-0.5 font-sans">
-              Захиалгын жагсаалтаас устгагдсан бүх захиалгын түүх. Баталгаажсан (Төлөгдсөн) захиалгыг устгасан ч орлого/ашгийн тооцоо хасагдахгүй хадгалагдана.
+              Устгагдсан захиалгуудын бүртгэл. Баталгаажсан захиалгын орлого хасагдахгүй.
             </p>
           </div>
           <span className="text-xs font-mono font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-            Нийт устгагдсан: {(financialData.deletedLogs || []).length} захиалга
+            Устгагдсан: {(financialData.deletedLogs || []).length}
           </span>
         </div>
 
