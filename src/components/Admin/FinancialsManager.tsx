@@ -30,11 +30,19 @@ import {
   RefreshCw,
   ShoppingCart,
   ShoppingBag,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 export default function FinancialsManager() {
   const [loading, setLoading] = useState(true);
   const [paymentFilter, setPaymentFilter] = useState<'ALL' | 'CASH' | 'TRANSFER' | 'CARD' | 'CREDIT'>('ALL');
+  
+  // Collapsible Section Toggle States
+  const [showLifetimeSection, setShowLifetimeSection] = useState(true);
+  const [showCurrentInventorySection, setShowCurrentInventorySection] = useState(true);
+  const [showPaymentMethodsSection, setShowPaymentMethodsSection] = useState(true);
+
   const [financialData, setFinancialData] = useState<any>({
     totalSales: 0,
     paidSales: 0,
@@ -271,10 +279,13 @@ export default function FinancialsManager() {
       )}
 
       {/* SECTION 1: LIFETIME CUMULATIVE INVENTORY STATS (NEVER DECREASE) */}
-      <div className="bg-gradient-to-br from-amber-500/10 via-amber-50/60 to-orange-50/50 border border-amber-200/90 p-6 rounded-2xl shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-amber-200/80 pb-3">
+      <div className="bg-gradient-to-br from-amber-500/10 via-amber-50/60 to-orange-50/50 border border-amber-200/90 p-5 sm:p-6 rounded-2xl shadow-xs space-y-4">
+        <div 
+          onClick={() => setShowLifetimeSection(!showLifetimeSection)}
+          className="flex items-center justify-between cursor-pointer select-none border-b border-amber-200/80 pb-3 group"
+        >
           <div>
-            <h3 className="text-base font-black text-amber-950 font-sans flex items-center gap-2">
+            <h3 className="text-base font-black text-amber-950 font-sans flex items-center gap-2 group-hover:text-amber-800 transition-colors">
               <Landmark className="w-5 h-5 text-amber-700" />
               Нийт Татан Авалтын Нэгдсэн Тооцоо (Огт Хасагдахгүй Түүхэн Дүн)
             </h3>
@@ -282,63 +293,75 @@ export default function FinancialsManager() {
               Дэлгүүрт худалдан авч оруулсан БҮХ барааны өртөг, зарах үнэ ба боломжит ашгийн нийт дүн. Бараа зарагдахад БАГАСАХГҮЙ.
             </p>
           </div>
-          <span className="text-[11px] font-bold font-mono bg-amber-200/80 text-amber-900 px-3 py-1 rounded-full border border-amber-300">
-            Огт хасагдахгүй үзүүлэлт
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="hidden sm:inline-block text-[11px] font-bold font-mono bg-amber-200/80 text-amber-900 px-3 py-1 rounded-full border border-amber-300">
+              Огт хасагдахгүй үзүүлэлт
+            </span>
+            <button
+              type="button"
+              className="p-1.5 bg-amber-200/60 hover:bg-amber-300/80 text-amber-950 rounded-xl transition-all"
+              title={showLifetimeSection ? "Хураах" : "Задрах"}
+            >
+              {showLifetimeSection ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          
-          {/* Lifetime Total Cost */}
-          <div className="p-4 bg-white/90 border border-amber-300/80 rounded-2xl space-y-1 shadow-2xs">
-            <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
-              <Package className="w-4 h-4 text-amber-700" />
-              Нийт Татан Авалтын Өртөг Дүн:
-            </span>
-            <span className="text-2xl font-black text-amber-950 block font-sans">
-              {formatMNT(financialData.totalPurchasedCostMnt || 0)}
-            </span>
-            <span className="text-[11px] text-amber-800 block">
-              Анхны болон дараах бүх татан авалтын худалдан авсан нийт өртөг
-            </span>
-          </div>
+        {showLifetimeSection && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fadeIn">
+            {/* Lifetime Total Cost */}
+            <div className="p-4 bg-white/90 border border-amber-300/80 rounded-2xl space-y-1 shadow-2xs">
+              <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
+                <Package className="w-4 h-4 text-amber-700" />
+                Нийт Татан Авалтын Өртөг Дүн:
+              </span>
+              <span className="text-2xl font-black text-amber-950 block font-sans">
+                {formatMNT(financialData.totalPurchasedCostMnt || 0)}
+              </span>
+              <span className="text-[11px] text-amber-800 block">
+                Анхны болон дараах бүх татан авалтын худалдан авсан нийт өртөг
+              </span>
+            </div>
 
-          {/* Lifetime Total Selling Value */}
-          <div className="p-4 bg-white/90 border border-amber-300/80 rounded-2xl space-y-1 shadow-2xs">
-            <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
-              <Tag className="w-4 h-4 text-amber-700" />
-              Нийт Татан Авалтын Зарах Үнийн Дүн:
-            </span>
-            <span className="text-2xl font-black text-amber-950 block font-sans">
-              {formatMNT(financialData.totalPurchasedSaleValueMnt || 0)}
-            </span>
-            <span className="text-[11px] text-amber-800 block">
-              Нийт худалдан авсан барааны зарах үнийн нийт дүн
-            </span>
-          </div>
+            {/* Lifetime Total Selling Value */}
+            <div className="p-4 bg-white/90 border border-amber-300/80 rounded-2xl space-y-1 shadow-2xs">
+              <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
+                <Tag className="w-4 h-4 text-amber-700" />
+                Нийт Татан Авалтын Зарах Үнийн Дүн:
+              </span>
+              <span className="text-2xl font-black text-amber-950 block font-sans">
+                {formatMNT(financialData.totalPurchasedSaleValueMnt || 0)}
+              </span>
+              <span className="text-[11px] text-amber-800 block">
+                Нийт худалдан авсан барааны зарах үнийн нийт дүн
+              </span>
+            </div>
 
-          {/* Lifetime Total Potential Profit */}
-          <div className="p-4 bg-amber-600 text-white rounded-2xl space-y-1 shadow-md">
-            <span className="text-xs text-amber-100 font-extrabold flex items-center gap-1.5 uppercase">
-              <Sparkles className="w-4 h-4 text-amber-200" />
-              Нийт Татан Авалтын Боломжит Ашиг:
-            </span>
-            <span className="text-2xl font-black block font-sans text-amber-200">
-              {formatMNT(financialData.totalPurchasedPotentialProfitMnt || 0)}
-            </span>
-            <span className="text-[11px] text-amber-100/90 block">
-              Нийт зарах дүнгээс авсан өртгийг хассан түүхэн нийт боломжит ашиг
-            </span>
+            {/* Lifetime Total Potential Profit */}
+            <div className="p-4 bg-amber-600 text-white rounded-2xl space-y-1 shadow-md">
+              <span className="text-xs text-amber-100 font-extrabold flex items-center gap-1.5 uppercase">
+                <Sparkles className="w-4 h-4 text-amber-200" />
+                Нийт Татан Авалтын Боломжит Ашиг:
+              </span>
+              <span className="text-2xl font-black block font-sans text-amber-200">
+                {formatMNT(financialData.totalPurchasedPotentialProfitMnt || 0)}
+              </span>
+              <span className="text-[11px] text-amber-100/90 block">
+                Нийт зарах дүнгээс авсан өртгийг хассан түүхэн нийт боломжит ашиг
+              </span>
+            </div>
           </div>
-
-        </div>
+        )}
       </div>
 
       {/* SECTION 2: CURRENT IN-STOCK INVENTORY METRICS */}
-      <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+      <div className="bg-white border border-gray-200 p-5 sm:p-6 rounded-2xl shadow-xs space-y-4">
+        <div 
+          onClick={() => setShowCurrentInventorySection(!showCurrentInventorySection)}
+          className="flex items-center justify-between cursor-pointer select-none border-b border-gray-100 pb-3 group"
+        >
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
+            <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2 group-hover:text-teal-700 transition-colors">
               <Package className="w-5 h-5 text-teal-700" />
               Одоогийн Агуулахын Үлдэгдэл Барааны Тооцоо
             </h3>
@@ -346,63 +369,75 @@ export default function FinancialsManager() {
               Яг одоо агуулахад бэлэн байгаа үлдэгдэл барааны өртөг, зарах дүн ба үлдсэн боломжит ашиг.
             </p>
           </div>
-          <span className="text-[11px] font-bold font-mono bg-teal-50 text-teal-800 px-3 py-1 rounded-full border border-teal-200">
-            Бодит үлдэгдэл
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="hidden sm:inline-block text-[11px] font-bold font-mono bg-teal-50 text-teal-800 px-3 py-1 rounded-full border border-teal-200">
+              Бодит үлдэгдэл
+            </span>
+            <button
+              type="button"
+              className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all"
+              title={showCurrentInventorySection ? "Хураах" : "Задрах"}
+            >
+              {showCurrentInventorySection ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          
-          {/* Card A: Current Inventory Cost */}
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
-            <span className="text-xs text-gray-500 font-bold flex items-center gap-1.5 uppercase">
-              <Package className="w-4 h-4 text-slate-600" />
-              Үлдэгдэл Барааны Өртөг:
-            </span>
-            <span className="text-xl font-extrabold text-gray-900 block font-sans">
-              {formatMNT(financialData.currentInventoryCostMnt || 0)}
-            </span>
-            <span className="text-[11px] text-gray-500 block">
-              Одоо агуулахад байгаа үлдэгдэл барааны татан авалтын өртөг
-            </span>
-          </div>
+        {showCurrentInventorySection && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fadeIn">
+            {/* Card A: Current Inventory Cost */}
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
+              <span className="text-xs text-gray-500 font-bold flex items-center gap-1.5 uppercase">
+                <Package className="w-4 h-4 text-slate-600" />
+                Үлдэгдэл Барааны Өртөг:
+              </span>
+              <span className="text-xl font-extrabold text-gray-900 block font-sans">
+                {formatMNT(financialData.currentInventoryCostMnt || 0)}
+              </span>
+              <span className="text-[11px] text-gray-500 block">
+                Одоо агуулахад байгаа үлдэгдэл барааны татан авалтын өртөг
+              </span>
+            </div>
 
-          {/* Card B: Inventory Retail Sale Value */}
-          <div className="p-4 bg-teal-50/70 border border-teal-200 rounded-xl space-y-1">
-            <span className="text-xs text-teal-900 font-bold flex items-center gap-1.5 uppercase">
-              <Tag className="w-4 h-4 text-teal-700" />
-              Үлдэгдэл Зарах Боломжит Дүн:
-            </span>
-            <span className="text-xl font-extrabold text-teal-950 block font-sans">
-              {formatMNT(financialData.currentInventorySaleValueMnt || 0)}
-            </span>
-            <span className="text-[11px] text-teal-800 block">
-              Үлдэгдэл бүрэн зарагдвал олох орлого
-            </span>
-          </div>
+            {/* Card B: Inventory Retail Sale Value */}
+            <div className="p-4 bg-teal-50/70 border border-teal-200 rounded-xl space-y-1">
+              <span className="text-xs text-teal-900 font-bold flex items-center gap-1.5 uppercase">
+                <Tag className="w-4 h-4 text-teal-700" />
+                Үлдэгдэл Зарах Боломжит Дүн:
+              </span>
+              <span className="text-xl font-extrabold text-teal-950 block font-sans">
+                {formatMNT(financialData.currentInventorySaleValueMnt || 0)}
+              </span>
+              <span className="text-[11px] text-teal-800 block">
+                Үлдэгдэл бүрэн зарагдвал олох орлого
+              </span>
+            </div>
 
-          {/* Card C: Inventory Potential Profit */}
-          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
-            <span className="text-xs text-emerald-900 font-bold flex items-center gap-1.5 uppercase">
-              <Sparkles className="w-4 h-4 text-emerald-700" />
-              Үлдэгдэл Барааны Боломжит Ашиг:
-            </span>
-            <span className="text-xl font-extrabold text-emerald-800 block font-sans">
-              {formatMNT(financialData.currentInventoryPotentialProfitMnt || 0)}
-            </span>
-            <span className="text-[11px] text-emerald-800 block">
-              Үлдэгдэл зарах дүнгээс өртгийг хассан үлдсэн боломжит ашиг
-            </span>
+            {/* Card C: Inventory Potential Profit */}
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
+              <span className="text-xs text-emerald-900 font-bold flex items-center gap-1.5 uppercase">
+                <Sparkles className="w-4 h-4 text-emerald-700" />
+                Үлдэгдэл Барааны Боломжит Ашиг:
+              </span>
+              <span className="text-xl font-extrabold text-emerald-800 block font-sans">
+                {formatMNT(financialData.currentInventoryPotentialProfitMnt || 0)}
+              </span>
+              <span className="text-[11px] text-emerald-800 block">
+                Үлдэгдэл зарах дүнгээс өртгийг хассан үлдсэн боломжит ашиг
+              </span>
+            </div>
           </div>
-
-        </div>
+        )}
       </div>
 
       {/* ROW 1.5: PAYMENT METHOD BREAKDOWN (CASH vs TRANSFER vs CARD) */}
-      <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+      <div className="bg-white border border-gray-200 p-5 sm:p-6 rounded-2xl shadow-xs space-y-4">
+        <div 
+          onClick={() => setShowPaymentMethodsSection(!showPaymentMethodsSection)}
+          className="flex items-center justify-between cursor-pointer select-none border-b border-gray-100 pb-3 group"
+        >
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
+            <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2 group-hover:text-teal-700 transition-colors">
               <CreditCard className="w-5 h-5 text-teal-700" />
               Төлбөрийн Хэлбэрийн Орлого (Бэлэн мөнгө / Дансны Шилжүүлэг / Карт)
             </h3>
@@ -410,113 +445,122 @@ export default function FinancialsManager() {
               Кассын бэлэн мөнгө, дансны шилжүүлэг болон карт уншуулсан орлогын тус тусын тооцоо
             </p>
           </div>
+          <button
+            type="button"
+            className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all shrink-0"
+            title={showPaymentMethodsSection ? "Хураах" : "Задрах"}
+          >
+            {showPaymentMethodsSection ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Cash Sales Card */}
-          <div
-            onClick={() => setPaymentFilter(paymentFilter === 'CASH' ? 'ALL' : 'CASH')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              paymentFilter === 'CASH'
-                ? 'bg-emerald-100 border-emerald-400 ring-2 ring-emerald-500/20'
-                : 'bg-emerald-50/70 border-emerald-200 hover:border-emerald-300'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-extrabold text-emerald-900 uppercase">
-              <span className="flex items-center gap-1.5">
-                <Banknote className="w-4 h-4 text-emerald-700" />
-                Бэлнээр:
+        {showPaymentMethodsSection && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeIn">
+            {/* Cash Sales Card */}
+            <div
+              onClick={() => setPaymentFilter(paymentFilter === 'CASH' ? 'ALL' : 'CASH')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                paymentFilter === 'CASH'
+                  ? 'bg-emerald-100 border-emerald-400 ring-2 ring-emerald-500/20'
+                  : 'bg-emerald-50/70 border-emerald-200 hover:border-emerald-300'
+              }`}
+            >
+              <div className="flex items-center justify-between text-xs font-extrabold text-emerald-900 uppercase">
+                <span className="flex items-center gap-1.5">
+                  <Banknote className="w-4 h-4 text-emerald-700" />
+                  Бэлнээр:
+                </span>
+                <span className="text-xs bg-emerald-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
+                  {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CASH').length || 0}
+                </span>
+              </div>
+              <span className="text-xl font-extrabold text-emerald-950 block font-sans mt-2">
+                {formatMNT(cashOrdersTotal)}
               </span>
-              <span className="text-xs bg-emerald-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
-                {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CASH').length || 0}
+              <span className="text-[11px] text-emerald-800 block mt-0.5">
+                Кассанд бэлэн мөнгөөр тушаагдсан орлого
               </span>
             </div>
-            <span className="text-xl font-extrabold text-emerald-950 block font-sans mt-2">
-              {formatMNT(cashOrdersTotal)}
-            </span>
-            <span className="text-[11px] text-emerald-800 block mt-0.5">
-              Кассанд бэлэн мөнгөөр тушаагдсан орлого
-            </span>
-          </div>
 
-          {/* Transfer Sales Card */}
-          <div
-            onClick={() => setPaymentFilter(paymentFilter === 'TRANSFER' ? 'ALL' : 'TRANSFER')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              paymentFilter === 'TRANSFER'
-                ? 'bg-teal-100 border-teal-400 ring-2 ring-teal-500/20'
-                : 'bg-teal-50/70 border-teal-200 hover:border-teal-300'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-extrabold text-teal-900 uppercase">
-              <span className="flex items-center gap-1.5">
-                <Landmark className="w-4 h-4 text-teal-700" />
-                Шилжүүлгээр:
+            {/* Transfer Sales Card */}
+            <div
+              onClick={() => setPaymentFilter(paymentFilter === 'TRANSFER' ? 'ALL' : 'TRANSFER')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                paymentFilter === 'TRANSFER'
+                  ? 'bg-teal-100 border-teal-400 ring-2 ring-teal-500/20'
+                  : 'bg-teal-50/70 border-teal-200 hover:border-teal-300'
+              }`}
+            >
+              <div className="flex items-center justify-between text-xs font-extrabold text-teal-900 uppercase">
+                <span className="flex items-center gap-1.5">
+                  <Landmark className="w-4 h-4 text-teal-700" />
+                  Шилжүүлгээр:
+                </span>
+                <span className="text-xs bg-teal-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
+                  {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod)).length || 0}
+                </span>
+              </div>
+              <span className="text-xl font-extrabold text-teal-950 block font-sans mt-2">
+                {formatMNT(transferOrdersTotal)}
               </span>
-              <span className="text-xs bg-teal-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
-                {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && (o.paymentMethod === 'TRANSFER' || !o.paymentMethod)).length || 0}
+              <span className="text-[11px] text-teal-800 block mt-0.5">
+                Дансаар болон QR шилжүүлгээр орсон орлого
               </span>
             </div>
-            <span className="text-xl font-extrabold text-teal-950 block font-sans mt-2">
-              {formatMNT(transferOrdersTotal)}
-            </span>
-            <span className="text-[11px] text-teal-800 block mt-0.5">
-              Дансаар болон QR шилжүүлгээр орсон орлого
-            </span>
-          </div>
 
-          {/* Card / POS Sales Card */}
-          <div
-            onClick={() => setPaymentFilter(paymentFilter === 'CARD' ? 'ALL' : 'CARD')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              paymentFilter === 'CARD'
-                ? 'bg-purple-100 border-purple-400 ring-2 ring-purple-500/20'
-                : 'bg-purple-50/70 border-purple-200 hover:border-purple-300'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-extrabold text-purple-900 uppercase">
-              <span className="flex items-center gap-1.5">
-                <CreditCard className="w-4 h-4 text-purple-700" />
-                Картаар (POS):
+            {/* Card / POS Sales Card */}
+            <div
+              onClick={() => setPaymentFilter(paymentFilter === 'CARD' ? 'ALL' : 'CARD')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                paymentFilter === 'CARD'
+                  ? 'bg-purple-100 border-purple-400 ring-2 ring-purple-500/20'
+                  : 'bg-purple-50/70 border-purple-200 hover:border-purple-300'
+              }`}
+            >
+              <div className="flex items-center justify-between text-xs font-extrabold text-purple-900 uppercase">
+                <span className="flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-purple-700" />
+                  Картаар (POS):
+                </span>
+                <span className="text-xs bg-purple-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
+                  {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CARD').length || 0}
+                </span>
+              </div>
+              <span className="text-xl font-extrabold text-purple-950 block font-sans mt-2">
+                {formatMNT(cardOrdersTotal)}
               </span>
-              <span className="text-xs bg-purple-200/80 px-2.5 py-0.5 rounded-full font-mono font-bold">
-                {financialData.orders?.filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CARD').length || 0}
+              <span className="text-[11px] text-purple-800 block mt-0.5">
+                Банкны Пос терминал картаар уншуулсан орлого
               </span>
             </div>
-            <span className="text-xl font-extrabold text-purple-950 block font-sans mt-2">
-              {formatMNT(cardOrdersTotal)}
-            </span>
-            <span className="text-[11px] text-purple-800 block mt-0.5">
-              Банкны Пос терминал картаар уншуулсан орлого
-            </span>
-          </div>
 
-          {/* Credit / Receivable Sales Card */}
-          <div
-            onClick={() => setPaymentFilter(paymentFilter === 'CREDIT' ? 'ALL' : 'CREDIT')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              paymentFilter === 'CREDIT'
-                ? 'bg-rose-100 border-rose-400 ring-2 ring-rose-500/20'
-                : 'bg-rose-50/70 border-rose-200 hover:border-rose-300'
-            }`}
-          >
-            <div className="flex items-center justify-between text-xs font-extrabold text-rose-900 uppercase">
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-rose-700" />
-                Зээлээр (Авлага):
+            {/* Credit / Receivable Sales Card */}
+            <div
+              onClick={() => setPaymentFilter(paymentFilter === 'CREDIT' ? 'ALL' : 'CREDIT')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                paymentFilter === 'CREDIT'
+                  ? 'bg-rose-100 border-rose-400 ring-2 ring-rose-500/20'
+                  : 'bg-rose-50/70 border-rose-200 hover:border-rose-300'
+              }`}
+            >
+              <div className="flex items-center justify-between text-xs font-extrabold text-rose-900 uppercase">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-rose-700" />
+                  Зээлээр (Авлага):
+                </span>
+                <span className="text-xs bg-rose-200/80 px-2.5 py-0.5 rounded-full font-mono text-rose-950 font-bold">
+                  {financialData.orders?.filter((o: any) => (o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID') && o.paymentStatus !== 'PAID').length || 0}
+                </span>
+              </div>
+              <span className="text-xl font-extrabold text-rose-950 block font-sans mt-2">
+                {formatMNT(creditOrdersTotal)}
               </span>
-              <span className="text-xs bg-rose-200/80 px-2.5 py-0.5 rounded-full font-mono text-rose-950 font-bold">
-                {financialData.orders?.filter((o: any) => (o.paymentMethod === 'CREDIT' || o.paymentStatus === 'UNPAID') && o.paymentStatus !== 'PAID').length || 0}
+              <span className="text-[11px] text-rose-800 block mt-0.5">
+                Зээлээр авсан дараа төлбөрт авлагын дүн
               </span>
             </div>
-            <span className="text-xl font-extrabold text-rose-950 block font-sans mt-2">
-              {formatMNT(creditOrdersTotal)}
-            </span>
-            <span className="text-[11px] text-rose-800 block mt-0.5">
-              Зээлээр авсан дараа төлбөрт авлагын дүн
-            </span>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ROW 2: FINANCIAL STAT CARDS (GROSS PROFIT vs OPERATING EXPENSES vs NET PROFIT) */}
