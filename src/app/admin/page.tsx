@@ -817,16 +817,11 @@ export default function AdminPage() {
       <div className="flex-1 flex flex-col min-w-0 bg-gray-50 min-h-screen">
 
         {/* Top Header Bar */}
-        <header className="bg-white border-b border-gray-200 px-6 sm:px-8 py-4 flex items-center justify-between shadow-xs sticky top-0 z-20">
+        <header className="bg-white border-b border-gray-200 px-6 sm:px-8 py-3 flex items-center justify-between shadow-xs sticky top-0 z-20">
           <div>
-            <span className="text-[11px] font-mono text-gray-400 uppercase tracking-wider block">
+            <span className="text-[11px] font-mono font-bold text-gray-500 uppercase tracking-wider block">
               Admin Panel / {activeTab}
             </span>
-            <div className="flex items-center gap-2.5 mt-0.5">
-              <h2 className="text-xl font-extrabold text-gray-900 font-sans">
-                {tabTitles[activeTab]}
-              </h2>
-            </div>
           </div>
 
           <div className="flex items-center gap-3 relative">
