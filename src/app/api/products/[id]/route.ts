@@ -164,6 +164,8 @@ export async function PUT(
           newYuanRate: yuanRateVal,
           oldPriceMnt: existing.priceMnt,
           newPriceMnt: priceMntVal,
+          // Store the unit cost in ₮ for RESTOCK/INITIAL events so financials can reconstruct historical batch costs
+          newCostMnt: (addStock && Number(addStock) > 0) ? costMntVal : null,
           addedStock: addStock ? Number(addStock) : null,
           newStock: updatedStock,
         },

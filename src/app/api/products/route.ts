@@ -139,6 +139,7 @@ export async function POST(request: Request) {
         newCostYuan: costYuanVal,
         newYuanRate: yuanRateVal,
         newPriceMnt: priceMntVal,
+        newCostMnt: costMntVal,
         addedStock: calculatedStock,
         newStock: calculatedStock,
       },

@@ -94,6 +94,7 @@ model ProductHistory {
   newYuanRate  Float?
   oldPriceMnt  Float?
   newPriceMnt  Float?
+  newCostMnt   Float?   // Unit cost in ₮ at the time of INITIAL/RESTOCK (for accurate lifetime cost calc)
   addedStock   Int?
   newStock     Int?
   note         String?

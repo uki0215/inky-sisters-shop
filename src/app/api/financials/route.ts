@@ -12,7 +12,10 @@ export async function GET() {
 
     const paidOrders = allOrders.filter((o: any) => o.paymentStatus === 'PAID');
 
-    const products = await db.product.findMany();
+    // Fetch products WITH their full history (for lifetime batch cost calculation)
+    const products = await db.product.findMany({
+      include: { history: { orderBy: { createdAt: 'asc' } } },
+    });
     const financialLogs = await db.financialLog.findMany({
       orderBy: { createdAt: 'desc' },
       take: 200,
@@ -57,33 +60,102 @@ export async function GET() {
     // Compute Gross Profit
     const grossProfitMnt = totalIncomeMnt - totalCogsMnt;
 
-    // Compute Inventory Values:
-    // 1. Current In-Stock Inventory Metrics
+    // -------------------------------------------------------------------------
+    // LIFETIME TOTAL ACQUIRED INVENTORY — computed from ProductHistory batches
+    // -------------------------------------------------------------------------
+    // For each product, sum ALL INITIAL and RESTOCK events:
+    //   batch cost contribution  = addedStock × costMntAtThatTime
+    //   batch sale contribution  = addedStock × salePriceAtThatTime
+    //
+    // Then the remaining (current) stock's sale value is updated to the LATEST
+    // selling price (per user spec: "үлдсэн барааг сүүлийн үнийн өөрчлөлтөөр").
+    // -------------------------------------------------------------------------
+
+    let totalPurchasedCostMnt = 0;
+    let totalPurchasedSaleValueMnt = 0;
+
+    // Also compute current inventory metrics (for the second stats section)
     let currentInventoryCostMnt = 0;
     let currentInventorySaleValueMnt = 0;
 
     products.forEach((p: any) => {
-      const unitCost = (p.costYuan && p.costYuan > 0 && p.yuanRate && p.yuanRate > 0)
+      // ── Current inventory (latest cost & price) ──
+      const currentUnitCost = (p.costYuan && p.costYuan > 0 && p.yuanRate && p.yuanRate > 0)
         ? p.costYuan * p.yuanRate
         : (p.costMnt || 0);
+      const currentSellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
+      currentInventoryCostMnt     += currentUnitCost       * (p.stock || 0);
+      currentInventorySaleValueMnt += currentSellingPrice   * (p.stock || 0);
 
-      const sellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
+      // ── Lifetime batches from ProductHistory ──
+      const restockEvents = (p.history || []).filter(
+        (h: any) => h.changeType === 'INITIAL' || h.changeType === 'RESTOCK'
+      );
 
-      // Current stock metrics
-      currentInventoryCostMnt += unitCost * (p.stock || 0);
-      currentInventorySaleValueMnt += sellingPrice * (p.stock || 0);
+      let cumulativeHistoryCostMnt      = 0;
+      let cumulativeHistorySaleValueMnt = 0;
+
+      if (restockEvents.length > 0) {
+        restockEvents.forEach((h: any) => {
+          const qty = h.addedStock || 0;
+          if (qty <= 0) return;
+
+          // Unit cost at the time of this batch
+          let batchUnitCost: number;
+          if (h.newCostMnt !== null && h.newCostMnt !== undefined && h.newCostMnt > 0) {
+            // Stored directly (new batches going forward)
+            batchUnitCost = h.newCostMnt;
+          } else if (h.newCostYuan && h.newCostYuan > 0 && h.newYuanRate && h.newYuanRate > 0) {
+            // Derive from yuan × rate
+            batchUnitCost = h.newCostYuan * h.newYuanRate;
+          } else {
+            // Fallback: use current product cost (for legacy records without newCostMnt)
+            batchUnitCost = currentUnitCost;
+          }
+
+          // Sale price at the time of this batch
+          const batchSalePrice = h.newPriceMnt || currentSellingPrice;
+
+          cumulativeHistoryCostMnt      += qty * batchUnitCost;
+          cumulativeHistorySaleValueMnt += qty * batchSalePrice;
+        });
+
+        // Adjust sale value: replace the REMAINING stock's historical sale price
+        // with the LATEST sale price (per user requirement)
+        const totalHistoryStock = restockEvents.reduce((s: number, h: any) => s + (h.addedStock || 0), 0);
+        const currentStock = p.stock || 0;
+
+        if (totalHistoryStock > 0 && currentStock > 0) {
+          // Find the average historical sale price for the remaining stock portion
+          // and replace it with the current sale price
+          const avgHistoricalSalePrice = cumulativeHistorySaleValueMnt / totalHistoryStock;
+          const remainingHistoricalSaleValue = avgHistoricalSalePrice * currentStock;
+          const remainingCurrentSaleValue    = currentSellingPrice     * currentStock;
+          // Adjust: subtract old valuation of remaining portion, add current price valuation
+          cumulativeHistorySaleValueMnt = cumulativeHistorySaleValueMnt
+            - remainingHistoricalSaleValue
+            + remainingCurrentSaleValue;
+        }
+
+        totalPurchasedCostMnt      += cumulativeHistoryCostMnt;
+        totalPurchasedSaleValueMnt += cumulativeHistorySaleValueMnt;
+      } else {
+        // No history at all — fall back to COGS + current inventory (legacy products)
+        totalPurchasedCostMnt      += currentUnitCost     * (p.stock || 0);
+        totalPurchasedSaleValueMnt += currentSellingPrice * (p.stock || 0);
+      }
     });
 
-    // 2. Lifetime Total Acquired Inventory Metrics (NEVER DECREASES when goods are sold or when cost changes)
-    // Lifetime Cost = (Historical COGS of all sold items) + (Cost of current remaining in-stock items)
-    const totalPurchasedCostMnt = totalCogsMnt + currentInventoryCostMnt;
-    
-    // Lifetime Sale Value = (Total Revenue from all paid sales) + (Potential sale value of current in-stock items)
-    const totalPurchasedSaleValueMnt = totalIncomeMnt + currentInventorySaleValueMnt;
+    // Also add COGS from sold items to lifetime totals
+    // (history covers total-ever-acquired qty; COGS is the cost of the sold portion)
+    // Since restockEvents sums ALL batches (sold + remaining), totalPurchasedCostMnt
+    // already represents the FULL lifetime acquired cost (no need to add COGS again).
+    // However, for sale value: history covers the sale price of all acquired items,
+    // and we've already adjusted remaining stock to use latest price.
 
     // Lifetime Potential Gross Profit = Lifetime Sale Value - Lifetime Cost
     const currentInventoryPotentialProfitMnt = currentInventorySaleValueMnt - currentInventoryCostMnt;
-    const totalPurchasedPotentialProfitMnt = totalPurchasedSaleValueMnt - totalPurchasedCostMnt;
+    const totalPurchasedPotentialProfitMnt   = totalPurchasedSaleValueMnt   - totalPurchasedCostMnt;
 
     const pendingOrdersCount = allOrders.filter((o: any) => o.paymentStatus === 'PENDING_PAYMENT').length;
     const deletedLogs = financialLogs.filter((l: any) => l.type === 'PAID_ORDER_DELETED' || l.type === 'ORDER_DELETED' || l.description?.includes('Устгагдсан'));
@@ -116,3 +188,4 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
