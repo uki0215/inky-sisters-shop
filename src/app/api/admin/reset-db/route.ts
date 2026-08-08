@@ -4,18 +4,17 @@ import { db } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 async function performWipe() {
-  // Delete in reverse foreign key order
+  // Delete in reverse foreign key order matching exact Prisma schema
   await db.orderItem.deleteMany();
   await db.order.deleteMany();
   await db.financialLog.deleteMany();
   await db.expense.deleteMany();
   await db.productHistory.deleteMany();
-  await db.productBundleItem.deleteMany();
+  await db.bundleItem.deleteMany();
   await db.productBundle.deleteMany();
-  await db.featuredCollectionItem.deleteMany();
   await db.featuredCollection.deleteMany();
   await db.product.deleteMany();
-  await db.promotion.deleteMany();
+  await db.promotionBanner.deleteMany();
 
   return {
     success: true,
