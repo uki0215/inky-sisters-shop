@@ -9,8 +9,8 @@ export default function ProfileManager() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [resetPassword, setResetPassword] = useState('inky1234');
-  const [adminEmail, setAdminEmail] = useState('uki.0215@gmail.com');
+  const [resetPassword, setResetPassword] = useState('inkysisters');
+  const [adminEmail, setAdminEmail] = useState('inkysisters1223@gmail.com');
 
   // Store Contact Details
   const [address, setAddress] = useState('');
@@ -345,7 +345,7 @@ export default function ProfileManager() {
                   type="email"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="uki.0215@gmail.com"
+                  placeholder="inkysisters1223@gmail.com"
                   className="w-full px-3.5 py-2 bg-white border border-rose-300 rounded-xl font-sans text-xs font-bold text-gray-900 focus:ring-2 focus:ring-rose-500 shadow-2xs"
                 />
               </div>

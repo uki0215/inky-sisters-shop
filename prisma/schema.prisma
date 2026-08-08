@@ -236,8 +236,8 @@ model AdminUser {
   id            String   @id @default("admin")
   username      String   @default("inkysisters")
   password      String   @default("inkysisters")
-  resetPassword String   @default("inky1234")
-  email         String   @default("uki.0215@gmail.com")
+  resetPassword String   @default("inkysisters")
+  email         String   @default("inkysisters1223@gmail.com")
   updatedAt     DateTime @updatedAt
 }
 

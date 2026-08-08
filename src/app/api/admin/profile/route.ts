@@ -15,16 +15,16 @@ export async function GET() {
           id: 'admin',
           username: 'inkysisters',
           password: 'inkysisters',
-          resetPassword: 'inky1234',
-          email: 'uki.0215@gmail.com',
+          resetPassword: 'inkysisters',
+          email: 'inkysisters1223@gmail.com',
         },
       });
     }
 
     return NextResponse.json({
       username: admin.username,
-      email: admin.email || 'uki.0215@gmail.com',
-      resetPassword: admin.resetPassword || 'inky1234',
+      email: admin.email || 'inkysisters1223@gmail.com',
+      resetPassword: admin.resetPassword || 'inkysisters',
       updatedAt: admin.updatedAt,
     });
   } catch (e: any) {

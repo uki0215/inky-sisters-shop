@@ -16,14 +16,14 @@ export async function POST() {
           id: 'admin',
           username: 'inkysisters',
           password: 'inkysisters',
-          resetPassword: 'inky1234',
-          email: 'uki.0215@gmail.com',
+          resetPassword: 'inkysisters',
+          email: 'inkysisters1223@gmail.com',
         },
       });
     }
 
-    const resetPass = admin.resetPassword || 'inky1234';
-    const targetEmail = admin.email || process.env.SMTP_USER || 'uki.0215@gmail.com';
+    const resetPass = admin.resetPassword || 'inkysisters';
+    const targetEmail = admin.email || process.env.SMTP_USER || 'inkysisters1223@gmail.com';
 
     const result = await sendResetPasswordEmail({
       to: targetEmail,

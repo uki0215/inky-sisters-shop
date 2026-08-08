@@ -49,8 +49,8 @@ export async function POST(request: Request) {
           id: 'admin',
           username: 'inkysisters',
           password: 'inkysisters',
-          resetPassword: 'inky1234',
-          email: 'uki.0215@gmail.com',
+          resetPassword: 'inkysisters',
+          email: 'inkysisters1223@gmail.com',
         },
       });
     }
@@ -84,8 +84,8 @@ export async function GET(request: Request) {
           id: 'admin',
           username: 'inkysisters',
           password: 'inkysisters',
-          resetPassword: 'inky1234',
-          email: 'uki.0215@gmail.com',
+          resetPassword: 'inkysisters',
+          email: 'inkysisters1223@gmail.com',
         },
       });
     }
