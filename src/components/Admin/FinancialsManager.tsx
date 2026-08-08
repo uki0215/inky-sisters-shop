@@ -183,7 +183,19 @@ export default function FinancialsManager() {
     csv += `"Нийт Урсгал Зардал (Түрээс, Тог, Ус г.м)","${totalOperatingExpenses}"\n`;
     csv += `"ЦЭВЭР АШИГ (Net Profit)","${netProfit}"\n\n`;
 
-    // 3. OPERATING EXPENSES BREAKDOWN TABLE
+    // 3. LIFETIME INVENTORY METRICS (NON-DECREASING)
+    csv += `"НИЙТ ТАТАН АВАЛТЫН ТҮҮХЭН НЭГДСЭН ДҮН (Огт Хасагдахгүй)"\n`;
+    csv += `"Нийт Татан Авалтын Өртөг Дүн","${financialData.totalPurchasedCostMnt || 0}"\n`;
+    csv += `"Нийт Татан Авалтын Зарах Дүн","${financialData.totalPurchasedSaleValueMnt || 0}"\n`;
+    csv += `"Нийт Татан Авалтын Боломжит Ашиг","${financialData.totalPurchasedPotentialProfitMnt || 0}"\n\n`;
+
+    // 4. CURRENT INVENTORY METRICS
+    csv += `"ОДООГИЙН АГУУЛАХЫН ҮЛДЭГДЭЛ БАРААНЫ ТООЦОО"\n`;
+    csv += `"Одоогийн Үлдэгдэл Барааны Өртөг","${financialData.currentInventoryCostMnt || 0}"\n`;
+    csv += `"Одоогийн Үлдэгдэл Барааны Зарах Дүн","${financialData.currentInventorySaleValueMnt || 0}"\n`;
+    csv += `"Одоогийн Үлдэгдэл Барааны Боломжит Ашиг","${financialData.currentInventoryPotentialProfitMnt || 0}"\n\n`;
+
+    // 5. OPERATING EXPENSES BREAKDOWN TABLE
     csv += `"УРСГАЛ ЗАРДЛЫН ДЭЛГЭРЭНГҮЙ БҮРТГЭЛ"\n`;
     csv += `"Огноо","Ангилал","Зардлын Нэр / Түүх","Тайбар / Тэмдэглэл","Дүн (₮)"\n`;
 
@@ -214,7 +226,7 @@ export default function FinancialsManager() {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn font-sans">
       
       {/* Header Bar */}
       <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -258,37 +270,90 @@ export default function FinancialsManager() {
         </div>
       )}
 
-      {/* ROW 1: INVENTORY VALUATION & POTENTIAL PROFIT / LOSS CALCULATION */}
+      {/* SECTION 1: LIFETIME CUMULATIVE INVENTORY STATS (NEVER DECREASE) */}
+      <div className="bg-gradient-to-br from-amber-500/10 via-amber-50/60 to-orange-50/50 border border-amber-200/90 p-6 rounded-2xl shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-amber-200/80 pb-3">
+          <div>
+            <h3 className="text-base font-black text-amber-950 font-sans flex items-center gap-2">
+              <Landmark className="w-5 h-5 text-amber-700" />
+              🏛️ Нийт Татан Авалтын Нэгдсэн Тооцоо (Огт Хасагдахгүй Түүхэн Дүн)
+            </h3>
+            <p className="text-xs text-amber-800/90 mt-0.5 font-sans">
+              Дэлгүүрт худалдан авч оруулсан БҮХ барааны өртөг, зарах үнэ ба боломжит ашгийн нийт дүн. Бараа зарагдахад БАГАСАХГҮЙ.
+            </p>
+          </div>
+          <span className="text-[11px] font-bold font-mono bg-amber-200/80 text-amber-900 px-3 py-1 rounded-full border border-amber-300">
+            Огт хасагдахгүй үзүүлэлт
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          
+          {/* Lifetime Total Cost */}
+          <div className="p-4 bg-white/90 border border-amber-300/80 rounded-2xl space-y-1 shadow-2xs">
+            <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
+              <Package className="w-4 h-4 text-amber-700" />
+              Нийт Татан Авалтын Өртөг Дүн:
+            </span>
+            <span className="text-2xl font-black text-amber-950 block font-sans">
+              {formatMNT(financialData.totalPurchasedCostMnt || 0)}
+            </span>
+            <span className="text-[11px] text-amber-800 block">
+              Анхны болон дараах бүх татан авалтын худалдан авсан нийт өртөг
+            </span>
+          </div>
+
+          {/* Lifetime Total Selling Value */}
+          <div className="p-4 bg-white/90 border border-amber-300/80 rounded-2xl space-y-1 shadow-2xs">
+            <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
+              <Tag className="w-4 h-4 text-amber-700" />
+              Нийт Татан Авалтын Зарах Үнийн Дүн:
+            </span>
+            <span className="text-2xl font-black text-amber-950 block font-sans">
+              {formatMNT(financialData.totalPurchasedSaleValueMnt || 0)}
+            </span>
+            <span className="text-[11px] text-amber-800 block">
+              Нийт худалдан авсан барааны зарах үнийн нийт дүн
+            </span>
+          </div>
+
+          {/* Lifetime Total Potential Profit */}
+          <div className="p-4 bg-amber-600 text-white rounded-2xl space-y-1 shadow-md">
+            <span className="text-xs text-amber-100 font-extrabold flex items-center gap-1.5 uppercase">
+              <Sparkles className="w-4 h-4 text-amber-200" />
+              Нийт Татан Авалтын Боломжит Ашиг:
+            </span>
+            <span className="text-2xl font-black block font-sans text-amber-200">
+              {formatMNT(financialData.totalPurchasedPotentialProfitMnt || 0)}
+            </span>
+            <span className="text-[11px] text-amber-100/90 block">
+              Нийт зарах дүнгээс авсан өртгийг хассан түүхэн нийт боломжит ашиг
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      {/* SECTION 2: CURRENT IN-STOCK INVENTORY METRICS */}
       <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <div>
             <h3 className="text-base font-extrabold text-gray-900 font-sans flex items-center gap-2">
               <Package className="w-5 h-5 text-teal-700" />
-              Үлдэгдэл Барааны Өртөг & Боломжит Зарах Үнийн Тооцоо
+              📦 Одоогийн Агуулахын Үлдэгдэл Барааны Тооцоо
             </h3>
             <p className="text-xs text-gray-500 mt-0.5 font-sans">
-              Нийт агуулахад байгаа барааны авсан өртөг, зарах үнийн дүн ба бүрэн заргадвал гарах боломжит ашиг.
+              Яг одоо агуулахад бэлэн байгаа үлдэгдэл барааны өртөг, зарах дүн ба үлдсэн боломжит ашиг.
             </p>
           </div>
+          <span className="text-[11px] font-bold font-mono bg-teal-50 text-teal-800 px-3 py-1 rounded-full border border-teal-200">
+            Бодит үлдэгдэл
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
-          {/* Card 0: Total Cumulative Investment Cost (NEVER DECREASES) */}
-          <div className="p-4 bg-amber-50/80 border border-amber-300 rounded-xl space-y-1">
-            <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
-              <Package className="w-4 h-4 text-amber-700" />
-              Нийт Барааны Нийт Өртөг (Хасагдахгүй):
-            </span>
-            <span className="text-xl font-extrabold text-amber-950 block font-sans">
-              {formatMNT(financialData.totalPurchasedCostMnt || 0)}
-            </span>
-            <span className="text-[11px] text-amber-800 block">
-              Анх болон нөхөж татсан нийт барааны худалдан авалтын нийт өртөг
-            </span>
-          </div>
-
-          {/* Card A: Inventory Cost (Remaining In Stock) */}
+          {/* Card A: Current Inventory Cost */}
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
             <span className="text-xs text-gray-500 font-bold flex items-center gap-1.5 uppercase">
               <Package className="w-4 h-4 text-slate-600" />
@@ -306,7 +371,7 @@ export default function FinancialsManager() {
           <div className="p-4 bg-teal-50/70 border border-teal-200 rounded-xl space-y-1">
             <span className="text-xs text-teal-900 font-bold flex items-center gap-1.5 uppercase">
               <Tag className="w-4 h-4 text-teal-700" />
-              Боломжит Зарах Дүн (Зарах Үнэ):
+              Үлдэгдэл Зарах Боломжит Дүн:
             </span>
             <span className="text-xl font-extrabold text-teal-950 block font-sans">
               {formatMNT(financialData.currentInventorySaleValueMnt || 0)}
@@ -323,10 +388,10 @@ export default function FinancialsManager() {
               Үлдэгдэл Барааны Боломжит Ашиг:
             </span>
             <span className="text-xl font-extrabold text-emerald-800 block font-sans">
-              {formatMNT(financialData.currentInventoryPotentialProfitMnt || (financialData.currentInventorySaleValueMnt - financialData.currentInventoryCostMnt) || 0)}
+              {formatMNT(financialData.currentInventoryPotentialProfitMnt || 0)}
             </span>
             <span className="text-[11px] text-emerald-800 block">
-              Зарах дүнгээс авсан өртгийг хассан боломжит ашиг
+              Үлдэгдэл зарах дүнгээс өртгийг хассан үлдсэн боломжит ашиг
             </span>
           </div>
 

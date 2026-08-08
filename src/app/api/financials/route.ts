@@ -55,12 +55,13 @@ export async function GET() {
     const grossProfitMnt = totalIncomeMnt - totalCogsMnt;
 
     // Compute Inventory Values:
-    // 1. totalPurchasedCostMnt: Total cumulative cost of ALL imported/added goods (NEVER DECREASES when items are sold)
-    // 2. currentInventoryCostMnt: Cost of remaining stock currently in warehouse
-    // 3. currentInventorySaleValueMnt: Potential retail sale value of remaining stock
+    // 1. Current In-Stock Inventory Metrics
+    // 2. Lifetime Total Acquired Inventory Metrics (NEVER DECREASES when goods are sold)
     let currentInventoryCostMnt = 0;
     let currentInventorySaleValueMnt = 0;
+
     let totalPurchasedCostMnt = 0;
+    let totalPurchasedSaleValueMnt = 0;
 
     const soldQtyMap: Record<string, number> = {};
     paidOrders.forEach((order: any) => {
@@ -76,17 +77,23 @@ export async function GET() {
         ? p.costYuan * p.yuanRate
         : (p.costMnt || 0);
 
+      const sellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
+
       const soldQty = soldQtyMap[p.id] || 0;
       const totalUnitsAcquired = (p.stock || 0) + soldQty;
 
+      // Current stock metrics
       currentInventoryCostMnt += unitCost * (p.stock || 0);
-      totalPurchasedCostMnt += unitCost * totalUnitsAcquired;
-
-      const sellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
       currentInventorySaleValueMnt += sellingPrice * (p.stock || 0);
+
+      // Lifetime total acquired stock metrics (NEVER DECREASE)
+      totalPurchasedCostMnt += unitCost * totalUnitsAcquired;
+      totalPurchasedSaleValueMnt += sellingPrice * totalUnitsAcquired;
     });
 
     const currentInventoryPotentialProfitMnt = currentInventorySaleValueMnt - currentInventoryCostMnt;
+    const totalPurchasedPotentialProfitMnt = totalPurchasedSaleValueMnt - totalPurchasedCostMnt;
+
     const pendingOrdersCount = allOrders.filter((o: any) => o.paymentStatus === 'PENDING_PAYMENT').length;
     const deletedLogs = financialLogs.filter((l: any) => l.type === 'PAID_ORDER_DELETED' || l.type === 'ORDER_DELETED' || l.description?.includes('Устгагдсан'));
 
@@ -101,6 +108,8 @@ export async function GET() {
       totalProfit: grossProfitMnt,
       netProfitMnt: grossProfitMnt,
       totalPurchasedCostMnt,
+      totalPurchasedSaleValueMnt,
+      totalPurchasedPotentialProfitMnt,
       currentInventoryCostMnt,
       currentInventorySaleValueMnt,
       currentInventoryPotentialProfitMnt,
