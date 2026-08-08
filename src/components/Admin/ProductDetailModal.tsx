@@ -22,7 +22,9 @@ export default function ProductDetailModal({
 }: ProductDetailModalProps) {
   if (!product) return null;
 
-  const costMnt = product.costMnt || (product.costYuan || 0) * (product.yuanRate || 485);
+  const costMnt = (product.costYuan && product.costYuan > 0 && product.yuanRate && product.yuanRate > 0)
+    ? (product.costYuan * product.yuanRate)
+    : (product.costMnt || 0);
   const priceMnt = product.isDiscounted && product.discountPriceMnt ? product.discountPriceMnt : product.priceMnt;
   const unitProfitMnt = priceMnt - costMnt;
   const profitMarginPercent = costMnt > 0 ? ((unitProfitMnt / costMnt) * 100).toFixed(1) : '0';
@@ -33,7 +35,7 @@ export default function ProductDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-      <div className="relative w-full max-w-2xl bg-white border border-gray-200 rounded-3xl p-6 shadow-2xl text-gray-900 overflow-hidden transform transition-all animate-scaleUp space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-white border border-gray-200 rounded-3xl p-6 shadow-2xl text-gray-900 overflow-hidden transform transition-all animate-scaleUp space-y-6 max-h-[90vh] overflow-y-auto font-sans">
         
         {/* Close Button */}
         <button
@@ -112,7 +114,7 @@ export default function ProductDetailModal({
                 Юанийн Ханш (₮):
               </span>
               <span className="text-sm font-mono font-black text-teal-800 block">
-                {product.yuanRate || 485}₮
+                {product.yuanRate ? `${product.yuanRate}₮` : '0₮ (Төгрөгөөр)'}
               </span>
               <span className="text-[10px] text-gray-400 block">1¥ Юанийн ханш</span>
             </div>
@@ -125,7 +127,9 @@ export default function ProductDetailModal({
               <span className="text-sm font-mono font-black text-teal-950 block">
                 {formatMNT(costMnt)}
               </span>
-              <span className="text-[10px] text-teal-800 block">¥ × Ханш</span>
+              <span className="text-[10px] text-teal-800 block">
+                {product.costYuan > 0 && product.yuanRate > 0 ? '¥ × Ханш' : 'Шууд Төгрөгийн өртөг'}
+              </span>
             </div>
 
             {/* Selling Price */}
@@ -137,7 +141,7 @@ export default function ProductDetailModal({
                 {formatMNT(priceMnt)}
               </span>
               <span className="text-[10px] text-rose-700 block">
-                {product.isDiscounted ? `(Хямдарсан ${product.discountPercent}%)` : `(¥${(priceMnt / (product.yuanRate || 485)).toFixed(1)})`}
+                {product.isDiscounted ? `(Хямдарсан ${product.discountPercent}%)` : (product.yuanRate > 0 ? `(¥${(priceMnt / product.yuanRate).toFixed(1)})` : '(₮ Төгрөгөөр авсан)')}
               </span>
             </div>
 

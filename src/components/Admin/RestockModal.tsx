@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { formatMNT } from '@/lib/utils';
-import { X, Plus, PackageCheck, TrendingUp, TrendingDown, RefreshCw, Calculator, DollarSign } from 'lucide-react';
+import { X, Plus, PackageCheck, TrendingUp, TrendingDown, Calculator } from 'lucide-react';
 
 interface RestockModalProps {
   product: any;
@@ -23,24 +23,34 @@ function parseDecimal(str: string | number): number {
   return isNaN(val) ? 0 : val;
 }
 
+function formatComma(num: number | string): string {
+  if (num === '' || num === undefined || num === null) return '';
+  const s = num.toString().replace(/[^0-9.]/g, '');
+  if (!s) return '';
+  const parts = s.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
 export default function RestockModal({ product, onClose, onSuccess }: RestockModalProps) {
   const [addQuantity, setAddQuantity] = useState<number>(10);
-  const [yuanRate, setYuanRate] = useState<number>(product.yuanRate || 485);
+  const [yuanRate, setYuanRate] = useState<number>(product.yuanRate || 0);
   const [costYuanRaw, setCostYuanRaw] = useState<string>((product.costYuan || 0).toString());
+  const [costMntInput, setCostMntInput] = useState<number>(product.costMnt || 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const costYuan = parseDecimal(costYuanRaw);
 
   // Rate & Cost Fluctuation Comparisons
-  const prevRate = product.yuanRate || 485;
+  const prevRate = product.yuanRate || 0;
   const rateDiff = yuanRate - prevRate;
 
   const prevCostYuan = product.costYuan || 0;
   const costYuanDiff = costYuan - prevCostYuan;
 
-  const prevCostMnt = product.costMnt || prevCostYuan * prevRate;
-  const newCostMnt = costYuan * yuanRate;
+  const prevCostMnt = (prevCostYuan > 0 && prevRate > 0) ? prevCostYuan * prevRate : (product.costMnt || 0);
+  const newCostMnt = (costYuan > 0 && yuanRate > 0) ? costYuan * yuanRate : costMntInput;
   const costMntDiff = newCostMnt - prevCostMnt;
 
   const totalRestockExpenseMnt = newCostMnt * addQuantity;
@@ -60,6 +70,7 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
           addStock: addQuantity,
           yuanRate: Number(yuanRate),
           costYuan: Number(costYuan),
+          costMnt: Number(newCostMnt),
         }),
       });
 
@@ -134,7 +145,7 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
             {/* Yuan Rate Input */}
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
               <label className="block text-[11px] font-bold text-gray-700">
-                Шинэ Юанийн Ханш (₮) *
+                Шинэ Юанийн Ханш (₮):
               </label>
               <input
                 type="number"
@@ -158,12 +169,11 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
             {/* Yuan Cost Input */}
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
               <label className="block text-[11px] font-bold text-gray-700">
-                Шинэ Авсан Үнэ (¥ Юань) *
+                Шинэ Авсан Үнэ (¥ Юань):
               </label>
               <input
                 type="text"
-                required
-                placeholder="2.25"
+                placeholder="0.00"
                 value={costYuanRaw}
                 onChange={(e) => setCostYuanRaw(e.target.value)}
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg font-mono font-bold text-xs text-gray-900"
@@ -179,6 +189,22 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
             </div>
 
           </div>
+
+          {/* Direct MNT cost input if costYuan is 0 or yuanRate is 0 */}
+          {(costYuan === 0 || yuanRate === 0) && (
+            <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl space-y-1">
+              <label className="block text-xs font-bold text-amber-900">
+                ₮ Төгрөгийн Өртөг Оруулах (Юань 0 үед шууд төгрөгөөр) *
+              </label>
+              <input
+                type="text"
+                placeholder="10,000"
+                value={formatComma(costMntInput || '')}
+                onChange={(e) => setCostMntInput(parseDecimal(e.target.value))}
+                className="w-full px-3.5 py-2 bg-white border border-amber-400 rounded-xl font-mono text-base font-extrabold text-amber-950 focus:ring-2 focus:ring-amber-500 shadow-2xs"
+              />
+            </div>
+          )}
 
           {/* FLUTTER & COST COMPARISON REPORT CARD */}
           <div className="p-4 bg-slate-900 text-white rounded-2xl space-y-2 text-xs">

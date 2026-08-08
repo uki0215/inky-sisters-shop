@@ -54,15 +54,34 @@ export async function GET() {
     // Compute Gross Profit
     const grossProfitMnt = totalIncomeMnt - totalCogsMnt;
 
-    // Compute Inventory Values (Total Stock Cost, Total Stock Retail Selling Value, and Potential Profit)
+    // Compute Inventory Values:
+    // 1. totalPurchasedCostMnt: Total cumulative cost of ALL imported/added goods (NEVER DECREASES when items are sold)
+    // 2. currentInventoryCostMnt: Cost of remaining stock currently in warehouse
+    // 3. currentInventorySaleValueMnt: Potential retail sale value of remaining stock
     let currentInventoryCostMnt = 0;
     let currentInventorySaleValueMnt = 0;
+    let totalPurchasedCostMnt = 0;
+
+    const soldQtyMap: Record<string, number> = {};
+    paidOrders.forEach((order: any) => {
+      order.items.forEach((item: any) => {
+        if (item.productId) {
+          soldQtyMap[item.productId] = (soldQtyMap[item.productId] || 0) + item.quantity;
+        }
+      });
+    });
+
     products.forEach((p: any) => {
       const unitCost = (p.costYuan && p.costYuan > 0 && p.yuanRate && p.yuanRate > 0)
         ? p.costYuan * p.yuanRate
         : (p.costMnt || 0);
 
+      const soldQty = soldQtyMap[p.id] || 0;
+      const totalUnitsAcquired = (p.stock || 0) + soldQty;
+
       currentInventoryCostMnt += unitCost * (p.stock || 0);
+      totalPurchasedCostMnt += unitCost * totalUnitsAcquired;
+
       const sellingPrice = p.isDiscounted && p.discountPriceMnt ? p.discountPriceMnt : p.priceMnt;
       currentInventorySaleValueMnt += sellingPrice * (p.stock || 0);
     });
@@ -81,6 +100,7 @@ export async function GET() {
       totalCogsMnt,
       totalProfit: grossProfitMnt,
       netProfitMnt: grossProfitMnt,
+      totalPurchasedCostMnt,
       currentInventoryCostMnt,
       currentInventorySaleValueMnt,
       currentInventoryPotentialProfitMnt,

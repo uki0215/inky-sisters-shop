@@ -272,19 +272,33 @@ export default function FinancialsManager() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Card A: Inventory Cost */}
+          {/* Card 0: Total Cumulative Investment Cost (NEVER DECREASES) */}
+          <div className="p-4 bg-amber-50/80 border border-amber-300 rounded-xl space-y-1">
+            <span className="text-xs text-amber-900 font-extrabold flex items-center gap-1.5 uppercase">
+              <Package className="w-4 h-4 text-amber-700" />
+              Нийт Барааны Нийт Өртөг (Хасагдахгүй):
+            </span>
+            <span className="text-xl font-extrabold text-amber-950 block font-sans">
+              {formatMNT(financialData.totalPurchasedCostMnt || 0)}
+            </span>
+            <span className="text-[11px] text-amber-800 block">
+              Анх болон нөхөж татсан нийт барааны худалдан авалтын нийт өртөг
+            </span>
+          </div>
+
+          {/* Card A: Inventory Cost (Remaining In Stock) */}
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-1">
             <span className="text-xs text-gray-500 font-bold flex items-center gap-1.5 uppercase">
               <Package className="w-4 h-4 text-slate-600" />
-              Нийт Барааны Өртөг Дүн:
+              Үлдэгдэл Барааны Өртөг:
             </span>
             <span className="text-xl font-extrabold text-gray-900 block font-sans">
               {formatMNT(financialData.currentInventoryCostMnt || 0)}
             </span>
             <span className="text-[11px] text-gray-500 block">
-              Агуулахад байгаа бүх барааны татан авалтын авсан өртөг
+              Одоо агуулахад байгаа үлдэгдэл барааны татан авалтын өртөг
             </span>
           </div>
 
@@ -298,7 +312,7 @@ export default function FinancialsManager() {
               {formatMNT(financialData.currentInventorySaleValueMnt || 0)}
             </span>
             <span className="text-[11px] text-teal-800 block">
-              Бүрэн зарагдвал олох нийт орлогын хэмжээ
+              Үлдэгдэл бүрэн зарагдвал олох орлого
             </span>
           </div>
 
@@ -312,7 +326,7 @@ export default function FinancialsManager() {
               {formatMNT(financialData.currentInventoryPotentialProfitMnt || (financialData.currentInventorySaleValueMnt - financialData.currentInventoryCostMnt) || 0)}
             </span>
             <span className="text-[11px] text-emerald-800 block">
-              Зарах дүнгээс авсан өртгийг хассан боломжит цэвэр ашиг
+              Зарах дүнгээс авсан өртгийг хассан боломжит ашиг
             </span>
           </div>
 
