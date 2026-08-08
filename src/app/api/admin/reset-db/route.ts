@@ -42,7 +42,20 @@ export async function POST(request: Request) {
 
     // Verify DB Reset Password
     let admin = await db.adminUser.findUnique({ where: { id: 'admin' } });
-    const expectedResetPass = admin?.resetPassword || 'inky1234';
+
+    if (!admin) {
+      admin = await db.adminUser.create({
+        data: {
+          id: 'admin',
+          username: 'inkysisters',
+          password: 'inkysisters',
+          resetPassword: 'inky1234',
+          email: 'uki.0215@gmail.com',
+        },
+      });
+    }
+
+    const expectedResetPass = (admin.resetPassword && admin.resetPassword.trim()) ? admin.resetPassword.trim() : 'inky1234';
 
     if (!resetPassword || resetPassword.trim() !== expectedResetPass) {
       return NextResponse.json(
@@ -64,11 +77,24 @@ export async function GET(request: Request) {
     const key = searchParams.get('key');
 
     let admin = await db.adminUser.findUnique({ where: { id: 'admin' } });
-    const expectedResetPass = admin?.resetPassword || 'inky1234';
 
-    if (key !== expectedResetPass && key !== 'RESET_NOW') {
+    if (!admin) {
+      admin = await db.adminUser.create({
+        data: {
+          id: 'admin',
+          username: 'inkysisters',
+          password: 'inkysisters',
+          resetPassword: 'inky1234',
+          email: 'uki.0215@gmail.com',
+        },
+      });
+    }
+
+    const expectedResetPass = (admin.resetPassword && admin.resetPassword.trim()) ? admin.resetPassword.trim() : 'inky1234';
+
+    if (!key || key.trim() !== expectedResetPass) {
       return NextResponse.json(
-        { error: 'Өгөгдлийг арилгахын тулд зөв ?key=НУУЦ_ҮГ параметрийг илгээнэ үү.' },
+        { error: '🔒 Өгөгдөл арилгах тусгай нууц үг буруу байна!' },
         { status: 400 }
       );
     }
