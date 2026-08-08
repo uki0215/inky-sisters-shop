@@ -30,17 +30,24 @@ export async function GET() {
     );
     const deletedPaidIncome = deletedPaidLogs.reduce((sum: number, l: any) => sum + (l.amountMnt || 0), 0);
 
-    // Total Financial Income
-    const totalIncomeMnt = activePaidIncome + deletedPaidIncome;
+    // Deduct order refunds (when items are returned or order amounts refunded)
+    const orderRefundLogs = financialLogs.filter((l: any) => l.type === 'ORDER_REFUND');
+    const totalRefundMnt = orderRefundLogs.reduce((sum: number, l: any) => sum + (l.amountMnt || 0), 0);
 
-    // Compute POS Sales vs Online Sales
-    const posSalesMnt = paidOrders
+    // Total Net Financial Income (after subtracting refunds)
+    const totalIncomeMnt = Math.max(0, activePaidIncome + deletedPaidIncome - totalRefundMnt);
+
+    // Compute POS Sales vs Online Sales (after deducting refunds)
+    const rawPosSalesMnt = paidOrders
       .filter((o: any) => o.orderNumber?.startsWith('POS-') || o.deliveryAddress?.includes('POS'))
       .reduce((sum: number, o: any) => sum + o.totalMnt, 0);
 
-    const onlineSalesMnt = paidOrders
-      .filter((o: any) => !o.orderNumber?.startsWith('POS-') && !o.deliveryAddress?.includes('POS'))
-      .reduce((sum: number, o: any) => sum + o.totalMnt, 0);
+    const posRefunds = orderRefundLogs
+      .filter((l: any) => l.description?.includes('POS-') || l.description?.includes('Касс'))
+      .reduce((sum: number, l: any) => sum + (l.amountMnt || 0), 0);
+
+    const posSalesMnt = Math.max(0, rawPosSalesMnt - posRefunds);
+    const onlineSalesMnt = Math.max(0, totalIncomeMnt - posSalesMnt);
 
     // Compute Cost of Goods Sold (COGS)
     // Uses item.costMnt (unit cost locked at purchase/checkout time) if available,

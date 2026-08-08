@@ -25,15 +25,16 @@ export default function ProductHistoryModal({ product, onClose }: ProductHistory
   }, [product.id]);
 
   const fetchHistory = async () => {
+    if (!product?.id) return;
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`/api/products/${product.id}/history`);
-      if (!res.ok) {
-        throw new Error('Түүх ачаалахад алдаа гарлаа');
-      }
       const data = await res.json();
-      setHistoryList(data || []);
+      if (!res.ok) {
+        throw new Error(data.error || 'Түүх ачаалахад алдаа гарлаа');
+      }
+      setHistoryList(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.message);
     } finally {

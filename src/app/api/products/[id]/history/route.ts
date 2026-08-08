@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
-    const resolvedParams = await params;
+    const resolvedParams = await Promise.resolve(params);
     const productId = resolvedParams?.id;
     if (!productId) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -21,6 +21,7 @@ export async function GET(
 
     return NextResponse.json(history);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Fetch product history error:', error);
+    return NextResponse.json({ error: error?.message || 'Failed to fetch history' }, { status: 500 });
   }
 }
