@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const allOrders = await db.order.findMany({
@@ -9,17 +11,26 @@ export async function GET() {
     });
 
     const paidOrders = allOrders.filter((o: any) => o.paymentStatus === 'PAID');
-    // If paid orders exist, use paid orders; otherwise include all non-cancelled orders for initial calculation visibility
-    const activeOrders = paidOrders.length > 0 ? paidOrders : allOrders;
+    // If paid orders exist, use paid orders; otherwise include all non-cancelled orders
+    const activeOrders = paidOrders.length > 0 ? paidOrders : allOrders.filter((o: any) => o.paymentStatus !== 'CANCELLED');
 
     const products = await db.product.findMany();
     const financialLogs = await db.financialLog.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 50,
+      take: 100,
     });
 
     // Compute Income
     const totalIncomeMnt = activeOrders.reduce((sum: number, order: any) => sum + order.totalMnt, 0);
+
+    // Compute POS Sales vs Online Sales
+    const posSalesMnt = paidOrders
+      .filter((o: any) => o.orderNumber?.startsWith('POS-') || o.deliveryAddress?.includes('POS'))
+      .reduce((sum: number, o: any) => sum + o.totalMnt, 0);
+
+    const onlineSalesMnt = paidOrders
+      .filter((o: any) => !o.orderNumber?.startsWith('POS-') && !o.deliveryAddress?.includes('POS'))
+      .reduce((sum: number, o: any) => sum + o.totalMnt, 0);
 
     // Compute Cost of Goods Sold (COGS)
     let totalCogsMnt = 0;
@@ -60,6 +71,8 @@ export async function GET() {
     return NextResponse.json({
       paidSales: totalIncomeMnt,
       totalIncomeMnt,
+      posSalesMnt,
+      onlineSalesMnt,
       totalCogsMnt,
       totalProfit: grossProfitMnt,
       netProfitMnt: grossProfitMnt,

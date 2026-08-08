@@ -27,6 +27,9 @@ import {
   Landmark,
   CreditCard,
   Clock,
+  RefreshCw,
+  ShoppingCart,
+  ShoppingBag,
 } from 'lucide-react';
 
 export default function FinancialsManager() {
@@ -139,6 +142,14 @@ export default function FinancialsManager() {
   const totalOperatingExpenses = expenses.reduce((sum, exp) => sum + (exp.amountMnt || 0), 0); // Нийт Урсгал зардал
   const netProfit = grossProfit - totalOperatingExpenses; // Цэвэр ашиг
 
+  const posSalesTotal = financialData.posSalesMnt ?? (financialData.orders || [])
+    .filter((o: any) => o.paymentStatus === 'PAID' && (o.orderNumber?.startsWith('POS-') || o.deliveryAddress?.includes('POS')))
+    .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+
+  const onlineSalesTotal = financialData.onlineSalesMnt ?? (financialData.orders || [])
+    .filter((o: any) => o.paymentStatus === 'PAID' && !o.orderNumber?.startsWith('POS-') && !o.deliveryAddress?.includes('POS'))
+    .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
+
   const cashOrdersTotal = (financialData.orders || [])
     .filter((o: any) => o.paymentStatus === 'PAID' && o.paymentMethod === 'CASH')
     .reduce((acc: number, curr: any) => acc + curr.totalMnt, 0);
@@ -217,14 +228,27 @@ export default function FinancialsManager() {
           </p>
         </div>
 
-        {/* Excel Download Button */}
-        <button
-          onClick={handleExportExcel}
-          className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95 shrink-0"
-        >
-          <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
-          <span>Excel Тайлан Татах (CSV)</span>
-        </button>
+        {/* Header Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={fetchData}
+            disabled={loading}
+            className="px-3.5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold text-xs rounded-xl transition-all flex items-center gap-1.5 border border-gray-200"
+            title="Тооцооллыг дахин шинэчлэх"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-teal-700 ${loading ? 'animate-spin' : ''}`} />
+            <span>Шинэчлэх</span>
+          </button>
+
+          <button
+            onClick={handleExportExcel}
+            className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95 shrink-0"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
+            <span>Excel Тайлан Татах (CSV)</span>
+          </button>
+        </div>
       </div>
 
       {noticeMsg && (
@@ -419,18 +443,25 @@ export default function FinancialsManager() {
       {/* ROW 2: FINANCIAL STAT CARDS (GROSS PROFIT vs OPERATING EXPENSES vs NET PROFIT) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* Card 1: Total Sales */}
+        {/* Card 1: Total Sales (With POS vs Online Breakdown) */}
         <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase">
-            <span>Нийт Орлого</span>
+            <span>Нийт Борлуулалтын Орлого</span>
             <TrendingUp className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl font-black text-gray-900 font-sans">
             {formatMNT(paidSales)}
           </div>
-          <span className="text-[11px] text-gray-400 block">
-            Баталгаажсан захиалгуудын дүн
-          </span>
+          <div className="pt-2 border-t border-gray-100 grid grid-cols-2 gap-1 text-[11px] font-mono">
+            <div>
+              <span className="text-gray-400 block font-sans text-[10px]">🏪 Кассаар:</span>
+              <span className="font-bold text-amber-900">{formatMNT(posSalesTotal)}</span>
+            </div>
+            <div>
+              <span className="text-gray-400 block font-sans text-[10px]">🛍️ Онлайнаар:</span>
+              <span className="font-bold text-teal-800">{formatMNT(onlineSalesTotal)}</span>
+            </div>
+          </div>
         </div>
 
         {/* Card 2: Gross Profit */}
