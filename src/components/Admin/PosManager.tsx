@@ -336,7 +336,12 @@ export default function PosManager({ products = [], categories = [], bundles = [
       setSplitCardText('');
       setCustomerName('');
       setCustomerPhone('');
-      setCreditNote('');
+      try {
+        const channel = new BroadcastChannel('inky_stock_sync');
+        channel.postMessage({ type: 'STOCK_CHANGED', timestamp: Date.now() });
+        channel.close();
+      } catch (e) {}
+      localStorage.setItem('inky_last_stock_update', Date.now().toString());
 
       if (onProductUpdate) onProductUpdate();
     } catch (err: any) {

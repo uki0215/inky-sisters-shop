@@ -50,6 +50,9 @@ import {
   CheckCheck,
   Trash2,
   Gift,
+  Printer,
+  FileSpreadsheet,
+  FileText,
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -301,8 +304,8 @@ export default function AdminPage() {
     setIsAuthenticated(false);
   };
 
-  const fetchAdminData = async () => {
-    setLoading(true);
+  const fetchAdminData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [resProd, resCat, resFin, resSet, resBun] = await Promise.all([
         fetch('/api/products'),
@@ -326,8 +329,179 @@ export default function AdminPage() {
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
+  };
+
+  // Real-time Live Stock Sync across POS, Admin, and Online Store (polling + broadcast channel)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Background silent refresh every 4 seconds
+    const intervalId = setInterval(() => {
+      fetchAdminData(true);
+    }, 4000);
+
+    // Cross-tab BroadcastChannel event listener
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel('inky_stock_sync');
+      channel.onmessage = () => {
+        fetchAdminData(true);
+      };
+    } catch (e) {}
+
+    // Storage event fallback
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'inky_last_stock_update') {
+        fetchAdminData(true);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // Window Focus Listener (instant refresh when tab gains focus)
+    const handleFocus = () => {
+      fetchAdminData(true);
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      if (channel) channel.close();
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [isAuthenticated]);
+
+  // PDF Export for Product Catalog with images, prices, stock, names, barcode & description
+  const handleExportProductCatalogPDF = () => {
+    const listToPrint = filteredProducts;
+
+    if (listToPrint.length === 0) {
+      alert('Экспортлох бараа байхгүй байна!');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Попап цонх нээхийг зөвшөөрнө үү!');
+      return;
+    }
+
+    const rowsHtml = listToPrint
+      .map(
+        (p, idx) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-weight: bold; font-family: monospace;">${idx + 1}</td>
+        <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center;">
+          <img
+            src="${p.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}"
+            alt="${p.name}"
+            style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #d1d5db; display: block; margin: 0 auto;"
+          />
+        </td>
+        <td style="padding: 8px; border: 1px solid #e5e7eb;">
+          <strong style="font-size: 13px; color: #111827; display: block;">${p.name}</strong>
+          <span style="font-family: monospace; font-size: 11px; color: #6b7280;">📷 ${p.barcode || '—'}</span>
+        </td>
+        <td style="padding: 8px; border: 1px solid #e5e7eb; font-size: 12px; color: #374151;">${p.category?.name || '—'}</td>
+        <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-family: monospace; font-weight: bold; font-size: 13px; color: ${
+          p.stock <= 0 ? '#dc2626' : p.stock <= 5 ? '#d97706' : '#059669'
+        };">
+          ${p.stock <= 0 ? 'Дууссан (0 ш)' : `${p.stock} ш`}
+        </td>
+        <td style="padding: 8px; border: 1px solid #e5e7eb; font-family: monospace; font-size: 12px; color: #4b5563;">
+          ${
+            p.costYuan && p.costYuan > 0
+              ? `¥${p.costYuan} <span style="font-size: 10px; color: #6b7280;">(${(p.costMnt || 0).toLocaleString()}₮)</span>`
+              : `${(p.costMnt || 0).toLocaleString()}₮`
+          }
+        </td>
+        <td style="padding: 8px; border: 1px solid #e5e7eb; font-family: monospace; font-weight: bold; font-size: 13px; color: #b91c1c;">
+          ${
+            p.isDiscounted && p.discountPriceMnt
+              ? `<div><span style="text-decoration: line-through; color: #9ca3af; font-size: 10px; display: block;">${(p.priceMnt || 0).toLocaleString()}₮</span>${(
+                  p.discountPriceMnt || 0
+                ).toLocaleString()}₮</div>`
+              : `${(p.priceMnt || 0).toLocaleString()}₮`
+          }
+        </td>
+        <td style="padding: 8px; border: 1px solid #e5e7eb; font-size: 11px; color: #4b5563; max-width: 180px; line-height: 1.3;">
+          ${p.description || '—'}
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+
+    const totalStockCount = listToPrint.reduce((acc, p) => acc + (p.stock || 0), 0);
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Inky Sisters Shop - Бараа Бүртгэлийн Тайлан (PDF)</title>
+          <meta charset="utf-8" />
+          <style>
+            @page { size: A4 portrait; margin: 12mm; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 15px; color: #111827; background: #fff; }
+            .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0d9488; padding-bottom: 12px; margin-bottom: 16px; }
+            .title { font-size: 20px; font-weight: 900; color: #0f766e; font-family: sans-serif; }
+            .subtitle { font-size: 12px; color: #4b5563; margin-top: 2px; }
+            .meta { font-size: 11px; text-align: right; color: #374151; font-family: monospace; }
+            .summary-box { display: flex; gap: 20px; background-color: #f0fdf4; border: 1px solid #99f6e4; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: bold; margin-bottom: 16px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+            th { background-color: #f3f4f6; color: #1f2937; padding: 8px; border: 1px solid #cbd5e1; font-size: 10px; text-transform: uppercase; font-family: monospace; }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header-bar">
+            <div>
+              <div class="title">INKY SISTERS SHOP</div>
+              <div class="subtitle">Бараа Бүртгэлийн Нэгдсэн Тайлан (PDF)</div>
+            </div>
+            <div class="meta">
+              <div>Хэвлэсэн: <strong>${new Date().toLocaleDateString('mn-MN')} ${new Date().toLocaleTimeString('mn-MN')}</strong></div>
+              <div>Хайлт/Шүүлт: <strong>${searchQuery ? `"${searchQuery}"` : 'Бүх бараа'}</strong></div>
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <div>📊 Нийт Төрөл: <span style="color: #0f766e;">${listToPrint.length}</span></div>
+            <div>📦 Нийт Үлдэгдэл Тоо: <span style="color: #0f766e;">${totalStockCount} ш</span></div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 30px;">#</th>
+                <th style="width: 60px;">Зураг</th>
+                <th>Барааны Нэр</th>
+                <th>Ангилал</th>
+                <th style="width: 70px;">Үлдэгдэл</th>
+                <th style="width: 90px;">Өртөг Үнэ</th>
+                <th style="width: 90px;">Зарах Үнэ</th>
+                <th>Тайлбар</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const handleBarcodeScan = (code: string) => {
@@ -928,6 +1102,30 @@ export default function AdminPage() {
                     <span className="px-3 py-1 bg-teal-100 text-teal-900 font-mono font-extrabold text-xs rounded-full border border-teal-200 shadow-2xs">
                       Нийт {products.length} Төрлийн Бараа
                     </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleExportProductCatalogPDF}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all border border-red-500 cursor-pointer shadow-2xs"
+                      title="Барааны зураг, үнэ, үлдэгдэл тоо ба тайлбар бүхий PDF тайлан экспортлох"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>📄 PDF Барааны тайлан хэвлэх</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedProductForEdit(null);
+                        setIsProductModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all border border-teal-600 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Шинэ бараа бүртгэх</span>
+                    </button>
                   </div>
                 </div>
 

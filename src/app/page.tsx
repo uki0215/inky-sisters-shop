@@ -48,8 +48,8 @@ function HomeContent() {
   const [scannedNotice, setScannedNotice] = useState<string | null>(null);
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [resProducts, resCategories, resPromo, resSettings, resSlides, resCollections, resBanks, resBundles] = await Promise.all([
         fetch('/api/products'),
@@ -73,8 +73,6 @@ function HomeContent() {
 
       if (Array.isArray(dataProducts)) {
         setProducts(dataProducts);
-        const shuffled = [...dataProducts].sort(() => 0.5 - Math.random());
-        setRandom20Products(shuffled.slice(0, 20));
       }
       if (Array.isArray(dataCategories)) setCategories(dataCategories);
       if (dataPromo) setPromoBanner(dataPromo);
@@ -86,12 +84,47 @@ function HomeContent() {
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchData();
+
+    // Silent background polling every 5 seconds for live stock sync
+    const intervalId = setInterval(() => {
+      fetchData(true);
+    }, 5000);
+
+    // Cross-tab BroadcastChannel event listener
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel('inky_stock_sync');
+      channel.onmessage = () => {
+        fetchData(true);
+      };
+    } catch (e) {}
+
+    // Storage event listener
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'inky_last_stock_update') {
+        fetchData(true);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // Window focus listener
+    const handleFocus = () => {
+      fetchData(true);
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      if (channel) channel.close();
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   useEffect(() => {
