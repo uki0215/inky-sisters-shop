@@ -373,7 +373,7 @@ export default function AdminPage() {
     };
   }, [isAuthenticated]);
 
-  // PDF Export for Product Catalog with images, prices, stock, names, barcode & description
+  // PDF Export for Product Presentation Catalog ("Барааны танилцуулга")
   const handleExportProductCatalogPDF = () => {
     const listToPrint = filteredProducts;
 
@@ -392,41 +392,27 @@ export default function AdminPage() {
       .map(
         (p, idx) => `
       <tr>
-        <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-weight: bold; font-family: monospace;">${idx + 1}</td>
-        <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center;">
+        <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center; font-weight: bold; font-family: monospace; font-size: 12px; color: #4b5563;">${idx + 1}</td>
+        <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">
           <img
             src="${p.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}"
             alt="${p.name}"
-            style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #d1d5db; display: block; margin: 0 auto;"
+            style="width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1px solid #d1d5db; display: block; margin: 0 auto;"
           />
         </td>
-        <td style="padding: 8px; border: 1px solid #e5e7eb;">
-          <strong style="font-size: 13px; color: #111827; display: block;">${p.name}</strong>
-          <span style="font-family: monospace; font-size: 11px; color: #6b7280;">📷 ${p.barcode || '—'}</span>
+        <td style="padding: 10px; border: 1px solid #e5e7eb;">
+          <strong style="font-size: 14px; color: #111827; display: block;">${p.name}</strong>
         </td>
-        <td style="padding: 8px; border: 1px solid #e5e7eb; font-size: 12px; color: #374151;">${p.category?.name || '—'}</td>
-        <td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center; font-family: monospace; font-weight: bold; font-size: 13px; color: ${
-          p.stock <= 0 ? '#dc2626' : p.stock <= 5 ? '#d97706' : '#059669'
-        };">
-          ${p.stock <= 0 ? 'Дууссан (0 ш)' : `${p.stock} ш`}
-        </td>
-        <td style="padding: 8px; border: 1px solid #e5e7eb; font-family: monospace; font-size: 12px; color: #4b5563;">
-          ${
-            p.costYuan && p.costYuan > 0
-              ? `¥${p.costYuan} <span style="font-size: 10px; color: #6b7280;">(${(p.costMnt || 0).toLocaleString()}₮)</span>`
-              : `${(p.costMnt || 0).toLocaleString()}₮`
-          }
-        </td>
-        <td style="padding: 8px; border: 1px solid #e5e7eb; font-family: monospace; font-weight: bold; font-size: 13px; color: #b91c1c;">
+        <td style="padding: 10px; border: 1px solid #e5e7eb; font-family: monospace; font-weight: bold; font-size: 14px; color: #0d9488; text-align: right; white-space: nowrap;">
           ${
             p.isDiscounted && p.discountPriceMnt
-              ? `<div><span style="text-decoration: line-through; color: #9ca3af; font-size: 10px; display: block;">${(p.priceMnt || 0).toLocaleString()}₮</span>${(
+              ? `<div><span style="text-decoration: line-through; color: #9ca3af; font-size: 11px; display: block;">${(p.priceMnt || 0).toLocaleString()}₮</span>${(
                   p.discountPriceMnt || 0
                 ).toLocaleString()}₮</div>`
               : `${(p.priceMnt || 0).toLocaleString()}₮`
           }
         </td>
-        <td style="padding: 8px; border: 1px solid #e5e7eb; font-size: 11px; color: #4b5563; max-width: 180px; line-height: 1.3;">
+        <td style="padding: 10px; border: 1px solid #e5e7eb; font-size: 12px; color: #4b5563; line-height: 1.4;">
           ${p.description || '—'}
         </td>
       </tr>
@@ -434,24 +420,25 @@ export default function AdminPage() {
       )
       .join('');
 
-    const totalStockCount = listToPrint.reduce((acc, p) => acc + (p.stock || 0), 0);
+    const logoSrc = window.location.origin + (settings?.logoUrl || '/logo.svg');
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Inky Sisters Shop - Бараа Бүртгэлийн Тайлан (PDF)</title>
+          <title>Inky Sisters Shop - Барааны Танилцуулга (PDF)</title>
           <meta charset="utf-8" />
           <style>
             @page { size: A4 portrait; margin: 12mm; }
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 15px; color: #111827; background: #fff; }
-            .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0d9488; padding-bottom: 12px; margin-bottom: 16px; }
-            .title { font-size: 20px; font-weight: 900; color: #0f766e; font-family: sans-serif; }
-            .subtitle { font-size: 12px; color: #4b5563; margin-top: 2px; }
+            .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0d9488; padding-bottom: 12px; margin-bottom: 20px; }
+            .brand-box { display: flex; align-items: center; gap: 14px; }
+            .brand-logo { height: 48px; width: auto; max-width: 140px; object-fit: contain; }
+            .title { font-size: 22px; font-weight: 900; color: #0f766e; font-family: sans-serif; letter-spacing: 0.5px; }
+            .subtitle { font-size: 13px; color: #4b5563; font-weight: 600; margin-top: 2px; }
             .meta { font-size: 11px; text-align: right; color: #374151; font-family: monospace; }
-            .summary-box { display: flex; gap: 20px; background-color: #f0fdf4; border: 1px solid #99f6e4; padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: bold; margin-bottom: 16px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 4px; }
-            th { background-color: #f3f4f6; color: #1f2937; padding: 8px; border: 1px solid #cbd5e1; font-size: 10px; text-transform: uppercase; font-family: monospace; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { background-color: #f0fdf4; color: #0f766e; padding: 10px; border: 1px solid #cbd5e1; font-size: 11px; text-transform: uppercase; font-family: monospace; font-weight: bold; }
             @media print {
               body { padding: 0; }
               .no-print { display: none; }
@@ -460,31 +447,26 @@ export default function AdminPage() {
         </head>
         <body>
           <div class="header-bar">
-            <div>
-              <div class="title">INKY SISTERS SHOP</div>
-              <div class="subtitle">Бараа Бүртгэлийн Нэгдсэн Тайлан (PDF)</div>
+            <div class="brand-box">
+              <img src="${logoSrc}" class="brand-logo" alt="Logo" onerror="this.style.display='none'" />
+              <div>
+                <div class="title">INKY SISTERS SHOP</div>
+                <div class="subtitle">✨ Барааны Танилцуулга</div>
+              </div>
             </div>
             <div class="meta">
-              <div>Хэвлэсэн: <strong>${new Date().toLocaleDateString('mn-MN')} ${new Date().toLocaleTimeString('mn-MN')}</strong></div>
-              <div>Хайлт/Шүүлт: <strong>${searchQuery ? `"${searchQuery}"` : 'Бүх бараа'}</strong></div>
+              <div>Огноо: <strong>${new Date().toLocaleDateString('mn-MN')}</strong></div>
+              <div>Нийт Бараа: <strong>${listToPrint.length} төрөл</strong></div>
             </div>
-          </div>
-
-          <div class="summary-box">
-            <div>📊 Нийт Төрөл: <span style="color: #0f766e;">${listToPrint.length}</span></div>
-            <div>📦 Нийт Үлдэгдэл Тоо: <span style="color: #0f766e;">${totalStockCount} ш</span></div>
           </div>
 
           <table>
             <thead>
               <tr>
                 <th style="width: 30px;">#</th>
-                <th style="width: 60px;">Зураг</th>
-                <th>Барааны Нэр</th>
-                <th>Ангилал</th>
-                <th style="width: 70px;">Үлдэгдэл</th>
-                <th style="width: 90px;">Өртөг Үнэ</th>
-                <th style="width: 90px;">Зарах Үнэ</th>
+                <th style="width: 70px;">Зураг</th>
+                <th style="width: 220px;">Барааны Нэр</th>
+                <th style="width: 110px; text-align: right;">Энгийн Үнэ</th>
                 <th>Тайлбар</th>
               </tr>
             </thead>
@@ -1108,23 +1090,11 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={handleExportProductCatalogPDF}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all border border-red-500 cursor-pointer shadow-2xs"
-                      title="Барааны зураг, үнэ, үлдэгдэл тоо ба тайлбар бүхий PDF тайлан экспортлох"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all border border-red-500 cursor-pointer shadow-2xs"
+                      title="Барааны зураг, нэр, энгийн үнэ ба тайлбар бүхий PDF танилцуулга экспортлох"
                     >
                       <Printer className="w-4 h-4" />
-                      <span>📄 PDF Барааны тайлан хэвлэх</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedProductForEdit(null);
-                        setIsProductModalOpen(true);
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all border border-teal-600 cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Шинэ бараа бүртгэх</span>
+                      <span>📄 PDF Барааны танилцуулга хэвлэх</span>
                     </button>
                   </div>
                 </div>
