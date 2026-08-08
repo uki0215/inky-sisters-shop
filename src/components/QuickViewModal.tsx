@@ -31,26 +31,29 @@ export default function QuickViewModal({
   if (!currentProduct) return null;
 
   const isImageValidUrl = (url?: string) => {
-    if (!url) return false;
+    if (!url || typeof url !== 'string') return false;
     const trimmed = url.trim();
+    if (trimmed.length < 8) return false;
     return (
       trimmed.startsWith('http://') ||
       trimmed.startsWith('https://') ||
       trimmed.startsWith('/') ||
-      trimmed.startsWith('data:image')
+      trimmed.startsWith('data:image/')
     );
   };
 
-  const rawImages = currentProduct?.imageUrl
-    ? currentProduct.imageUrl
-        .split(',')
-        .map((s: string) => s.trim())
-        .filter((s: string) => s && isImageValidUrl(s))
-    : [];
+  const rawImages =
+    typeof currentProduct?.imageUrl === 'string' && currentProduct.imageUrl.trim()
+      ? currentProduct.imageUrl
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s && isImageValidUrl(s))
+      : [];
 
   const FALLBACK_IMG = 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80';
   const productImages = rawImages.length > 0 ? rawImages : [FALLBACK_IMG];
-  const mainImgUrl = productImages[selectedImgIndex] || productImages[0] || FALLBACK_IMG;
+  const safeImgIndex = selectedImgIndex < productImages.length ? selectedImgIndex : 0;
+  const mainImgUrl = productImages[safeImgIndex] || FALLBACK_IMG;
 
   const isOutOfStock = currentProduct.stock <= 0;
 
