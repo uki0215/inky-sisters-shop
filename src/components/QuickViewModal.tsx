@@ -30,10 +30,27 @@ export default function QuickViewModal({
 
   if (!currentProduct) return null;
 
-  const productImages = currentProduct.imageUrl
-    ? currentProduct.imageUrl.split(',').map((s: string) => s.trim()).filter(Boolean)
+  const isImageValidUrl = (url?: string) => {
+    if (!url) return false;
+    const trimmed = url.trim();
+    return (
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('/') ||
+      trimmed.startsWith('data:image')
+    );
+  };
+
+  const rawImages = currentProduct?.imageUrl
+    ? currentProduct.imageUrl
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter((s: string) => s && isImageValidUrl(s))
     : [];
-  const mainImgUrl = productImages[selectedImgIndex] || productImages[0] || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80';
+
+  const FALLBACK_IMG = 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80';
+  const productImages = rawImages.length > 0 ? rawImages : [FALLBACK_IMG];
+  const mainImgUrl = productImages[selectedImgIndex] || productImages[0] || FALLBACK_IMG;
 
   const isOutOfStock = currentProduct.stock <= 0;
 
@@ -217,6 +234,9 @@ export default function QuickViewModal({
               <img
                 src={mainImgUrl}
                 alt={currentProduct.name}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = FALLBACK_IMG;
+                }}
                 className={`w-full h-full object-cover ${isOutOfStock ? 'opacity-40 grayscale' : ''}`}
               />
               {hasDiscount && currentProduct.discountPercent && (
@@ -243,7 +263,14 @@ export default function QuickViewModal({
                       selectedImgIndex === idx ? 'border-teal-600 ring-2 ring-teal-500/20' : 'border-gray-200 opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={img}
+                      alt=""
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = FALLBACK_IMG;
+                      }}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
