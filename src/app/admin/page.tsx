@@ -333,14 +333,9 @@ export default function AdminPage() {
     }
   };
 
-  // Real-time Live Stock Sync across POS, Admin, and Online Store (polling + broadcast channel)
+  // Real-time Live Stock Sync across POS, Admin, and Online Store (event-driven on change, window focus, or broadcast)
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    // Background silent refresh every 4 seconds
-    const intervalId = setInterval(() => {
-      fetchAdminData(true);
-    }, 4000);
 
     // Cross-tab BroadcastChannel event listener
     let channel: BroadcastChannel | null = null;
@@ -359,21 +354,20 @@ export default function AdminPage() {
     };
     window.addEventListener('storage', handleStorageChange);
 
-    // Window Focus Listener (instant refresh when tab gains focus)
+    // Window Focus Listener (refresh when tab gains focus)
     const handleFocus = () => {
       fetchAdminData(true);
     };
     window.addEventListener('focus', handleFocus);
 
     return () => {
-      clearInterval(intervalId);
       if (channel) channel.close();
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleFocus);
     };
   }, [isAuthenticated]);
 
-  // PDF Export for Product Presentation Catalog ("Барааны танилцуулга")
+  // PDF Export for Product Presentation Catalog ("PDF Танилцуулга")
   const handleExportProductCatalogPDF = () => {
     const listToPrint = filteredProducts;
 
@@ -426,7 +420,7 @@ export default function AdminPage() {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Inky Sisters Shop - Барааны Танилцуулга (PDF)</title>
+          <title>Inky Sisters Shop - PDF Танилцуулга</title>
           <meta charset="utf-8" />
           <style>
             @page { size: A4 portrait; margin: 12mm; }
@@ -451,7 +445,7 @@ export default function AdminPage() {
               <img src="${logoSrc}" class="brand-logo" alt="Logo" onerror="this.style.display='none'" />
               <div>
                 <div class="title">INKY SISTERS SHOP</div>
-                <div class="subtitle">✨ Барааны Танилцуулга</div>
+                <div class="subtitle">✨ PDF Танилцуулга</div>
               </div>
             </div>
             <div class="meta">
@@ -466,7 +460,7 @@ export default function AdminPage() {
                 <th style="width: 30px;">#</th>
                 <th style="width: 70px;">Зураг</th>
                 <th style="width: 220px;">Барааны Нэр</th>
-                <th style="width: 110px; text-align: right;">Энгийн Үнэ</th>
+                <th style="width: 110px; text-align: right;">Үнэ</th>
                 <th>Тайлбар</th>
               </tr>
             </thead>

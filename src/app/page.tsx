@@ -91,11 +91,6 @@ function HomeContent() {
   useEffect(() => {
     fetchData();
 
-    // Silent background polling every 5 seconds for live stock sync
-    const intervalId = setInterval(() => {
-      fetchData(true);
-    }, 5000);
-
     // Cross-tab BroadcastChannel event listener
     let channel: BroadcastChannel | null = null;
     try {
@@ -120,7 +115,6 @@ function HomeContent() {
     window.addEventListener('focus', handleFocus);
 
     return () => {
-      clearInterval(intervalId);
       if (channel) channel.close();
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleFocus);
