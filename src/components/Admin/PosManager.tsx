@@ -478,8 +478,8 @@ export default function PosManager({ products = [], categories = [], bundles = [
             </div>
           </div>
 
-          {/* Product & Bundle Cards Grid - Natural High-Density View */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 max-h-[calc(100vh-210px)] min-h-[500px] overflow-y-auto pr-1 font-sans">
+          {/* Product & Bundle Cards Grid - Natural Proportion View */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 max-h-[calc(100vh-210px)] overflow-y-auto pr-1 items-start font-sans">
             {/* Render Bundles first if available */}
             {filteredBundles.map((bundle) => {
               const bundleProductId = `bundle-${bundle.id}`;
