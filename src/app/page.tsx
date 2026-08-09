@@ -27,13 +27,21 @@ function HomeContent() {
   const [featuredCollections, setFeaturedCollections] = useState<any[]>([]);
   const [banksList, setBanksList] = useState<any[]>([]);
   const [promoBanner, setPromoBanner] = useState<any>(null);
-  const [settings, setSettings] = useState<any>({
-    showStockQuantity: true,
-    logoUrl: '/logo.svg',
-    address: 'Улаанбаатар хот, Сүхбаатар дүүрэг, 1-р хороо, Энхтайваны өргөн чөлөө',
-    phone: '88112233, 99112233',
-    email: 'info@inkysisters.mn',
-    workingHours: 'Даваа - Ням: 10:00 - 20:00',
+  const [settings, setSettings] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_cached_settings');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return {
+      showStockQuantity: true,
+      logoUrl: '',
+      address: 'Улаанбаатар хот, Сүхбаатар дүүрэг, 1-р хороо, Энхтайваны өргөн чөлөө',
+      phone: '88112233, 99112233',
+      email: 'info@inkysisters.mn',
+      workingHours: 'Даваа - Ням: 10:00 - 20:00',
+    };
   });
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -1247,11 +1255,13 @@ function HomeContent() {
           {/* Column 1: Logo & Store Bio */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <img
-                src={settings.logoUrl || '/logo.svg'}
-                alt="Inky Sisters Logo"
-                className="w-12 h-12 object-contain"
-              />
+              {settings.logoUrl && (
+                <img
+                  src={settings.logoUrl}
+                  alt="Inky Sisters Logo"
+                  className="w-12 h-12 object-contain"
+                />
+              )}
               <div>
                 <span className="font-extrabold text-lg text-teal-950 block leading-none font-sans">
                   INKY SISTERS

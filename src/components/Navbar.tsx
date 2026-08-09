@@ -155,11 +155,13 @@ export default function Navbar({
               }
             }}
           >
-            <img
-              src={logoUrl || '/logo.svg'}
-              alt="Inky Sisters Logo"
-              className="w-14 h-14 object-contain transition-transform hover:scale-105"
-            />
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt="Inky Sisters Logo"
+                className="w-14 h-14 object-contain transition-transform hover:scale-105"
+              />
+            )}
             <div>
               <span className="text-xl font-bold tracking-tight text-teal-950 block leading-none font-sans">
                 INKY SISTERS
