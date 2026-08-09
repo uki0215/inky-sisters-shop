@@ -120,19 +120,10 @@ export default function Navbar({
     }
   };
 
-  // Subcategories mapping generator
-  const subCategoryMap: Record<string, string[]> = {
-    'pens-markers': ['Пастел Үзэг (Pastel Pens)', 'Майлдлайнер (Highlighters)', 'Гелин үзэг (Gel Pens)', 'Каллиграф багс (Calligraphy)', 'Бичгийн гар болон Ниб'],
-    'notebooks-planners': ['Bullet Journal Дэвтэр', 'Аарьсан хавтастай дэвтэр', 'Спиральтай дэвтэр', 'Тодотгогч стикер (Sticky Notes)', 'Планер & Төлөвлөгч'],
-    'art-drawing': ['Усан будаг & Багс', 'Эскиз дэвтэр (Sketchbook)', 'Өнгөт харандаа', 'Акрилик будаг', 'Мольберт & Хавтас'],
-    'office-supplies': ['Үдэгч & Үдээс', 'Хайч & Тайрагч', 'Бичгийн цаас', 'Файл хавтас', 'Оффис органайзер'],
-    'school-supplies': ['Үүргэвч & Пенал', 'Шөнө гэрэлтэгч шугам', 'Баллуур & Ирлэгч', 'Цавуу ба Скоч', 'Эхний ангийн багц'],
-  };
-
-  const defaultCategory = categories[0] || {
-    id: 'pens',
-    name: 'Үзэг & Маркер',
-    slug: 'pens-markers',
+  const defaultCategory = mainCategories[0] || categories[0] || {
+    id: 'all',
+    name: 'Бүх Бараанууд',
+    slug: 'all',
   };
 
   const activeHover = hoveredCategory || defaultCategory;
@@ -469,7 +460,24 @@ export default function Navbar({
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
-                    {activeHover?.children && activeHover.children.length > 0 ? (
+                    {activeHover?.slug === 'all' ? (
+                      mainCategories.map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => {
+                            onSelectCategory(cat.slug);
+                            setIsMegaMenuOpen(false);
+                          }}
+                          className="text-left p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-xs font-semibold text-gray-700 hover:text-teal-900 flex items-center justify-between group"
+                        >
+                          <span className="flex items-center gap-2">
+                            {getCategoryIcon(cat.icon)}
+                            <span>{cat.name}</span>
+                          </span>
+                          <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700" />
+                        </button>
+                      ))
+                    ) : activeHover?.children && activeHover.children.length > 0 ? (
                       activeHover.children
                         .filter((sub: any) => {
                           const name = (sub.name || '').trim();
@@ -493,26 +501,9 @@ export default function Navbar({
                         </button>
                       ))
                     ) : (
-                      (subCategoryMap[activeHover?.slug] || [
-                        'Үдэгч & Үдээс',
-                        'Хайч & Тайрагч',
-                        'Бичгийн цаас',
-                        'Файл хавтас',
-                        'Оффис органайзер',
-                      ]).map((subItem: string, idx: number) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            onSearchChange(subItem.split(' ')[0]);
-                            onSelectCategory(activeHover?.slug || 'all');
-                            setIsMegaMenuOpen(false);
-                          }}
-                          className="text-left p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-xs font-semibold text-gray-700 hover:text-teal-900 flex items-center justify-between group"
-                        >
-                          <span>{subItem}</span>
-                          <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700" />
-                        </button>
-                      ))
+                      <div className="col-span-2 p-6 text-center text-xs text-gray-400 bg-gray-50 rounded-2xl border border-gray-100 font-sans">
+                        Энэ ангилалд одоогоор дэд ангилал бүртгэгдээгүй байна.
+                      </div>
                     )}
                   </div>
                 </div>
