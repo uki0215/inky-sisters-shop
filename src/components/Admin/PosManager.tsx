@@ -478,8 +478,8 @@ export default function PosManager({ products = [], categories = [], bundles = [
             </div>
           </div>
 
-          {/* Product & Bundle Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[620px] overflow-y-auto pr-1">
+          {/* Product & Bundle Cards Grid - Compact High-Density View */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 max-h-[calc(100vh-210px)] min-h-[500px] overflow-y-auto pr-1 font-sans">
             {/* Render Bundles first if available */}
             {filteredBundles.map((bundle) => {
               const bundleProductId = `bundle-${bundle.id}`;
@@ -490,44 +490,44 @@ export default function PosManager({ products = [], categories = [], bundles = [
                 <div
                   key={bundle.id}
                   onClick={() => handleAddBundleToCart(bundle)}
-                  className={`relative p-3 bg-white border border-cherry-200 rounded-2xl shadow-xs transition-all flex flex-col justify-between cursor-pointer select-none group hover:border-cherry-500 hover:shadow-md ${
-                    inCartQty > 0 ? 'border-cherry-600 ring-2 ring-cherry-500/20 bg-cherry-50/20' : ''
+                  className={`relative p-2 bg-white border border-rose-200 rounded-xl shadow-2xs transition-all flex flex-col justify-between cursor-pointer select-none group hover:border-rose-500 hover:shadow-xs ${
+                    inCartQty > 0 ? 'border-rose-600 ring-2 ring-rose-500/20 bg-rose-50/20' : ''
                   }`}
                 >
                   <div>
                     {/* Badge if in cart */}
                     {inCartQty > 0 && (
-                      <span className="absolute top-2 right-2 bg-cherry-600 text-white font-mono font-extrabold text-[10px] w-6 h-6 rounded-full flex items-center justify-center shadow-md z-10">
+                      <span className="absolute top-1 right-1 bg-rose-600 text-white font-mono font-extrabold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md z-10">
                         {inCartQty}
                       </span>
                     )}
 
-                    <div className="aspect-square w-full bg-cherry-50 rounded-xl overflow-hidden mb-2 relative">
+                    <div className="aspect-square w-full bg-rose-50 rounded-lg overflow-hidden mb-1 relative">
                       <img
                         src={getFirstImageUrl(bundle.imageUrl)}
                         alt={bundle.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
-                      <span className="absolute top-1.5 left-1.5 px-2 py-0.5 bg-cherry-600 text-white text-[9px] font-black rounded-full font-mono shadow-xs">
-                        -{bundle.discountPercent}% ХЯМДРАЛ
+                      <span className="absolute top-1 left-1 px-1.5 py-0.2 bg-rose-600 text-white text-[8px] font-black rounded font-mono shadow-2xs">
+                        -{bundle.discountPercent}%
                       </span>
                     </div>
 
-                    <h4 className="font-bold text-gray-900 text-xs line-clamp-2 leading-snug group-hover:text-cherry-700 transition-colors">
+                    <h4 className="font-bold text-gray-900 text-[11px] line-clamp-2 leading-snug group-hover:text-rose-700 transition-colors">
                       🎁 {bundle.name}
                     </h4>
 
-                    <span className="font-mono text-[10px] text-cherry-600 font-bold block mt-0.5">
-                      Иж бүрэн багц ({bundle.items?.length || 0} бараа)
+                    <span className="font-mono text-[9px] text-rose-600 font-bold block mt-0.5">
+                      Багц ({bundle.items?.length || 0} бараа)
                     </span>
                   </div>
 
-                  <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cherry-100 text-cherry-800">
+                  <div className="mt-1 pt-1 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-rose-100 text-rose-800">
                       ИЖ БҮРДЭЛ
                     </span>
 
-                    <span className="font-black text-cherry-600 text-xs font-sans">
+                    <span className="font-black text-rose-600 text-xs font-sans">
                       {formatMNT(bundle.bundlePriceMnt)}
                     </span>
                   </div>
@@ -544,23 +544,23 @@ export default function PosManager({ products = [], categories = [], bundles = [
                 <div
                   key={product.id}
                   onClick={() => !isOutOfStock && handleAddToCart(product)}
-                  className={`relative p-3 bg-white border rounded-2xl shadow-xs transition-all flex flex-col justify-between cursor-pointer select-none group ${
+                  className={`relative p-2 bg-white border rounded-xl shadow-2xs transition-all flex flex-col justify-between cursor-pointer select-none group ${
                     isOutOfStock
                       ? 'opacity-50 bg-gray-50 border-gray-200 cursor-not-allowed'
                       : inCartQty > 0
                       ? 'border-teal-600 ring-2 ring-teal-500/20 bg-teal-50/20'
-                      : 'border-gray-200 hover:border-teal-500 hover:shadow-md'
+                      : 'border-gray-200 hover:border-teal-500 hover:shadow-xs'
                   }`}
                 >
                   <div>
                     {/* Badge if in cart */}
                     {inCartQty > 0 && (
-                      <span className="absolute top-2 right-2 bg-teal-700 text-white font-mono font-extrabold text-[10px] w-6 h-6 rounded-full flex items-center justify-center shadow-md z-10">
+                      <span className="absolute top-1 right-1 bg-teal-700 text-white font-mono font-extrabold text-[10px] w-5 h-5 rounded-full flex items-center justify-center shadow-md z-10">
                         {inCartQty}
                       </span>
                     )}
 
-                    <div className="aspect-square w-full bg-gray-50 rounded-xl overflow-hidden mb-2 relative">
+                    <div className="aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-1 relative">
                       <img
                         src={getFirstImageUrl(product.imageUrl)}
                         alt={product.name}
@@ -568,18 +568,18 @@ export default function PosManager({ products = [], categories = [], bundles = [
                       />
                     </div>
 
-                    <h4 className="font-bold text-gray-900 text-xs line-clamp-2 leading-snug group-hover:text-teal-700 transition-colors">
+                    <h4 className="font-bold text-gray-900 text-[11px] line-clamp-2 leading-tight group-hover:text-teal-700 transition-colors">
                       {product.name}
                     </h4>
 
-                    <span className="font-mono text-[10px] text-gray-400 block mt-0.5">
+                    <span className="font-mono text-[9px] text-gray-400 block mt-0.5">
                       #{product.barcode}
                     </span>
                   </div>
 
-                  <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">
+                  <div className="mt-1 pt-1 border-t border-gray-100 flex items-center justify-between">
                     <span
-                      className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                      className={`text-[9px] font-mono font-bold px-1 py-0.2 rounded ${
                         isOutOfStock
                           ? 'bg-red-100 text-red-700'
                           : product.stock <= 20
@@ -587,7 +587,7 @@ export default function PosManager({ products = [], categories = [], bundles = [
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      {isOutOfStock ? 'Дууссан' : `Үлдэгдэл: ${product.stock}`}
+                      {isOutOfStock ? 'Дууссан' : `${product.stock}ш`}
                     </span>
 
                     <span className="font-black text-gray-950 text-xs font-sans">
