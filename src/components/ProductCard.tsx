@@ -58,6 +58,8 @@ export default function ProductCard({ product, onQuickView, showStockQuantity = 
             <img
               src={firstUrl}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
               className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'opacity-40 grayscale' : 'opacity-100'}`}
             />

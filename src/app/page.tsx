@@ -21,8 +21,24 @@ import { ShoppingBag, ChevronLeft, ChevronRight, ChevronDown, Barcode, Sparkles,
 
 function HomeContent() {
   const { addBundleToCart } = useCart();
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_cached_products');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [categories, setCategories] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_cached_categories');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [heroSlides, setHeroSlides] = useState<any[]>([]);
   const [featuredCollections, setFeaturedCollections] = useState<any[]>([]);
   const [banksList, setBanksList] = useState<any[]>([]);
@@ -53,12 +69,20 @@ function HomeContent() {
   const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
   const [quickViewBundle, setQuickViewBundle] = useState<any | null>(null);
   const [bundles, setBundles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_cached_products');
+        if (cached && JSON.parse(cached).length > 0) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
   const [scannedNotice, setScannedNotice] = useState<string | null>(null);
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
 
   const fetchData = async (silent = false) => {
-    if (!silent) setLoading(true);
+    if (!silent && products.length === 0) setLoading(true);
     try {
       const [resProducts, resCategories, resPromo, resSettings, resSlides, resCollections, resBanks, resBundles] = await Promise.all([
         fetch('/api/products'),
@@ -71,19 +95,25 @@ function HomeContent() {
         fetch('/api/bundles?activeOnly=true'),
       ]);
 
-      const dataProducts = await resProducts.json();
-      const dataCategories = await resCategories.json();
-      const dataPromo = await resPromo.json();
-      const dataSettings = await resSettings.json();
-      const dataSlides = await resSlides.json();
-      const dataCollections = await resCollections.json();
-      const dataBanks = await resBanks.json();
-      const dataBundles = await resBundles.json();
+      const [dataProducts, dataCategories, dataPromo, dataSettings, dataSlides, dataCollections, dataBanks, dataBundles] = await Promise.all([
+        resProducts.json(),
+        resCategories.json(),
+        resPromo.json(),
+        resSettings.json(),
+        resSlides.json(),
+        resCollections.json(),
+        resBanks.json(),
+        resBundles.json(),
+      ]);
 
       if (Array.isArray(dataProducts)) {
         setProducts(dataProducts);
+        try { localStorage.setItem('inky_cached_products', JSON.stringify(dataProducts)); } catch (e) {}
       }
-      if (Array.isArray(dataCategories)) setCategories(dataCategories);
+      if (Array.isArray(dataCategories)) {
+        setCategories(dataCategories);
+        try { localStorage.setItem('inky_cached_categories', JSON.stringify(dataCategories)); } catch (e) {}
+      }
       if (dataPromo) setPromoBanner(dataPromo);
       if (dataSettings) {
         setSettings(dataSettings);
