@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { formatMNT, formatYuan } from '@/lib/utils';
+import { formatMNT, formatYuan, notifyDataSync } from '@/lib/utils';
 import { getFirstImageUrl } from '@/lib/imageUtils';
 import ProductModal from '@/components/Admin/ProductModal';
 import RestockModal from '@/components/Admin/RestockModal';
@@ -1252,7 +1252,7 @@ export default function AdminPage() {
           {activeTab === 'bundles' && <BundleManager />}
 
           {/* TAB 4: CATEGORIES */}
-          {activeTab === 'categories' && <CategoryManager />}
+          {activeTab === 'categories' && <CategoryManager onCategoryUpdate={fetchAdminData} />}
 
           {/* TAB 5: BANKS */}
           {activeTab === 'banks' && <BankManager />}

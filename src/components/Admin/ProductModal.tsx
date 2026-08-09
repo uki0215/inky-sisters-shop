@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import BarcodeRenderer from '@/components/BarcodeRenderer';
-import { generateBarcode, formatMNT, formatYuan } from '@/lib/utils';
+import { generateBarcode, formatMNT, formatYuan, notifyDataSync } from '@/lib/utils';
 import { parseImageUrls, serializeImageUrls } from '@/lib/imageUtils';
 import { X, Barcode, Calculator, Save, RefreshCw, Clock } from 'lucide-react';
 
@@ -169,6 +169,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Алдаа гарлаа');
 
+      notifyDataSync();
       onSave();
       onClose();
     } catch (err: any) {

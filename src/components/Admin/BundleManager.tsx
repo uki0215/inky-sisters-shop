@@ -20,7 +20,7 @@ import {
   Barcode,
   RefreshCw,
 } from 'lucide-react';
-import { formatMNT, generateBarcode } from '@/lib/utils';
+import { formatMNT, generateBarcode, notifyDataSync } from '@/lib/utils';
 import { getFirstImageUrl } from '@/lib/imageUtils';
 import ImageUploader from '@/components/ImageUploader';
 import BarcodeRenderer from '@/components/BarcodeRenderer';
@@ -178,6 +178,7 @@ export default function BundleManager() {
 
       if (res.ok) {
         resetForm();
+        notifyDataSync();
         fetchData();
       } else {
         const data = await res.json();
@@ -224,7 +225,10 @@ export default function BundleManager() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !bundle.isActive }),
       });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        notifyDataSync();
+        fetchData();
+      }
     } catch (e) {
       console.error(e);
     }
@@ -234,7 +238,10 @@ export default function BundleManager() {
     if (!confirm('Энэ багцыг устгахдаа итгэлтэй байна уу?')) return;
     try {
       const res = await fetch(`/api/bundles/${id}`, { method: 'DELETE' });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        notifyDataSync();
+        fetchData();
+      }
     } catch (e) {
       console.error(e);
     }

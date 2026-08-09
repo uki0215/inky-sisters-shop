@@ -42,3 +42,20 @@ export function generateOrderNumber(): string {
   const digits = Math.floor(100000 + Math.random() * 900000);
   return `INKY-${digits}`;
 }
+
+// Real-time instant data sync notifier across browser tabs & admin panel
+export function notifyDataSync() {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem('inky_cached_products');
+      localStorage.removeItem('inky_cached_categories');
+      localStorage.removeItem('inky_cached_hero_slides');
+      localStorage.removeItem('inky_cached_settings');
+      localStorage.setItem('inky_last_stock_update', Date.now().toString());
+
+      const channel = new BroadcastChannel('inky_stock_sync');
+      channel.postMessage({ type: 'sync', timestamp: Date.now() });
+      channel.close();
+    } catch (e) {}
+  }
+}

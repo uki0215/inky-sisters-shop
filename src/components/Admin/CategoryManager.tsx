@@ -15,8 +15,13 @@ import {
   Edit,
   X,
 } from 'lucide-react';
+import { notifyDataSync } from '@/lib/utils';
 
-export default function CategoryManager() {
+interface CategoryManagerProps {
+  onCategoryUpdate?: () => void;
+}
+
+export default function CategoryManager({ onCategoryUpdate }: CategoryManagerProps) {
   const [categories, setCategories] = useState<any[]>([]);
   const [newCatName, setNewCatName] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string>('');
@@ -74,6 +79,8 @@ export default function CategoryManager() {
 
       if (res.ok) {
         setEditingCategory(null);
+        notifyDataSync();
+        if (onCategoryUpdate) onCategoryUpdate();
         fetchCategories();
       } else {
         const data = await res.json();
@@ -105,6 +112,8 @@ export default function CategoryManager() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ imageUrl: data.url }),
           });
+          notifyDataSync();
+          if (onCategoryUpdate) onCategoryUpdate();
           fetchCategories();
         } else if (editingCategory) {
           setEditImageUrl(data.url);
@@ -139,6 +148,8 @@ export default function CategoryManager() {
         setNewCatName('');
         setSelectedParentId('');
         setNewCatImageUrl('');
+        notifyDataSync();
+        if (onCategoryUpdate) onCategoryUpdate();
         fetchCategories();
       }
     } catch (e) {
@@ -150,7 +161,11 @@ export default function CategoryManager() {
     if (!confirm('Энэ ангиллыг (болон түүний дэд ангилуудыг) устгах уу?')) return;
     try {
       const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
-      if (res.ok) fetchCategories();
+      if (res.ok) {
+        notifyDataSync();
+        if (onCategoryUpdate) onCategoryUpdate();
+        fetchCategories();
+      }
     } catch (e) {
       console.error(e);
     }
