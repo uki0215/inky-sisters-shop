@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { formatMNT } from '@/lib/utils';
-import { getFirstImageUrl } from '@/lib/imageUtils';
+import { getFirstImageUrl, parseImageUrls } from '@/lib/imageUtils';
 import SalesReportModal from '@/components/Admin/SalesReportModal';
 import OrderReturnModal from '@/components/Admin/OrderReturnModal';
 import {
@@ -27,6 +27,10 @@ import {
   Layers,
   Clock,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ZoomIn,
 } from 'lucide-react';
 
 interface OrderManagerProps {
@@ -45,6 +49,70 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
   // Modals state
   const [isSalesReportOpen, setIsSalesReportOpen] = useState(false);
   const [selectedOrderForReturn, setSelectedOrderForReturn] = useState<any | null>(null);
+
+  // Lightbox modal state for reviewing ordered product images & quantities up close
+  const [lightboxSlides, setLightboxSlides] = useState<any[] | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+
+  useEffect(() => {
+    if (!lightboxSlides) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setLightboxSlides(null);
+      } else if (e.key === 'ArrowLeft') {
+        setLightboxIndex((prev) => (prev > 0 ? prev - 1 : lightboxSlides.length - 1));
+      } else if (e.key === 'ArrowRight') {
+        setLightboxIndex((prev) => (prev < lightboxSlides.length - 1 ? prev + 1 : 0));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxSlides]);
+
+  const openOrderLightbox = (order: any, targetItemIdx: number) => {
+    if (!order.items || order.items.length === 0) return;
+
+    const slides: any[] = [];
+    let initialSlideIdx = 0;
+
+    order.items.forEach((item: any, itemIdx: number) => {
+      const isHeader = item.productName?.startsWith('🎁');
+      const isSub = item.productName?.includes('└─');
+      if (isHeader || isSub) return;
+
+      let chosenImg = item.selectedImageUrl;
+      if (!chosenImg && item.productName && item.productName.includes('[IMG:')) {
+        const match = item.productName.match(/\[IMG:(.*?)\]/);
+        if (match && match[1]) chosenImg = match[1];
+      }
+
+      const cleanName = (item.productName || '').replace(/\[IMG:.*?\]/g, '').trim();
+      const productImgs = parseImageUrls(item.product?.imageUrl);
+      const combined = Array.from(new Set([chosenImg, ...productImgs].filter(Boolean))) as string[];
+      const finalImgs = combined.length > 0 ? combined : ['/placeholder-product.svg'];
+
+      finalImgs.forEach((imgUrl, imgIdx) => {
+        if (itemIdx === targetItemIdx && imgIdx === 0) {
+          initialSlideIdx = slides.length;
+        }
+        slides.push({
+          imgUrl,
+          name: cleanName,
+          barcode: item.barcode,
+          quantity: item.quantity,
+          priceMnt: item.priceMnt,
+          totalPriceMnt: item.quantity * item.priceMnt,
+          orderNumber: order.orderNumber,
+        });
+      });
+    });
+
+    if (slides.length === 0) return;
+    setLightboxSlides(slides);
+    setLightboxIndex(initialSlideIdx);
+  };
 
   const getOrderActionFlags = (order: any) => {
     const note = order.returnNote || '';
@@ -534,7 +602,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                     <div className="space-y-1.5">
                       <h5 className="font-extrabold text-gray-800">Захиалсан Бараанууд &amp; Багц:</h5>
                       <div className="space-y-1">
-                        {order.items?.map((item: any) => {
+                        {order.items?.map((item: any, itemIdx: number) => {
                           const isBundleHeader = item.productName.startsWith('🎁');
                           const isBundleSubItem = item.productName.includes('└─');
 
@@ -551,7 +619,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
 
                           return (
                             <div
-                              key={item.id}
+                              key={item.id || itemIdx}
                               className={`flex items-center justify-between p-2.5 rounded-xl border text-xs transition-all ${
                                 isBundleHeader
                                   ? 'bg-rose-50 border-rose-300 text-rose-950 font-black shadow-2xs'
@@ -561,14 +629,30 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0 pr-2">
-                                <img
-                                  src={getFirstImageUrl(itemImg)}
-                                  alt={cleanName}
-                                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
-                                  className="w-10 h-10 object-cover rounded-lg border border-gray-200 bg-white shrink-0 shadow-2xs"
-                                />
-                                <div className="min-w-0">
-                                  <span className="truncate block font-bold text-gray-900 font-sans">
+                                <div
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openOrderLightbox(order, itemIdx);
+                                  }}
+                                  className="relative group/img cursor-pointer shrink-0"
+                                  title="Зураг томруулж үзэх"
+                                >
+                                  <img
+                                    src={getFirstImageUrl(itemImg)}
+                                    alt={cleanName}
+                                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
+                                    className="w-11 h-11 object-cover rounded-lg border border-gray-200 bg-white shrink-0 shadow-2xs group-hover/img:border-teal-500 group-hover/img:scale-105 transition-all"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                    <ZoomIn className="w-4 h-4" />
+                                  </div>
+                                </div>
+
+                                <div
+                                  onClick={() => openOrderLightbox(order, itemIdx)}
+                                  className="min-w-0 cursor-pointer group/title"
+                                >
+                                  <span className="truncate block font-bold text-gray-900 font-sans group-hover/title:text-teal-700 transition-colors">
                                     {cleanName}
                                   </span>
                                   <span className="font-mono text-[10px] text-gray-500 block">
@@ -607,6 +691,134 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
           onSuccess={fetchOrders}
         />
       )}
+
+      {/* LIGHTBOX SLIDER MODAL FOR ORDERED PRODUCT IMAGES */}
+      {lightboxSlides && lightboxSlides.length > 0 && (() => {
+        const currentSlide = lightboxSlides[lightboxIndex] || lightboxSlides[0];
+
+        const handlePrev = () => {
+          setLightboxIndex((prev) => (prev > 0 ? prev - 1 : lightboxSlides.length - 1));
+        };
+
+        const handleNext = () => {
+          setLightboxIndex((prev) => (prev < lightboxSlides.length - 1 ? prev + 1 : 0));
+        };
+
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-4 sm:p-6 animate-fadeIn text-white font-sans select-none"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setLightboxSlides(null);
+            }}
+          >
+            {/* Top Bar Controls */}
+            <div className="flex items-center justify-between z-10">
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 bg-teal-800 text-teal-100 rounded-full font-mono text-xs font-bold border border-teal-600 shadow-sm">
+                  Захиалга #{currentSlide.orderNumber}
+                </span>
+                <span className="text-xs text-gray-300 font-mono font-medium">
+                  Зураг {lightboxIndex + 1} / {lightboxSlides.length}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setLightboxSlides(null)}
+                className="p-2.5 text-gray-300 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all cursor-pointer shadow-lg"
+                title="Хаах (Esc)"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Main Image View & Slide Navigation Arrows */}
+            <div className="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
+              {lightboxSlides.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/25 text-white rounded-full transition-all z-20 hover:scale-110 active:scale-95 cursor-pointer border border-white/20 shadow-2xl"
+                  title="Өмнөх зураг"
+                >
+                  <ChevronLeft className="w-8 h-8" />
+                </button>
+              )}
+
+              <div className="relative max-w-4xl max-h-[65vh] w-full flex items-center justify-center p-2">
+                <img
+                  src={getFirstImageUrl(currentSlide.imgUrl)}
+                  alt={currentSlide.name}
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
+                  className="max-w-full max-h-[65vh] object-contain rounded-2xl shadow-2xl border border-white/10 animate-scaleUp"
+                />
+              </div>
+
+              {lightboxSlides.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/25 text-white rounded-full transition-all z-20 hover:scale-110 active:scale-95 cursor-pointer border border-white/20 shadow-2xl"
+                  title="Дараах зураг"
+                >
+                  <ChevronRight className="w-8 h-8" />
+                </button>
+              )}
+            </div>
+
+            {/* Bottom Info Footer & Carousel Strip */}
+            <div className="space-y-4 max-w-4xl mx-auto w-full z-10">
+              {/* Product Details & Quantity Badge */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xl">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[11px] text-teal-300 font-bold bg-teal-950/70 px-2 py-0.5 rounded border border-teal-700/50">
+                      #{currentSlide.barcode}
+                    </span>
+                    <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 font-black text-xs rounded-full border border-emerald-500/40 font-mono">
+                      Захиалсан тоо: {currentSlide.quantity} ш
+                    </span>
+                  </div>
+                  <h4 className="text-base font-black text-white truncate font-sans">
+                    {currentSlide.name}
+                  </h4>
+                </div>
+
+                <div className="text-right font-mono shrink-0 bg-black/40 px-4 py-2 rounded-xl border border-white/10">
+                  <span className="text-[11px] text-gray-400 block font-sans">Тоо ширхэг × Үнэ:</span>
+                  <span className="text-lg font-black text-emerald-400 block">
+                    {currentSlide.quantity} ш × {formatMNT(currentSlide.priceMnt)} = {formatMNT(currentSlide.totalPriceMnt)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Horizontal Carousel Thumbnails */}
+              {lightboxSlides.length > 1 && (
+                <div className="flex items-center justify-center gap-2.5 overflow-x-auto py-1 scrollbar-thin max-w-full">
+                  {lightboxSlides.map((slide, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setLightboxIndex(idx)}
+                      className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                        lightboxIndex === idx
+                          ? 'border-teal-400 scale-105 ring-2 ring-teal-400/60 shadow-xl opacity-100'
+                          : 'border-white/20 opacity-50 hover:opacity-90 hover:border-white/50'
+                      }`}
+                    >
+                      <img
+                        src={getFirstImageUrl(slide.imgUrl)}
+                        alt={slide.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
