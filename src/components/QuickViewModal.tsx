@@ -4,7 +4,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import { formatMNT } from '@/lib/utils';
 import { parseImageUrls, getFirstImageUrl } from '@/lib/imageUtils';
 import { useCart } from '@/context/CartContext';
-import { X, ShoppingBag, Barcode, ChevronRight, ChevronLeft, Share2, Heart, RefreshCw, CheckCircle2, ZoomIn, Plus, Trash2, Check } from 'lucide-react';
+import {
+  X,
+  ShoppingBag,
+  Barcode,
+  ChevronRight,
+  ChevronLeft,
+  Share2,
+  Heart,
+  RefreshCw,
+  CheckCircle2,
+  ZoomIn,
+  Plus,
+  Trash2,
+  Truck,
+  ShieldCheck,
+  Sparkles
+} from 'lucide-react';
 
 interface QuickViewModalProps {
   product: any;
@@ -225,48 +241,75 @@ export default function QuickViewModal({
           </div>
         )}
 
-        {/* Recommended strip - compact horizontal bar on top */}
+        {/* Recommended strip - Premium e-commerce carousel on top */}
         {recommendedList.length > 0 && (
-          <div className="px-5 pt-5 pr-16">
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3 space-y-2">
+          <div className="px-5 pt-4 pr-16">
+            <div className="bg-gradient-to-r from-teal-50/80 via-white to-gray-50 border border-teal-100/90 rounded-2xl p-2.5 space-y-2 shadow-2xs">
               <div className="flex items-center justify-between pr-2">
-                <span className="text-[11px] font-bold text-gray-700 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-teal-500 inline-block" />
-                  Танд санал болгох
+                <span className="text-[11px] font-black text-teal-950 flex items-center gap-1.5 font-sans">
+                  <Sparkles className="w-3.5 h-3.5 text-teal-600 animate-pulse" />
+                  <span>Танд санал болгох цуглуулга</span>
+                  <span className="text-[9px] font-mono font-extrabold text-teal-700 bg-teal-100/80 px-1.5 py-0.2 rounded-full border border-teal-200">
+                    {recommendedList.length}
+                  </span>
                 </span>
                 <div className="flex items-center gap-1">
-                  <button type="button" onClick={() => scrollRecommend('left')} className="p-1 text-gray-500 hover:text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-all">
+                  <button
+                    type="button"
+                    onClick={() => scrollRecommend('left')}
+                    className="p-1 text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-all shadow-2xs"
+                    title="Өмнөх"
+                  >
                     <ChevronLeft className="w-3.5 h-3.5" />
                   </button>
-                  <button type="button" onClick={() => scrollRecommend('right')} className="p-1 text-gray-500 hover:text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-all">
+                  <button
+                    type="button"
+                    onClick={() => scrollRecommend('right')}
+                    className="p-1 text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-all shadow-2xs"
+                    title="Дараагийн"
+                  >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
-              <div ref={recommendScrollRef} className="flex items-center gap-2 overflow-x-auto scrollbar-none scroll-smooth">
+
+              <div ref={recommendScrollRef} className="flex items-center gap-2 overflow-x-auto scrollbar-none scroll-smooth py-0.5">
                 {recommendedList.map((item) => {
                   const expired = item.discountEndDate ? new Date() > new Date(item.discountEndDate) : false;
                   const disc = Boolean(item.isDiscounted && !expired && item.discountPriceMnt && item.discountPriceMnt < item.priceMnt);
                   const firstImg = getFirstImageUrl(item.imageUrl, '');
+
                   return (
                     <div
                       key={item.id}
                       onClick={() => handleSelectRecommend(item)}
-                      className="shrink-0 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-2 py-1.5 cursor-pointer hover:border-teal-400 hover:shadow-sm transition-all group"
+                      className="shrink-0 flex items-center gap-2.5 bg-white border border-gray-200/90 rounded-xl px-2.5 py-1.5 cursor-pointer hover:border-teal-500 hover:shadow-md transition-all group max-w-[200px]"
                     >
-                      <div className="w-9 h-9 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                      <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 relative">
                         <img
                           src={isValidUrl(firstImg) ? firstImg : FALLBACK_IMG}
                           alt={item.name}
                           onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
+                        {disc && (
+                          <span className="absolute top-0 right-0 w-2 h-2 bg-red-600 rounded-full" />
+                        )}
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-gray-800 line-clamp-1 group-hover:text-teal-700">{item.name}</p>
-                        <p className={`text-[11px] font-extrabold font-sans ${disc ? 'text-red-600' : 'text-gray-700'}`}>
-                          {formatMNT(disc ? item.discountPriceMnt : item.priceMnt)}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-bold text-gray-900 line-clamp-1 group-hover:text-teal-700 transition-colors">
+                          {item.name}
                         </p>
+                        <div className="flex items-baseline gap-1 mt-0.5 font-sans">
+                          <span className={`text-[11px] font-black ${disc ? 'text-red-600' : 'text-emerald-700'}`}>
+                            {formatMNT(disc ? item.discountPriceMnt : item.priceMnt)}
+                          </span>
+                          {disc && (
+                            <span className="text-[9px] text-emerald-700 line-through font-bold">
+                              {formatMNT(item.priceMnt)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -410,12 +453,12 @@ export default function QuickViewModal({
           </div>
 
           {/* RIGHT: Product details panel */}
-          <div className="md:w-[320px] lg:w-[360px] shrink-0 space-y-3.5">
+          <div className="md:w-[320px] lg:w-[360px] shrink-0 space-y-3">
 
             {/* Category + Title + Barcode */}
             <div>
               {currentProduct.category?.name && (
-                <span className="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200 inline-block mb-1.5">
+                <span className="text-[11px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200 inline-block mb-1">
                   {currentProduct.category.name}
                 </span>
               )}
@@ -435,27 +478,55 @@ export default function QuickViewModal({
               </p>
             )}
 
-            {/* Price box */}
-            <div className="p-3 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 space-y-1">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
-                {hasDiscount ? 'Хямдарсан үнэ' : 'Үнэ'}
-              </span>
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span className={`text-xl sm:text-2xl font-extrabold font-sans ${hasDiscount ? 'text-red-600' : 'text-emerald-700'}`}>
-                  {formatMNT(currentPrice)}
+            {/* Sleek Inline Price Card (No empty space on right, crossed-out original price in GREEN) */}
+            <div className="p-3 bg-teal-50/60 border border-teal-100 rounded-2xl flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                  {hasDiscount ? 'Хямдарсан тусгай үнэ' : 'Худалдаалах үнэ'}
                 </span>
-                {hasDiscount && currentProduct.discountPercent && (
-                  <span className="px-2 py-0.5 bg-red-100 text-red-600 font-black text-[10px] rounded border border-red-200">
-                    -{currentProduct.discountPercent}%
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className={`text-xl sm:text-2xl font-black font-sans tracking-tight ${hasDiscount ? 'text-red-600' : 'text-emerald-700'}`}>
+                    {formatMNT(currentPrice)}
                   </span>
-                )}
+                  {hasDiscount && (
+                    <span className="text-xs sm:text-sm font-bold font-sans text-emerald-700 line-through">
+                      {formatMNT(originalPrice)}
+                    </span>
+                  )}
+                </div>
               </div>
-              {hasDiscount && (
-                <div className="flex items-center justify-between text-xs border-t border-gray-100 pt-1">
-                  <span className="text-gray-400 font-medium line-through">{formatMNT(originalPrice)}</span>
-                  {savings > 0 && <span className="text-red-600 font-bold">-{formatMNT(savings)} хэмнэлт</span>}
+
+              {hasDiscount && currentProduct.discountPercent && (
+                <div className="text-right shrink-0">
+                  <span className="px-2.5 py-1 bg-red-600 text-white font-black text-xs rounded-xl shadow-xs block font-mono">
+                    -{currentProduct.discountPercent}% OFF
+                  </span>
+                  {savings > 0 && (
+                    <span className="text-[10px] text-red-600 font-extrabold block mt-0.5">
+                      -{formatMNT(savings)} хэмнэлт
+                    </span>
+                  )}
                 </div>
               )}
+            </div>
+
+            {/* 3 Trust & Delivery Guarantee Feature Cards */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-gray-50 border border-gray-200/80 rounded-xl p-2 text-center flex flex-col items-center justify-center space-y-0.5">
+                <Truck className="w-4 h-4 text-teal-700" />
+                <span className="text-[10px] font-extrabold text-gray-900 leading-tight block">Шуурхай хүргэлт</span>
+                <span className="text-[9px] text-gray-500 block leading-tight">24-48 цагт</span>
+              </div>
+              <div className="bg-gray-50 border border-gray-200/80 rounded-xl p-2 text-center flex flex-col items-center justify-center space-y-0.5">
+                <ShieldCheck className="w-4 h-4 text-teal-700" />
+                <span className="text-[10px] font-extrabold text-gray-900 leading-tight block">100% Оригинал</span>
+                <span className="text-[9px] text-gray-500 block leading-tight">Чанарын баталгаа</span>
+              </div>
+              <div className="bg-gray-50 border border-gray-200/80 rounded-xl p-2 text-center flex flex-col items-center justify-center space-y-0.5">
+                <CheckCircle2 className="w-4 h-4 text-teal-700" />
+                <span className="text-[10px] font-extrabold text-gray-900 leading-tight block">Найдвартай</span>
+                <span className="text-[9px] text-gray-500 block leading-tight">Баталгаат төлбөр</span>
+              </div>
             </div>
 
             {/* ─── Selected Image Variants List Box ─── */}
