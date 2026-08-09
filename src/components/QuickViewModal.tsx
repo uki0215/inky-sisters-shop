@@ -102,7 +102,7 @@ export default function QuickViewModal({
 
   const scrollRecommend = (direction: 'left' | 'right') => {
     if (recommendScrollRef.current) {
-      recommendScrollRef.current.scrollBy({ left: direction === 'left' ? -220 : 220, behavior: 'smooth' });
+      recommendScrollRef.current.scrollBy({ left: direction === 'left' ? -270 : 270, behavior: 'smooth' });
     }
   };
 
@@ -244,36 +244,36 @@ export default function QuickViewModal({
         {/* Recommended strip - Premium e-commerce carousel on top */}
         {recommendedList.length > 0 && (
           <div className="px-5 pt-4 pr-16">
-            <div className="bg-gradient-to-r from-teal-50/80 via-white to-gray-50 border border-teal-100/90 rounded-2xl p-2.5 space-y-2 shadow-2xs">
+            <div className="bg-gradient-to-r from-teal-50/80 via-white to-gray-50 border border-teal-100/90 rounded-2xl p-3 space-y-2.5 shadow-2xs">
               <div className="flex items-center justify-between pr-2">
-                <span className="text-[11px] font-black text-teal-950 flex items-center gap-1.5 font-sans">
-                  <Sparkles className="w-3.5 h-3.5 text-teal-600 animate-pulse" />
+                <span className="text-xs sm:text-sm font-black text-teal-950 flex items-center gap-1.5 font-sans">
+                  <Sparkles className="w-4 h-4 text-teal-600 animate-pulse" />
                   <span>Танд санал болгох цуглуулга</span>
-                  <span className="text-[9px] font-mono font-extrabold text-teal-700 bg-teal-100/80 px-1.5 py-0.2 rounded-full border border-teal-200">
+                  <span className="text-xs font-mono font-extrabold text-teal-700 bg-teal-100/80 px-2 py-0.5 rounded-full border border-teal-200">
                     {recommendedList.length}
                   </span>
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => scrollRecommend('left')}
-                    className="p-1 text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-all shadow-2xs"
+                    className="p-1.5 text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 transition-all shadow-2xs"
                     title="Өмнөх"
                   >
-                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
                     onClick={() => scrollRecommend('right')}
-                    className="p-1 text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-all shadow-2xs"
+                    className="p-1.5 text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 transition-all shadow-2xs"
                     title="Дараагийн"
                   >
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              <div ref={recommendScrollRef} className="flex items-center gap-2 overflow-x-auto scrollbar-none scroll-smooth py-0.5">
+              <div ref={recommendScrollRef} className="flex items-center gap-3 overflow-x-auto scrollbar-none scroll-smooth py-1">
                 {recommendedList.map((item) => {
                   const expired = item.discountEndDate ? new Date() > new Date(item.discountEndDate) : false;
                   const disc = Boolean(item.isDiscounted && !expired && item.discountPriceMnt && item.discountPriceMnt < item.priceMnt);
@@ -283,33 +283,38 @@ export default function QuickViewModal({
                     <div
                       key={item.id}
                       onClick={() => handleSelectRecommend(item)}
-                      className="shrink-0 flex items-center gap-2.5 bg-white border border-gray-200/90 rounded-xl px-2.5 py-1.5 cursor-pointer hover:border-teal-500 hover:shadow-md transition-all group max-w-[200px]"
+                      className="shrink-0 flex items-center gap-3 bg-white border border-gray-200 rounded-2xl p-2.5 cursor-pointer hover:border-teal-500 hover:shadow-lg transition-all group max-w-[240px] sm:max-w-[260px]"
                     >
-                      <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 relative">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 relative shadow-2xs">
                         <img
                           src={isValidUrl(firstImg) ? firstImg : FALLBACK_IMG}
                           alt={item.name}
                           onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
-                        {disc && (
-                          <span className="absolute top-0 right-0 w-2 h-2 bg-red-600 rounded-full" />
+                        {disc && item.discountPercent && (
+                          <span className="absolute top-0.5 left-0.5 px-1 py-0.2 bg-red-600 text-white text-[9px] font-black rounded shadow-xs">
+                            -{item.discountPercent}%
+                          </span>
                         )}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-bold text-gray-900 line-clamp-1 group-hover:text-teal-700 transition-colors">
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <p className="text-xs sm:text-sm font-extrabold text-gray-900 line-clamp-1 group-hover:text-teal-700 transition-colors">
                           {item.name}
                         </p>
-                        <div className="flex items-baseline gap-1 mt-0.5 font-sans">
-                          <span className={`text-[11px] font-black ${disc ? 'text-red-600' : 'text-emerald-700'}`}>
+                        <div className="flex items-baseline gap-1.5 font-sans">
+                          <span className={`text-xs sm:text-sm font-black ${disc ? 'text-red-600' : 'text-emerald-700'}`}>
                             {formatMNT(disc ? item.discountPriceMnt : item.priceMnt)}
                           </span>
                           {disc && (
-                            <span className="text-[9px] text-emerald-700 line-through font-bold">
+                            <span className="text-[10px] text-emerald-700 line-through font-bold">
                               {formatMNT(item.priceMnt)}
                             </span>
                           )}
                         </div>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-700 group-hover:underline pt-0.5">
+                          Үзэх →
+                        </span>
                       </div>
                     </div>
                   );
