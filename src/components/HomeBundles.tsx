@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, ShoppingBag, Eye, ArrowRight, Layers, Sparkles, Check } from 'lucide-react';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { useCart } from '@/context/CartContext';
 import BundleModal from '@/components/BundleModal';
 
@@ -103,7 +104,7 @@ export default function HomeBundles({ onViewAll }: HomeBundlesProps) {
                 {/* Image & Discount Badge */}
                 <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
                   <img
-                    src={bundle.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
+                    src={getFirstImageUrl(bundle.imageUrl)}
                     alt={bundle.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ProductSelector from '@/components/Admin/ProductSelector';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { Sparkles, Save, Plus, Trash2, Image, Link, Star } from 'lucide-react';
 
 export default function PromotionManager() {
@@ -348,7 +349,7 @@ export default function PromotionManager() {
               <div key={slide.id} className="p-4 flex items-center justify-between gap-4 hover:bg-gray-50">
                 <div className="flex items-center gap-3">
                   <div className="w-16 h-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden shrink-0">
-                    <img src={slide.imageUrl} alt={slide.title} className="w-full h-full object-cover" />
+                    <img src={getFirstImageUrl(slide.imageUrl)} alt={slide.title} className="w-full h-full object-cover" />
                   </div>
 
                   <div>

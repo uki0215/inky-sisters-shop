@@ -21,6 +21,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { formatMNT, generateBarcode } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import ImageUploader from '@/components/ImageUploader';
 import BarcodeRenderer from '@/components/BarcodeRenderer';
 
@@ -411,7 +412,7 @@ export default function BundleManager() {
 
                   return (
                     <div className="mt-2 flex items-center gap-2 p-2 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900">
-                      <img src={firstSelectedProd.imageUrl} alt="Auto preview" className="w-9 h-9 object-cover rounded-lg border border-blue-200 shrink-0" />
+                      <img src={getFirstImageUrl(firstSelectedProd.imageUrl)} alt="Auto preview" className="w-9 h-9 object-cover rounded-lg border border-blue-200 shrink-0" />
                       <span className="text-[11px] leading-tight font-medium">
                         ℹ️ Багцын тусгай зураг оруулаагүй тул сонгосон эхний барааны (<b>{firstSelectedProd.name}</b>) зураг ашиглагдана.
                       </span>
@@ -492,7 +493,7 @@ export default function BundleManager() {
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-2">
                         <img
-                          src={product.imageUrl || '/placeholder.png'}
+                          src={getFirstImageUrl(product.imageUrl)}
                           alt={product.name}
                           className="w-8 h-8 object-cover rounded-md border shrink-0"
                         />
@@ -553,7 +554,7 @@ export default function BundleManager() {
                       >
                         <div className="flex items-center gap-2 min-w-0 pr-2">
                           <img
-                            src={product.imageUrl || '/placeholder.png'}
+                            src={getFirstImageUrl(product.imageUrl)}
                             alt={product.name}
                             className="w-8 h-8 object-cover rounded-md border shrink-0"
                           />
@@ -647,7 +648,7 @@ export default function BundleManager() {
                 >
                   <div className="flex items-start gap-4">
                     <img
-                      src={bundle.imageUrl || bundle.items?.[0]?.product?.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
+                      src={getFirstImageUrl(bundle.imageUrl || bundle.items?.[0]?.product?.imageUrl)}
                       alt={bundle.name}
                       className="w-20 h-20 object-cover rounded-xl border border-gray-200 shrink-0"
                     />

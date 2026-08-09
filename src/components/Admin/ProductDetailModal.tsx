@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { formatMNT, formatYuan } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import BarcodeRenderer from '@/components/BarcodeRenderer';
 import { X, Package, Tag, Edit, Plus, DollarSign, TrendingUp, Barcode, Layers, Percent, CheckCircle2, History } from 'lucide-react';
 
@@ -49,7 +50,7 @@ export default function ProductDetailModal({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border-b border-gray-100 pb-4">
           <div className="w-20 h-20 rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden shrink-0 shadow-xs">
             <img
-              src={product.imageUrl || 'https://placehold.co/200x200?text=No+Image'}
+              src={getFirstImageUrl(product.imageUrl)}
               alt={product.name}
               className="w-full h-full object-cover"
             />

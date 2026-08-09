@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { Search, Tag, Check, X, Package, RefreshCw, Sparkles } from 'lucide-react';
 
 interface ProductSelectorProps {
@@ -80,7 +81,7 @@ export default function ProductSelector({
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-xl bg-white border border-teal-200 overflow-hidden shrink-0 shadow-xs">
               <img
-                src={selectedProduct.imageUrl || 'https://placehold.co/100x100?text=No+Image'}
+                src={getFirstImageUrl(selectedProduct.imageUrl)}
                 alt={selectedProduct.name}
                 className="w-full h-full object-cover"
               />
@@ -206,7 +207,7 @@ export default function ProductSelector({
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <img
-                          src={product.imageUrl || 'https://placehold.co/100x100?text=No+Image'}
+                          src={getFirstImageUrl(product.imageUrl)}
                           alt={product.name}
                           className="w-10 h-10 rounded-lg object-cover bg-white border border-gray-200 shrink-0"
                         />

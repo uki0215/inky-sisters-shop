@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import Navbar from '@/components/Navbar';
 import ProductCard from '@/components/ProductCard';
 import PromoModal from '@/components/PromoModal';
@@ -571,7 +572,7 @@ function HomeContent() {
                   className="relative rounded-2xl overflow-hidden aspect-[4/5] group bg-gray-900 border border-gray-200 cursor-pointer shadow-xs hover:shadow-lg transition-all"
                 >
                   <img
-                    src={col.imageUrl}
+                    src={getFirstImageUrl(col.imageUrl)}
                     alt={col.title}
                     className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-all duration-500"
                   />
@@ -1105,10 +1106,7 @@ function HomeContent() {
                             {/* Image & Discount Badge */}
                             <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
                               <img
-                                src={
-                                  bundle.imageUrl ||
-                                  'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'
-                                }
+                                src={getFirstImageUrl(bundle.imageUrl)}
                                 alt={bundle.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               />

@@ -3,6 +3,7 @@
 import React from 'react';
 import { useCart } from '@/context/CartContext';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { X, RefreshCw, ShoppingBag, Trash2, Check, Barcode } from 'lucide-react';
 
 interface CompareModalProps {
@@ -75,7 +76,7 @@ export default function CompareModal({ onQuickView }: CompareModalProps) {
                 >
                   <div className="aspect-square w-full rounded-xl bg-white overflow-hidden border border-gray-200">
                     <img
-                      src={item.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=400&auto=format&fit=crop&q=80'}
+                      src={getFirstImageUrl(item.imageUrl)}
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />

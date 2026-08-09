@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { formatMNT } from '@/lib/utils';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { formatMNT, formatYuan, generateBarcode } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import BarcodeListener from '@/components/BarcodeListener';
 import {
   ShoppingCart,
@@ -503,7 +504,7 @@ export default function PosManager({ products = [], categories = [], bundles = [
 
                     <div className="aspect-square w-full bg-cherry-50 rounded-xl overflow-hidden mb-2 relative">
                       <img
-                        src={bundle.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
+                        src={getFirstImageUrl(bundle.imageUrl)}
                         alt={bundle.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
@@ -561,7 +562,7 @@ export default function PosManager({ products = [], categories = [], bundles = [
 
                     <div className="aspect-square w-full bg-gray-50 rounded-xl overflow-hidden mb-2 relative">
                       <img
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
+                        src={getFirstImageUrl(product.imageUrl)}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />

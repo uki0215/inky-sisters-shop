@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeroSliderProps {
@@ -73,7 +74,7 @@ export default function HeroSlider({ slides, allProducts, allBundles = [], onQui
         >
           {/* Canva Banner Image */}
           <img
-            src={currentSlide.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=1400&auto=format&fit=crop&q=80'}
+            src={getFirstImageUrl(currentSlide.imageUrl)}
             alt="Hero Banner"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-101"
           />

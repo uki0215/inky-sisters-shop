@@ -3,6 +3,7 @@
 import React from 'react';
 import { X, Gift, ShoppingBag, Check, Layers, Sparkles } from 'lucide-react';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { useCart } from '@/context/CartContext';
 
 interface BundleModalProps {
@@ -55,7 +56,7 @@ export default function BundleModal({ bundle, onClose }: BundleModalProps) {
         <div className="p-6 overflow-y-auto space-y-6 flex-1 scrollbar-thin">
           <div className="flex flex-col sm:flex-row items-center gap-4 bg-teal-50/70 p-4 rounded-2xl border border-teal-100">
             <img
-              src={bundle.imageUrl || bundle.items?.[0]?.product?.imageUrl || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80'}
+              src={getFirstImageUrl(bundle.imageUrl || bundle.items?.[0]?.product?.imageUrl)}
               alt={bundle.name}
               className="w-28 h-28 object-cover rounded-xl border border-teal-200 shadow-xs shrink-0"
             />
@@ -103,7 +104,7 @@ export default function BundleModal({ bundle, onClose }: BundleModalProps) {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <img
-                        src={product.imageUrl || '/placeholder.png'}
+                        src={getFirstImageUrl(product.imageUrl)}
                         alt={product.name}
                         className="w-12 h-12 object-cover rounded-xl border border-gray-200 bg-white shrink-0"
                       />
