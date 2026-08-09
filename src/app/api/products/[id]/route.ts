@@ -3,11 +3,14 @@ import { db } from '@/lib/db';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
+    const resolvedParams = await params;
+    const productId = resolvedParams.id;
+
     const product = await db.product.findUnique({
-      where: { id: params.id },
+      where: { id: productId },
       include: { category: true },
     });
 
@@ -23,11 +26,14 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
+    const resolvedParams = await params;
+    const productId = resolvedParams.id;
+
     const body = await request.json();
-    const existing = await db.product.findUnique({ where: { id: params.id } });
+    const existing = await db.product.findUnique({ where: { id: productId } });
 
     if (!existing) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -103,7 +109,7 @@ export async function PUT(
     }
 
     const updated = await db.product.update({
-      where: { id: params.id },
+      where: { id: productId },
       data: {
         barcode: barcode || existing.barcode,
         name: name || existing.name,
