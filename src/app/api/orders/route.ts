@@ -127,7 +127,8 @@ export async function POST(request: Request) {
           }
         }
       } else {
-        const product = await db.product.findUnique({ where: { id: item.id } });
+        const realProductId = item.productId || (typeof item.id === 'string' ? item.id.split('__')[0] : item.id);
+        const product = await db.product.findUnique({ where: { id: realProductId } });
         if (!product) {
           return NextResponse.json({ error: `Бараа олдсонгүй: ${item.name}` }, { status: 400 });
         }
@@ -147,9 +148,11 @@ export async function POST(request: Request) {
 
         totalMnt += itemPrice * item.quantity;
 
+        const chosenImgTag = item.selectedImageUrl ? ` [IMG:${item.selectedImageUrl}]` : '';
+
         orderItemsData.push({
           productId: product.id,
-          productName: product.name,
+          productName: `${product.name}${chosenImgTag}`,
           barcode: product.barcode,
           priceMnt: itemPrice,
           costMnt: unitCost,

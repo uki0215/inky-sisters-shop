@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CartItem {
   id: string;
+  productId?: string;
   name: string;
   barcode: string;
   priceMnt: number;
@@ -136,17 +137,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     if (product.stock <= 0) return;
 
+    const chosenImg = selectedImageUrl || null;
+    const cartItemId = chosenImg ? `${product.id}__${chosenImg}` : product.id;
+
     setCart((prevCart) => {
-      const existing = prevCart.find((item) => item.id === product.id);
+      // Calculate total existing quantity for this base product across all variants
+      const totalUsedForProduct = prevCart.reduce((sum, item) => {
+        const pId = item.productId || (typeof item.id === 'string' ? item.id.split('__')[0] : item.id);
+        return pId === product.id ? sum + item.quantity : sum;
+      }, 0);
+
+      const maxAddable = Math.max(0, product.stock - totalUsedForProduct);
+      if (maxAddable <= 0) return prevCart;
+
+      const qtyToAdd = Math.min(quantity, maxAddable);
+      const existing = prevCart.find((item) => item.id === cartItemId);
+
       if (existing) {
-        const newQty = Math.min(existing.quantity + quantity, product.stock);
         return prevCart.map((item) =>
-          item.id === product.id
+          item.id === cartItemId
             ? {
                 ...item,
-                quantity: newQty,
-                // Update selectedImageUrl if a new one was specified
-                selectedImageUrl: selectedImageUrl !== undefined ? selectedImageUrl : item.selectedImageUrl,
+                quantity: item.quantity + qtyToAdd,
               }
             : item
         );
@@ -158,16 +170,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return [
           ...prevCart,
           {
-            id: product.id,
+            id: cartItemId,
+            productId: product.id,
             name: product.name,
             barcode: product.barcode,
             priceMnt: itemPrice,
             originalPriceMnt: product.priceMnt,
             discountPriceMnt: product.discountPriceMnt,
             imageUrl: product.imageUrl,
-            selectedImageUrl: selectedImageUrl ?? null,
+            selectedImageUrl: chosenImg,
             stock: product.stock,
-            quantity: Math.min(quantity, product.stock),
+            quantity: qtyToAdd,
           },
         ];
       }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import SalesReportModal from '@/components/Admin/SalesReportModal';
 import OrderReturnModal from '@/components/Admin/OrderReturnModal';
 import {
@@ -537,6 +538,17 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                           const isBundleHeader = item.productName.startsWith('🎁');
                           const isBundleSubItem = item.productName.includes('└─');
 
+                          let itemImg = item.selectedImageUrl;
+                          if (!itemImg && item.productName && item.productName.includes('[IMG:')) {
+                            const match = item.productName.match(/\[IMG:(.*?)\]/);
+                            if (match && match[1]) itemImg = match[1];
+                          }
+                          if (!itemImg) {
+                            itemImg = item.product?.imageUrl;
+                          }
+
+                          const cleanName = (item.productName || '').replace(/\[IMG:.*?\]/g, '').trim();
+
                           return (
                             <div
                               key={item.id}
@@ -548,10 +560,24 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                                   : 'bg-gray-50 border-gray-200 text-gray-900 font-bold'
                               }`}
                             >
-                              <span className="truncate">
-                                {item.productName} ({item.barcode})
-                              </span>
-                              <span className="font-mono font-bold shrink-0 ml-2">
+                              <div className="flex items-center gap-3 min-w-0 pr-2">
+                                <img
+                                  src={getFirstImageUrl(itemImg)}
+                                  alt={cleanName}
+                                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
+                                  className="w-10 h-10 object-cover rounded-lg border border-gray-200 bg-white shrink-0 shadow-2xs"
+                                />
+                                <div className="min-w-0">
+                                  <span className="truncate block font-bold text-gray-900 font-sans">
+                                    {cleanName}
+                                  </span>
+                                  <span className="font-mono text-[10px] text-gray-500 block">
+                                    #{item.barcode}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <span className="font-mono font-extrabold text-teal-950 shrink-0 ml-2 text-xs">
                                 {item.quantity} ш × {formatMNT(item.priceMnt)} = {formatMNT(item.quantity * item.priceMnt)}
                               </span>
                             </div>

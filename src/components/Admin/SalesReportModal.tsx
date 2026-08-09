@@ -171,7 +171,9 @@ export default function SalesReportModal({ onClose }: SalesReportModalProps) {
                         data.items.map((item: any, idx: number) => (
                           <tr key={idx} className="hover:bg-gray-50">
                             <td className="p-3 font-mono text-gray-500">{item.barcode}</td>
-                            <td className="p-3 font-bold text-gray-900">{item.productName}</td>
+                            <td className="p-3 font-bold text-gray-900 font-sans">
+                              {(item.productName || '').replace(/\[IMG:.*?\]/g, '').trim()}
+                            </td>
                             <td className="p-3 text-right font-bold text-gray-900 font-mono">{item.totalQtySold} ш</td>
                             <td className="p-3 text-right font-mono text-gray-600">{formatMNT(item.unitPriceMnt)}</td>
                             <td className="p-3 text-right font-bold font-mono text-emerald-800">{formatMNT(item.totalRevenueMnt)}</td>

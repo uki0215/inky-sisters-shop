@@ -199,7 +199,9 @@ export default function OrderReturnModal({
                     className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl border border-gray-200 text-xs"
                   >
                     <div className="flex-1 pr-2">
-                      <span className="font-bold text-gray-900 block">{item.productName}</span>
+                      <span className="font-bold text-gray-900 block font-sans">
+                        {(item.productName || '').replace(/\[IMG:.*?\]/g, '').trim()}
+                      </span>
                       <span className="text-[11px] text-gray-500 font-mono">#{item.barcode} | {formatMNT(item.priceMnt)}</span>
                     </div>
 

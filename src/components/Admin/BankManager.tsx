@@ -51,14 +51,14 @@ export default function BankManager() {
     const payload = editingBank
       ? editingBank
       : {
-          bankName,
-          bankCode,
-          bankLogoUrl,
-          accountName,
-          accountNumber,
-          qrImageUrl: qrImageUrl || 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=BankQR',
-          isActive: true,
-        };
+        bankName,
+        bankCode,
+        bankLogoUrl,
+        accountName,
+        accountNumber,
+        qrImageUrl: qrImageUrl || 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=BankQR',
+        isActive: true,
+      };
 
     try {
       const res = await fetch('/api/banks', {
@@ -92,7 +92,7 @@ export default function BankManager() {
 
   return (
     <div className="space-y-6">
-      
+
       {/* Header */}
       <div className="flex items-center justify-between bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
         <div>
