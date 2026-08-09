@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Upload, Link as LinkIcon, Loader2, X, AlertTriangle, Plus, GripVertical } from 'lucide-react';
 
 interface ImageUploaderProps {
-  // Single image (backwards compat)
   value?: string;
   onChange?: (url: string) => void;
-  // Multi image
   values?: string[];
   onChangeMultiple?: (urls: string[]) => void;
   label?: string;
@@ -82,59 +80,77 @@ export default function ImageUploader({
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Use a ref to always have the latest image list inside async callbacks
+  const currentImagesRef = useRef<string[]>([]);
+
   const isMulti = multiple || !!onChangeMultiple;
 
-  // Normalise current images array
-  const rawList = Array.isArray(values) && values.length > 0
-    ? values
-    : (value && typeof value === 'string' ? value.split(',').map(s => s.trim()).filter(isValidUrl) : []);
-
-  const currentImages: string[] = rawList.filter(isValidUrl);
-
-  const pushImages = (newUrls: string[]) => {
-    if (isMulti) {
-      const merged = [...currentImages, ...newUrls];
-      onChangeMultiple?.(merged);
-      // also keep single onChange in sync with first image
-      onChange?.(merged[0] ?? '');
-    } else {
-      const url = newUrls[newUrls.length - 1] ?? '';
-      onChange?.(url);
+  // Derive current images from props (controlled component)
+  const currentImages: string[] = (() => {
+    if (Array.isArray(values) && values.length > 0) {
+      return values.filter(isValidUrl);
     }
-  };
+    if (value && typeof value === 'string') {
+      return value.split(',').map(s => s.trim()).filter(isValidUrl);
+    }
+    return [];
+  })();
+
+  // Keep ref in sync
+  currentImagesRef.current = currentImages;
+
+  // Emit change upward — always work from ref to avoid stale closures
+  const emitImages = useCallback((newList: string[]) => {
+    if (isMulti) {
+      onChangeMultiple?.(newList);
+      onChange?.(newList[0] ?? '');
+    } else {
+      onChange?.(newList[newList.length - 1] ?? '');
+    }
+  }, [isMulti, onChange, onChangeMultiple]);
+
+  const pushImages = useCallback((newUrls: string[]) => {
+    const base = currentImagesRef.current;
+    if (isMulti) {
+      emitImages([...base, ...newUrls]);
+    } else {
+      emitImages([newUrls[newUrls.length - 1] ?? '']);
+    }
+  }, [isMulti, emitImages]);
 
   const removeImage = (idx: number) => {
-    const next = currentImages.filter((_, i) => i !== idx);
-    if (isMulti) {
-      onChangeMultiple?.(next);
-      onChange?.(next[0] ?? '');
-    } else {
-      onChange?.('');
-    }
+    const next = currentImagesRef.current.filter((_, i) => i !== idx);
+    emitImages(next);
   };
 
   const uploadFiles = async (files: File[]) => {
     if (!files.length) return;
     setUploading(true);
     setError(null);
+
     const limit = isMulti ? files.length : 1;
     const slice = files.slice(0, limit);
     setUploadingCount(slice.length);
 
-    // 1. Instant local preview for 0ms visual feedback
-    const localPreviews = await Promise.all(
-      slice.map((file) => compressImageFile(file))
-    );
-    const validLocal = localPreviews.filter(Boolean);
+    // Step 1: compress all files client-side in parallel → instant preview
+    const localPreviews = await Promise.all(slice.map(compressImageFile));
+    const validLocal = localPreviews.filter(Boolean) as string[];
+
+    // Show instant preview immediately
     if (validLocal.length) {
-      pushImages(validLocal);
+      const base = currentImagesRef.current;
+      if (isMulti) {
+        emitImages([...base, ...validLocal]);
+      } else {
+        emitImages([validLocal[validLocal.length - 1]]);
+      }
     }
 
-    // 2. Process server upload
+    // Step 2: upload to server to get a permanent URL (or keep the data URL)
     const serverResults: string[] = [];
     for (let i = 0; i < slice.length; i++) {
       const file = slice[i];
-      const localUrl = validLocal[i];
+      const localUrl = validLocal[i] ?? '';
       try {
         const fd = new FormData();
         fd.append('file', file);
@@ -143,24 +159,28 @@ export default function ImageUploader({
         const data = await res.json();
         if (res.ok && data.url) {
           serverResults.push(data.url);
-        } else if (localUrl) {
-          serverResults.push(localUrl);
+        } else {
+          serverResults.push(localUrl || '');
         }
       } catch {
-        if (localUrl) serverResults.push(localUrl);
+        serverResults.push(localUrl || '');
       }
     }
 
     setUploading(false);
     setUploadingCount(0);
 
-    // Replace temporary previews if server returned dedicated URLs
-    if (serverResults.length && JSON.stringify(serverResults) !== JSON.stringify(validLocal)) {
+    // Step 3: Replace the local preview URLs with the final server URLs
+    // We need to replace exactly the entries we added (the validLocal ones)
+    const finalResults = serverResults.filter(Boolean);
+    if (finalResults.length > 0) {
+      // Get the current list (which now includes validLocal previews), remove them, add server results
+      const latestBase = currentImagesRef.current;
+      const withoutPreviews = latestBase.filter(img => !validLocal.includes(img));
       if (isMulti) {
-        const otherImages = currentImages.filter((img) => !validLocal.includes(img));
-        onChangeMultiple?.([...otherImages, ...serverResults]);
+        emitImages([...withoutPreviews, ...finalResults]);
       } else {
-        onChange?.(serverResults[serverResults.length - 1]);
+        emitImages([finalResults[finalResults.length - 1]]);
       }
     }
 
@@ -169,14 +189,14 @@ export default function ImageUploader({
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    await uploadFiles(files);
+    if (files.length) await uploadFiles(files);
   };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    await uploadFiles(files);
+    if (files.length) await uploadFiles(files);
   };
 
   const handleAddUrl = () => {
@@ -190,20 +210,15 @@ export default function ImageUploader({
     setUrlInput('');
   };
 
-  // Drag reorder
+  // Drag-to-reorder handlers
   const handleDragStart = (idx: number) => setDraggingIdx(idx);
   const handleDragEnter = (idx: number) => {
     if (draggingIdx === null || draggingIdx === idx) return;
-    const next = [...currentImages];
+    const next = [...currentImagesRef.current];
     const [moved] = next.splice(draggingIdx, 1);
     next.splice(idx, 0, moved);
     setDraggingIdx(idx);
-    if (isMulti) {
-      onChangeMultiple?.(next);
-      onChange?.(next[0] ?? '');
-    } else {
-      onChange?.(next[0] ?? '');
-    }
+    emitImages(next);
   };
   const handleDragEnd = () => setDraggingIdx(null);
 
@@ -320,10 +335,10 @@ export default function ImageUploader({
               Нийт {currentImages.length} зураг
               {isMulti && <span className="text-gray-400 font-normal ml-1">(чирж дараалал өөрчлөх боломжтой)</span>}
             </span>
-            {currentImages.length > 1 && isMulti && (
+            {currentImages.length > 0 && isMulti && (
               <button
                 type="button"
-                onClick={() => { onChangeMultiple?.([]); onChange?.(''); }}
+                onClick={() => emitImages([])}
                 className="text-[10px] text-red-500 hover:text-red-700 font-medium"
               >
                 Бүгдийг устгах
@@ -334,7 +349,7 @@ export default function ImageUploader({
           <div className={`grid gap-2 ${currentImages.length === 1 ? 'grid-cols-1' : 'grid-cols-3 sm:grid-cols-4'}`}>
             {currentImages.map((img, idx) => (
               <div
-                key={idx}
+                key={`${idx}-${img.slice(-20)}`}
                 draggable={isMulti}
                 onDragStart={() => handleDragStart(idx)}
                 onDragEnter={() => handleDragEnter(idx)}
@@ -348,7 +363,10 @@ export default function ImageUploader({
                 <img
                   src={img}
                   alt={`Зураг ${idx + 1}`}
-                  onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_IMG; }}
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    if (el.src !== FALLBACK_IMG) el.src = FALLBACK_IMG;
+                  }}
                   className="w-full h-full object-cover"
                 />
 
@@ -375,7 +393,7 @@ export default function ImageUploader({
               </div>
             ))}
 
-            {/* Add more button when multi */}
+            {/* Add more button */}
             {isMulti && currentImages.length > 0 && mode === 'file' && (
               <div
                 className="aspect-square rounded-xl border-2 border-dashed border-gray-300 hover:border-teal-500 hover:bg-teal-50/20 flex flex-col items-center justify-center cursor-pointer transition-all relative group"
