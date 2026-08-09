@@ -38,6 +38,99 @@ interface OrderManagerProps {
   onOrderUpdate?: () => void;
 }
 
+function renderFormattedHistoryCards(returnNote: string) {
+  if (!returnNote || !returnNote.trim()) return null;
+
+  const blocks = returnNote
+    .split(/(?=📌)/g)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  return (
+    <div className="p-3 bg-amber-50/60 border border-amber-200/80 rounded-2xl space-y-2.5 font-sans shadow-2xs max-w-full overflow-hidden">
+      <div className="flex items-center gap-2 font-extrabold text-xs text-amber-900 border-b border-amber-200/80 pb-2">
+        <History className="w-4 h-4 text-amber-700 shrink-0" />
+        <span>📜 Захиалгын засвар &amp; Буцаалтын Түүхэн Бүртгэл</span>
+      </div>
+
+      <div className="space-y-2">
+        {blocks.map((block, idx) => {
+          const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+          const firstLine = lines[0] || '';
+          
+          const timeMatch = firstLine.match(/\[(.*?)\]/);
+          const timeStr = timeMatch ? timeMatch[1] : '';
+          const headerText = firstLine.replace(/📌\s*\[.*?\]\s*/, '').trim();
+
+          const detailLines = lines.slice(1);
+
+          return (
+            <div key={idx} className="p-3 bg-white border border-amber-200/90 rounded-xl shadow-2xs space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-gray-100 pb-1.5 text-xs">
+                <span className="font-extrabold text-amber-900 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block shrink-0" />
+                  {headerText || 'Захиалгын засвар / буцаалт'}
+                </span>
+                {timeStr && (
+                  <span className="text-[11px] font-mono text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md shrink-0">
+                    ⏰ {timeStr}
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-1.5 pt-0.5">
+                {detailLines.length > 0 ? (
+                  detailLines.map((line, lIdx) => {
+                    let imgUrl = '';
+                    if (line.includes('[IMG:')) {
+                      const match = line.match(/\[IMG:(.*?)\]/);
+                      if (match && match[1]) imgUrl = match[1];
+                    }
+                    const cleanLine = line.replace(/\[IMG:.*?\]/g, '').trim();
+
+                    const isAdded = cleanLine.startsWith('🟢');
+                    const isRemoved = cleanLine.startsWith('🔴');
+                    const isDiff = cleanLine.startsWith('📊');
+                    const isNote = cleanLine.startsWith('📝');
+
+                    return (
+                      <div
+                        key={lIdx}
+                        className={`p-2 rounded-xl text-xs flex items-center gap-2.5 font-medium transition-all ${
+                          isAdded
+                            ? 'bg-emerald-50 border border-emerald-200 text-emerald-950 font-bold'
+                            : isRemoved
+                            ? 'bg-rose-50 border border-rose-200 text-rose-950 font-bold'
+                            : isDiff
+                            ? 'bg-blue-50 border border-blue-200 text-blue-950 font-bold font-mono'
+                            : isNote
+                            ? 'bg-amber-50 border border-amber-200 text-amber-950 italic'
+                            : 'bg-gray-50 border border-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {imgUrl && (
+                          <img
+                            src={imgUrl}
+                            alt="product thumbnail"
+                            className="w-10 h-10 object-cover rounded-lg border border-gray-200 shrink-0 bg-white shadow-2xs"
+                          />
+                        )}
+                        <span className="break-words flex-1 leading-relaxed">{cleanLine}</span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-gray-700 font-mono break-words">{block}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function OrderManager({ products = [], onOrderUpdate }: OrderManagerProps) {
   const [orders, setOrders] = useState<any[]>([]);
   const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'HAS_RETURN' | 'HAS_EDIT'>('ALL');
@@ -618,17 +711,7 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                       </div>
                     </div>
 
-                    {order.returnNote && (
-                      <div className="p-3 bg-amber-50/80 border border-amber-200 text-amber-950 rounded-xl space-y-1.5 shadow-2xs overflow-hidden max-w-full">
-                        <div className="flex items-center gap-2 font-extrabold text-xs text-amber-900 border-b border-amber-200/60 pb-1">
-                          <History className="w-4 h-4 text-amber-700 shrink-0" />
-                          <span>📜 Захиалгын засвар &amp; Буцаалтын түүх (History):</span>
-                        </div>
-                        <div className="whitespace-pre-wrap font-mono text-[11px] leading-relaxed pl-1 text-gray-800 break-words break-all overflow-x-auto">
-                          {order.returnNote}
-                        </div>
-                      </div>
-                    )}
+                    {renderFormattedHistoryCards(order.returnNote)}
 
                     <div className="space-y-1.5">
                       <h5 className="font-extrabold text-gray-800">Захиалсан Бараанууд &amp; Багц:</h5>
