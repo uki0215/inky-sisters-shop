@@ -436,22 +436,22 @@ export default function QuickViewModal({
             )}
 
             {/* Price box */}
-            <div className="p-3.5 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 space-y-1.5">
+            <div className="p-3 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 space-y-1">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
                 {hasDiscount ? 'Хямдарсан үнэ' : 'Үнэ'}
               </span>
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className={`text-2xl sm:text-3xl font-extrabold font-sans ${hasDiscount ? 'text-red-600' : 'text-gray-900'}`}>
+                <span className={`text-xl sm:text-2xl font-extrabold font-sans ${hasDiscount ? 'text-red-600' : 'text-emerald-700'}`}>
                   {formatMNT(currentPrice)}
                 </span>
                 {hasDiscount && currentProduct.discountPercent && (
-                  <span className="px-2 py-0.5 bg-red-100 text-red-600 font-black text-[11px] rounded border border-red-200">
+                  <span className="px-2 py-0.5 bg-red-100 text-red-600 font-black text-[10px] rounded border border-red-200">
                     -{currentProduct.discountPercent}%
                   </span>
                 )}
               </div>
               {hasDiscount && (
-                <div className="flex items-center justify-between text-xs border-t border-gray-100 pt-1.5">
+                <div className="flex items-center justify-between text-xs border-t border-gray-100 pt-1">
                   <span className="text-gray-400 font-medium line-through">{formatMNT(originalPrice)}</span>
                   {savings > 0 && <span className="text-red-600 font-bold">-{formatMNT(savings)} хэмнэлт</span>}
                 </div>

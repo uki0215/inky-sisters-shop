@@ -169,7 +169,7 @@ export default function ProductCard({ product, onQuickView, showStockQuantity = 
                   </span>
                 </div>
               ) : (
-                <span className="text-base sm:text-lg font-black text-gray-900 font-sans tracking-tight">
+                <span className="text-base sm:text-lg font-black text-emerald-700 font-sans tracking-tight">
                   {formatMNT(product.priceMnt)}
                 </span>
               )}
