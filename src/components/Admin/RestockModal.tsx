@@ -13,12 +13,7 @@ interface RestockModalProps {
 function parseDecimal(str: string | number): number {
   if (typeof str === 'number') return str;
   if (!str) return 0;
-  let clean = str.toString().trim();
-  if (clean.includes(',') && !clean.includes('.')) {
-    clean = clean.replace(',', '.');
-  } else {
-    clean = clean.replace(/,/g, '');
-  }
+  const clean = str.toString().replace(/,/g, '').trim();
   const val = parseFloat(clean);
   return isNaN(val) ? 0 : val;
 }
