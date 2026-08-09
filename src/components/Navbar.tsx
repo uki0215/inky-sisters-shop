@@ -46,9 +46,15 @@ export default function Navbar({
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Filter ONLY main categories (where parentId is null)
+  // Filter ONLY main categories (where parentId is null), exclude "Бусад" / empty names
   const mainCategories = useMemo(() => {
-    return (categories || []).filter((c) => !c.parentId);
+    return (categories || []).filter((c) => {
+      if (c.parentId) return false; // must be top-level
+      const name = (c.name || '').trim();
+      if (!name) return false; // skip unnamed
+      if (name === 'Бусад' || name.toLowerCase() === 'other') return false;
+      return true;
+    });
   }, [categories]);
 
   // Dynamic feature showcase product for hovered category in Mega Menu
