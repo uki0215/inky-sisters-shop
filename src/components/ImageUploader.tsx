@@ -121,15 +121,18 @@ export default function ImageUploader({
     const results: string[] = [];
     for (const file of slice) {
       try {
+        const compressedDataUrl = await compressImageFile(file);
         const fd = new FormData();
         fd.append('file', file);
+        if (compressedDataUrl) {
+          fd.append('dataUrl', compressedDataUrl);
+        }
         const res = await fetch('/api/upload', { method: 'POST', body: fd });
         const data = await res.json();
         if (res.ok && data.url) {
           results.push(data.url);
         } else {
-          const fallback = await compressImageFile(file);
-          if (fallback) results.push(fallback);
+          if (compressedDataUrl) results.push(compressedDataUrl);
         }
       } catch {
         const fallback = await compressImageFile(file);
