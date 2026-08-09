@@ -85,9 +85,11 @@ export default function ImageUploader({
   const isMulti = multiple || !!onChangeMultiple;
 
   // Normalise current images array
-  const currentImages: string[] = isMulti
-    ? (values ?? (value ? value.split(',').map(s => s.trim()).filter(isValidUrl) : []))
-    : (value && isValidUrl(value) ? [value] : []);
+  const rawList = Array.isArray(values) && values.length > 0
+    ? values
+    : (value && typeof value === 'string' ? value.split(',').map(s => s.trim()).filter(isValidUrl) : []);
+
+  const currentImages: string[] = rawList.filter(isValidUrl);
 
   const pushImages = (newUrls: string[]) => {
     if (isMulti) {
