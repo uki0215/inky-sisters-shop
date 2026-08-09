@@ -47,11 +47,11 @@ export default function ProductCard({ product, onQuickView, showStockQuantity = 
   return (
     <div
       onClick={() => onQuickView(product)}
-      className="group relative bg-white border border-gray-200 hover:border-teal-500 rounded-2xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between cursor-pointer"
+      className="group relative bg-white border border-gray-200/90 hover:border-teal-500 rounded-2xl overflow-hidden shadow-xs card-3d-glow flex flex-col justify-between cursor-pointer transform-gpu"
     >
 
       {/* Image Container */}
-      <div className="relative aspect-square w-full bg-gray-50 overflow-hidden">
+      <div className="relative aspect-square w-full bg-gray-50 overflow-hidden sheen-effect">
         {(() => {
           const firstUrl = getFirstImageUrl(product.imageUrl);
           return (

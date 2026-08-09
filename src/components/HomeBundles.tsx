@@ -99,10 +99,10 @@ export default function HomeBundles({ onViewAll }: HomeBundlesProps) {
               <div
                 key={bundle.id}
                 onClick={() => setSelectedBundle(bundle)}
-                className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group cursor-pointer hover:border-teal-300 relative"
+                className="bg-white border border-gray-200/90 rounded-3xl overflow-hidden shadow-sm card-3d-glow flex flex-col group cursor-pointer hover:border-teal-300 relative transform-gpu"
               >
                 {/* Image & Discount Badge */}
-                <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
+                <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden sheen-effect">
                   <img
                     src={getFirstImageUrl(bundle.imageUrl)}
                     alt={bundle.name}

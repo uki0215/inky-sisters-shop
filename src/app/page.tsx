@@ -423,7 +423,7 @@ function HomeContent() {
                   window.location.href = settings.banner1Link;
                 }
               }}
-              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 block cursor-pointer"
+              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
             >
               <img
                 src={settings.banner1Image || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=800&auto=format&fit=crop&q=80'}
@@ -452,7 +452,7 @@ function HomeContent() {
                   window.location.href = settings.banner2Link;
                 }
               }}
-              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 block cursor-pointer"
+              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
             >
               <img
                 src={settings.banner2Image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80'}
@@ -481,7 +481,7 @@ function HomeContent() {
                   window.location.href = settings.banner3Link;
                 }
               }}
-              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 block cursor-pointer"
+              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
             >
               <img
                 src={settings.banner3Image || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&auto=format&fit=crop&q=80'}

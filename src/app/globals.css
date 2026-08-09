@@ -70,3 +70,63 @@
 .animate-slideLeft {
   animation: slideLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* 3D Visual Effect Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.card-3d-glow {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-3d-glow:hover {
+  transform: translateY(-5px) scale(1.015);
+  box-shadow: 0 16px 32px -10px rgba(13, 148, 136, 0.2), 0 0 0 1px rgba(20, 184, 166, 0.3);
+}
+
+@keyframes float3d {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes sheenSweep {
+  0% { transform: translateX(-150%) rotate(25deg); }
+  100% { transform: translateX(150%) rotate(25deg); }
+}
+
+.animate-float-slow {
+  animation: float3d 4s ease-in-out infinite;
+}
+
+.sheen-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.sheen-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 70%
+  );
+  transform: translateX(-150%) rotate(25deg);
+  pointer-events: none;
+  z-index: 15;
+}
+
+.sheen-effect:hover::after {
+  animation: sheenSweep 0.85s ease-in-out;
+}
+

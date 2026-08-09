@@ -89,7 +89,7 @@ export default function HeroSlider({ slides, allProducts, allBundles = [], onQui
         {/* Pure Image Banner Container */}
         <div
           onClick={handleBannerClick}
-          className="relative aspect-[2/1] sm:aspect-[2.3/1] lg:aspect-[2.5/1] w-full overflow-hidden rounded-xl bg-gray-100 shadow-xs cursor-pointer group"
+          className="relative aspect-[2/1] sm:aspect-[2.3/1] lg:aspect-[2.5/1] w-full overflow-hidden rounded-2xl bg-gray-100 shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer group border border-gray-200/80 sheen-effect"
         >
           {/* Stacked Slide Images for smooth transition & priority loading */}
           {slides.map((slide, idx) => {
@@ -105,7 +105,7 @@ export default function HeroSlider({ slides, allProducts, allBundles = [], onQui
                 // @ts-ignore
                 fetchpriority={idx === 0 ? 'high' : 'auto'}
                 decoding="async"
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 group-hover:scale-101 ${
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.015] ${
                   isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                 }`}
               />
@@ -116,20 +116,20 @@ export default function HeroSlider({ slides, allProducts, allBundles = [], onQui
           <button
             type="button"
             onClick={handlePrev}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-1.5 text-gray-700/80 hover:text-gray-950 bg-white/40 hover:bg-white/80 backdrop-blur-xs rounded-full transition-all z-20 shadow-xs"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 text-gray-800 hover:text-teal-900 bg-white/70 hover:bg-white backdrop-blur-md rounded-full transition-all z-20 shadow-md border border-white/80 active:scale-95"
             title="Өмнөх банер"
           >
-            <ChevronLeft className="w-5 h-5 sm:w-7 sm:h-7" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
           {/* Right Arrow */}
           <button
             type="button"
             onClick={handleNext}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 text-gray-700/80 hover:text-gray-950 bg-white/40 hover:bg-white/80 backdrop-blur-xs rounded-full transition-all z-20 shadow-xs"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 text-gray-800 hover:text-teal-900 bg-white/70 hover:bg-white backdrop-blur-md rounded-full transition-all z-20 shadow-md border border-white/80 active:scale-95"
             title="Дараагийн банер"
           >
-            <ChevronRight className="w-5 h-5 sm:w-7 sm:h-7" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
           {/* Bottom Pagination Dots */}
