@@ -5,13 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Format currency to Mongolian Togrog (₮)
-export function formatMNT(amount: number | null | undefined): string {
-  if (amount === undefined || amount === null || isNaN(amount)) return '0 ₮';
+// Format currency to Mongolian Togrog (₮) with optional 2 decimal places
+export function formatMNT(amount: number | null | undefined, showDecimals: boolean = false): string {
+  if (amount === undefined || amount === null || isNaN(amount)) return showDecimals ? '0.00 ₮' : '0 ₮';
   return new Intl.NumberFormat('mn-MN', {
     style: 'currency',
     currency: 'MNT',
-    maximumFractionDigits: 0,
+    minimumFractionDigits: showDecimals ? 2 : 0,
+    maximumFractionDigits: showDecimals ? 2 : 0,
   }).format(amount).replace('MNT', '₮');
 }
 

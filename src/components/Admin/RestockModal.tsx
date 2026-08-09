@@ -242,11 +242,11 @@ export default function RestockModal({ product, onClose, onSuccess }: RestockMod
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div>
                   <span className="text-slate-400 block">Өмнөх 1ш Өртөг ₮:</span>
-                  <span className="font-mono font-bold text-slate-200">{formatMNT(prevCostMnt)}</span>
+                  <span className="font-mono font-bold text-slate-200">{formatMNT(prevCostMnt, true)}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Шинэ 1ш Өртөг ₮:</span>
-                  <span className="font-mono font-bold text-amber-300">{formatMNT(newCostMnt)}</span>
+                  <span className="font-mono font-bold text-amber-300">{formatMNT(newCostMnt, true)}</span>
                 </div>
               </div>
 

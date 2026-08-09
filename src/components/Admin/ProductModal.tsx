@@ -112,7 +112,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
   const parsedCostYuan = parseComma(costYuanRaw);
 
   const calculatedCostMnt = (parsedCostYuan > 0 && formData.yuanRate > 0)
-    ? Math.round(parsedCostYuan * formData.yuanRate)
+    ? (parsedCostYuan * formData.yuanRate)
     : (formData.costMnt || 0);
 
   const totalUnitsFromBox = (formData.boxCount || 1) * (formData.unitsPerBox || 1);
@@ -379,7 +379,7 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
               <div className="p-2.5 bg-white rounded-xl border border-gray-200">
                 <span className="text-gray-500 block text-[11px]">1 ширхэг авсан өртөг (₮):</span>
                 <span className="font-mono font-black text-amber-700 text-base block">
-                  {formatMNT(calculatedCostMnt)}
+                  {formatMNT(calculatedCostMnt, true)}
                 </span>
               </div>
               <div className="p-2.5 bg-white rounded-xl border border-gray-200">
