@@ -3,6 +3,7 @@
 import React from 'react';
 import { useCart } from '@/context/CartContext';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { X, Heart, ShoppingBag, Trash2 } from 'lucide-react';
 
 interface SavedModalProps {
@@ -66,12 +67,7 @@ export default function SavedModal({ onQuickView }: SavedModalProps) {
                   className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
                 >
                   <img
-                    src={(() => {
-                      const raw = typeof item.imageUrl === 'string' ? item.imageUrl : '';
-                      return raw.split(',').map((s: string) => s.trim()).find((s: string) =>
-                        s.length > 7 && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:image/'))
-                      ) || '/placeholder-product.svg';
-                    })()}
+                    src={getFirstImageUrl(item.imageUrl)}
                     alt={item.name}
                     onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
                     className="w-14 h-14 object-cover rounded-xl border border-gray-200 shrink-0"

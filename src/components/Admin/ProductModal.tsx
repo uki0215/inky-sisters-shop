@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import BarcodeRenderer from '@/components/BarcodeRenderer';
 import { generateBarcode, formatMNT, formatYuan } from '@/lib/utils';
+import { parseImageUrls, serializeImageUrls } from '@/lib/imageUtils';
 import { X, Barcode, Calculator, Save, RefreshCw, Clock } from 'lucide-react';
 
 interface ProductModalProps {
@@ -292,12 +293,14 @@ export default function ProductModal({ product, categories, onClose, onSave }: P
             <div>
               <ImageUploader
                 multiple
-                value={formData.imageUrl}
-                values={formData.imageUrl
-                  ? formData.imageUrl.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 7 && (s.startsWith('http') || s.startsWith('data:image/') || s.startsWith('/')))
-                  : []}
-                onChangeMultiple={(urls) => setFormData((prev) => ({ ...prev, imageUrl: urls.join(',') }))}
-                onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+                values={parseImageUrls(formData.imageUrl)}
+                onChangeMultiple={(urls) => setFormData((prev) => ({ ...prev, imageUrl: serializeImageUrls(urls) }))}
+                onChange={(url) => {
+                  // only used when single image mode triggers
+                  if (url && !url.startsWith('[')) {
+                    setFormData((prev) => ({ ...prev, imageUrl: url }));
+                  }
+                }}
                 label="Барааны Зурагнууд"
               />
             </div>

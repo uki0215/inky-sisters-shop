@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { formatMNT } from '@/lib/utils';
+import { parseImageUrls, getFirstImageUrl } from '@/lib/imageUtils';
 import { useCart } from '@/context/CartContext';
 import { X, ShoppingBag, Barcode, ChevronRight, ChevronLeft, Share2, Heart, RefreshCw, CheckCircle2, ZoomIn } from 'lucide-react';
 
@@ -43,10 +44,7 @@ export default function QuickViewModal({
   if (!currentProduct) return null;
 
   // Parse images
-  const rawImages =
-    typeof currentProduct?.imageUrl === 'string' && currentProduct.imageUrl.trim()
-      ? currentProduct.imageUrl.split(',').map((s: string) => s.trim()).filter(isValidUrl)
-      : [];
+  const rawImages = parseImageUrls(currentProduct?.imageUrl);
   const productImages = rawImages.length > 0 ? rawImages : [FALLBACK_IMG];
   const safeIdx = selectedImgIndex < productImages.length ? selectedImgIndex : 0;
   const mainImgUrl = productImages[safeIdx];
@@ -171,7 +169,7 @@ export default function QuickViewModal({
                 {recommendedList.map((item) => {
                   const expired = item.discountEndDate ? new Date() > new Date(item.discountEndDate) : false;
                   const disc = Boolean(item.isDiscounted && !expired && item.discountPriceMnt && item.discountPriceMnt < item.priceMnt);
-                  const firstImg = item.imageUrl ? item.imageUrl.split(',')[0].trim() : '';
+                  const firstImg = getFirstImageUrl(item.imageUrl, '');
                   return (
                     <div
                       key={item.id}

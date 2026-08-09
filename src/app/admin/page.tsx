@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatMNT, formatYuan } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import ProductModal from '@/components/Admin/ProductModal';
 import RestockModal from '@/components/Admin/RestockModal';
 import ProductDetailModal from '@/components/Admin/ProductDetailModal';
@@ -390,7 +391,7 @@ export default function AdminPage() {
         <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center; font-weight: bold; font-family: monospace; font-size: 12px; color: #4b5563;">${idx + 1}</td>
         <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: center;">
           <img
-            src="${(() => { const raw = p.imageUrl || ''; const first = raw.split(',').map((s: string) => s.trim()).find((s: string) => s.length > 7 && (s.startsWith('http') || s.startsWith('/')|| s.startsWith('data:image/'))); return first || '/placeholder-product.svg'; })()}"
+            src="${getFirstImageUrl(p.imageUrl)}"
             alt="${p.name}"
             style="width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1px solid #d1d5db; display: block; margin: 0 auto;"
           />
@@ -1098,12 +1099,7 @@ export default function AdminPage() {
                               className="p-4 flex items-center gap-3"
                             >
                               <img
-                                src={(() => {
-                                  const raw = typeof p.imageUrl === 'string' ? p.imageUrl : '';
-                                  return raw.split(',').map((s: string) => s.trim()).find((s: string) =>
-                                    s.length > 7 && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:image/'))
-                                  ) || '/placeholder-product.svg';
-                                })()}
+                                src={getFirstImageUrl(p.imageUrl)}
                                 alt={p.name}
                                 onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
                                 className="w-12 h-12 object-cover rounded-xl border border-gray-200 bg-gray-50 group-hover:scale-105 transition-transform"

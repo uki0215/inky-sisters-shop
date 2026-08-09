@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, Link as LinkIcon, Loader2, X, AlertTriangle, Plus, GripVertical } from 'lucide-react';
+import { isValidImageUrl, parseImageUrls, serializeImageUrls } from '@/lib/imageUtils';
 
 interface ImageUploaderProps {
   value?: string;
@@ -13,18 +14,7 @@ interface ImageUploaderProps {
 }
 
 const FALLBACK_IMG = '/placeholder-product.svg';
-
-const isValidUrl = (url?: string): boolean => {
-  if (!url || typeof url !== 'string') return false;
-  const t = url.trim();
-  if (t.length < 8) return false;
-  return (
-    t.startsWith('http://') ||
-    t.startsWith('https://') ||
-    t.startsWith('/') ||
-    t.startsWith('data:image/')
-  );
-};
+const isValidUrl = isValidImageUrl;
 
 const compressImageFile = (file: File): Promise<string> => {
   return new Promise((resolve) => {
@@ -90,10 +80,8 @@ export default function ImageUploader({
     if (Array.isArray(values) && values.length > 0) {
       return values.filter(isValidUrl);
     }
-    if (value && typeof value === 'string') {
-      return value.split(',').map(s => s.trim()).filter(isValidUrl);
-    }
-    return [];
+    // Use parseImageUrls to correctly handle data:image URLs (which contain commas)
+    return parseImageUrls(value);
   })();
 
   // Keep ref in sync
@@ -103,7 +91,8 @@ export default function ImageUploader({
   const emitImages = useCallback((newList: string[]) => {
     if (isMulti) {
       onChangeMultiple?.(newList);
-      onChange?.(newList[0] ?? '');
+      // also store as JSON string in single onChange so DB gets the correct format
+      onChange?.(serializeImageUrls(newList));
     } else {
       onChange?.(newList[newList.length - 1] ?? '');
     }
@@ -117,6 +106,8 @@ export default function ImageUploader({
       emitImages([newUrls[newUrls.length - 1] ?? '']);
     }
   }, [isMulti, emitImages]);
+
+
 
   const removeImage = (idx: number) => {
     const next = currentImagesRef.current.filter((_, i) => i !== idx);

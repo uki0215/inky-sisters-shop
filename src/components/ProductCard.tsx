@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { formatMNT } from '@/lib/utils';
+import { getFirstImageUrl } from '@/lib/imageUtils';
 import { useCart } from '@/context/CartContext';
 import { Barcode, Heart, RefreshCw } from 'lucide-react';
 
@@ -52,10 +53,7 @@ export default function ProductCard({ product, onQuickView, showStockQuantity = 
       {/* Image Container */}
       <div className="relative aspect-square w-full bg-gray-50 overflow-hidden">
         {(() => {
-          const raw = typeof product.imageUrl === 'string' ? product.imageUrl : '';
-          const firstUrl = raw.split(',').map((s: string) => s.trim()).find((s: string) =>
-            s.length > 7 && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:image/'))
-          ) || '/placeholder-product.svg';
+          const firstUrl = getFirstImageUrl(product.imageUrl);
           return (
             <img
               src={firstUrl}
