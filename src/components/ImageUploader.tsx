@@ -118,30 +118,50 @@ export default function ImageUploader({
     const limit = isMulti ? files.length : 1;
     const slice = files.slice(0, limit);
     setUploadingCount(slice.length);
-    const results: string[] = [];
-    for (const file of slice) {
+
+    // 1. Instant local preview for 0ms visual feedback
+    const localPreviews = await Promise.all(
+      slice.map((file) => compressImageFile(file))
+    );
+    const validLocal = localPreviews.filter(Boolean);
+    if (validLocal.length) {
+      pushImages(validLocal);
+    }
+
+    // 2. Process server upload
+    const serverResults: string[] = [];
+    for (let i = 0; i < slice.length; i++) {
+      const file = slice[i];
+      const localUrl = validLocal[i];
       try {
-        const compressedDataUrl = await compressImageFile(file);
         const fd = new FormData();
         fd.append('file', file);
-        if (compressedDataUrl) {
-          fd.append('dataUrl', compressedDataUrl);
-        }
+        if (localUrl) fd.append('dataUrl', localUrl);
         const res = await fetch('/api/upload', { method: 'POST', body: fd });
         const data = await res.json();
         if (res.ok && data.url) {
-          results.push(data.url);
-        } else {
-          if (compressedDataUrl) results.push(compressedDataUrl);
+          serverResults.push(data.url);
+        } else if (localUrl) {
+          serverResults.push(localUrl);
         }
       } catch {
-        const fallback = await compressImageFile(file);
-        if (fallback) results.push(fallback);
+        if (localUrl) serverResults.push(localUrl);
       }
     }
+
     setUploading(false);
     setUploadingCount(0);
-    if (results.length) pushImages(results);
+
+    // Replace temporary previews if server returned dedicated URLs
+    if (serverResults.length && JSON.stringify(serverResults) !== JSON.stringify(validLocal)) {
+      if (isMulti) {
+        const otherImages = currentImages.filter((img) => !validLocal.includes(img));
+        onChangeMultiple?.([...otherImages, ...serverResults]);
+      } else {
+        onChange?.(serverResults[serverResults.length - 1]);
+      }
+    }
+
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
