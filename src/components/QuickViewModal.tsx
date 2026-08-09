@@ -227,9 +227,9 @@ export default function QuickViewModal({
 
         {/* Recommended strip - compact horizontal bar on top */}
         {recommendedList.length > 0 && (
-          <div className="px-5 pt-5">
+          <div className="px-5 pt-5 pr-16">
             <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3 space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pr-2">
                 <span className="text-[11px] font-bold text-gray-700 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-teal-500 inline-block" />
                   Танд санал болгох
