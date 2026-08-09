@@ -140,15 +140,27 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
 
   const handleUpdateStatus = async (orderId: string, newPaymentStatus: string) => {
     try {
+      const isCancelled = newPaymentStatus === 'CANCELLED';
       // Optimistic state update so red badges disappear instantly
       setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, paymentStatus: newPaymentStatus } : o))
+        prev.map((o) =>
+          o.id === orderId
+            ? {
+                ...o,
+                paymentStatus: newPaymentStatus,
+                ...(isCancelled ? { orderStatus: 'CANCELLED' } : {}),
+              }
+            : o
+        )
       );
 
       const res = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentStatus: newPaymentStatus }),
+        body: JSON.stringify({
+          paymentStatus: newPaymentStatus,
+          ...(isCancelled ? { orderStatus: 'CANCELLED' } : {}),
+        }),
       });
 
       const data = await res.json();

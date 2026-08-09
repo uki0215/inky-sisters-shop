@@ -30,6 +30,9 @@ export async function PUT(
 
     if (paymentStatus) {
       updateData.paymentStatus = paymentStatus;
+      if (paymentStatus === 'CANCELLED') {
+        updateData.orderStatus = 'CANCELLED';
+      }
       if (paymentStatus === 'PAID' && existing.paymentStatus !== 'PAID') {
         updateData.paymentConfirmedAt = new Date();
 

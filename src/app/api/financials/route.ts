@@ -190,7 +190,7 @@ export async function GET() {
     const currentInventoryPotentialProfitMnt = currentInventorySaleValueMnt - currentInventoryCostMnt;
     const totalPurchasedPotentialProfitMnt   = totalPurchasedSaleValueMnt   - totalPurchasedCostMnt;
 
-    const pendingOrdersCount = allOrders.filter((o: any) => o.paymentStatus === 'PENDING_PAYMENT').length;
+    const pendingOrdersCount = allOrders.filter((o: any) => o.paymentStatus === 'PENDING_PAYMENT' && o.paymentStatus !== 'CANCELLED' && o.orderStatus !== 'CANCELLED').length;
     const deletedLogs = financialLogs.filter((l: any) => l.type === 'PAID_ORDER_DELETED' || l.type === 'ORDER_DELETED' || l.description?.includes('Устгагдсан'));
 
     return NextResponse.json({

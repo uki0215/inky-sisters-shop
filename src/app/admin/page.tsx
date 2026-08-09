@@ -183,24 +183,28 @@ export default function AdminPage() {
     return products.filter((p) => (p.stock || 0) <= 5 && !dismissedStockIds.has(p.id));
   }, [products, dismissedStockIds]);
 
-  // Unread ONLINE orders (Exclude POS sales and Exclude Confirmed/Paid orders)
+  // Unread ONLINE orders (Exclude POS sales and Exclude Confirmed/Paid/Cancelled orders)
   const unreadOrders = React.useMemo(() => {
     return ordersList.filter(
       (o) =>
         !o.orderNumber?.startsWith('POS-') &&
+        o.orderStatus !== 'CANCELLED' &&
+        o.paymentStatus !== 'CANCELLED' &&
         o.orderStatus === 'PENDING' &&
-        o.paymentStatus === 'PENDING' &&
+        (o.paymentStatus === 'PENDING_PAYMENT' || o.paymentStatus === 'UNPAID') &&
         !readOrderIds.has(o.id)
     );
   }, [ordersList, readOrderIds]);
 
-  // Pending orders count for sidebar navigation tab
+  // Pending orders count for sidebar navigation tab "Захиалга Тулгах"
   const pendingOrdersCount = React.useMemo(() => {
     return ordersList.filter(
       (o) =>
         !o.orderNumber?.startsWith('POS-') &&
-        (o.paymentStatus === 'PENDING_PAYMENT' || o.paymentStatus === 'UNPAID' || o.orderStatus === 'PENDING') &&
-        o.paymentStatus !== 'PAID'
+        o.paymentStatus !== 'PAID' &&
+        o.paymentStatus !== 'CANCELLED' &&
+        o.orderStatus !== 'CANCELLED' &&
+        (o.paymentStatus === 'PENDING_PAYMENT' || o.paymentStatus === 'UNPAID' || o.orderStatus === 'PENDING')
     ).length;
   }, [ordersList]);
 
