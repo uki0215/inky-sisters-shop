@@ -511,7 +511,7 @@ function HomeContent() {
       {/* SECTION 1: SECTION HEADER & FEATURED DISCOUNTS ("ОНЦЛОХ ХЯМДРАЛ") */}
       {/* SECTION 1: FEATURED DISCOUNTS ("Inky's sales") WITH BROWSE ALL BUTTON */}
       {discountedProducts.length > 0 && !isCatalogMode && (
-        <section id="featured-discounts" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white my-6 border-y border-gray-200">
+        <section id="featured-discounts" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/85 backdrop-blur-md rounded-3xl shadow-sm border border-gray-200/80 my-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight font-sans">
@@ -793,7 +793,7 @@ function HomeContent() {
       )}
 
       {/* MAIN PRODUCTS GRID SECTION */}
-      <main id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white my-6 border-y border-gray-200">
+      <main id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/85 backdrop-blur-md rounded-3xl shadow-sm border border-gray-200/80 my-6">
         {!isCatalogMode ? (
           /* HOME PAGE MODE: 6 Products list, NO sidebar, "Бүгдийг үзэх" button on the right */
           <div className="space-y-6">
