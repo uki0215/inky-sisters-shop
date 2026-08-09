@@ -355,7 +355,16 @@ export async function DELETE(
 
     // Create permanent audit log entry for deleted order
     const isPaidOrder = existing.paymentStatus === 'PAID';
-    const itemSummary = existing.items.map((i: any) => `${i.productName} (${i.quantity}ш)`).join(', ');
+    const itemSummary = existing.items
+      .map((i: any) => {
+        // Strip any embedded [IMG:...] base64 or data URI from product name
+        const cleanName = (i.productName || '')
+          .replace(/\[IMG:[^\]]{0,30000}\]/g, '')
+          .replace(/data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]{0,100000}/g, '')
+          .trim();
+        return `${cleanName} (${i.quantity}ш)`;
+      })
+      .join(', ');
     await db.financialLog.create({
       data: {
         type: isPaidOrder ? 'PAID_ORDER_DELETED' : 'ORDER_DELETED',

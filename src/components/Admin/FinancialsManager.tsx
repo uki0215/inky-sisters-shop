@@ -745,6 +745,11 @@ export default function FinancialsManager() {
               <tbody className="divide-y divide-gray-100 font-sans">
                 {(financialData.deletedLogs || []).map((log: any) => {
                   const isPaid = log.type === 'PAID_ORDER_DELETED' || log.description?.includes('[Төлөв: Төлөгдсөн]');
+                  // Strip base64 image blobs and [IMG:...] tags from description before display
+                  const cleanDescription = (log.description || '')
+                    .replace(/\[IMG:[^\]]{0,30000}\]/g, '')
+                    .replace(/data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]{0,100000}/g, '')
+                    .trim();
                   return (
                     <tr key={log.id} className="hover:bg-gray-50/80 transition-colors">
                       <td className="py-3.5 px-4 font-mono text-gray-500 whitespace-nowrap">
@@ -761,8 +766,8 @@ export default function FinancialsManager() {
                           {isPaid ? '✅ Баталгаажсан (Төлөгдсөн)' : '⏳ Баталгаажаагүй'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-medium text-gray-900 leading-relaxed max-w-xl">
-                        {log.description}
+                      <td className="py-3.5 px-4 font-medium text-gray-900 leading-relaxed max-w-md break-words overflow-hidden">
+                        {cleanDescription}
                       </td>
                       <td className="py-3.5 px-4 text-right font-extrabold text-slate-900 font-mono text-sm whitespace-nowrap">
                         {formatMNT(log.amountMnt, true)}
