@@ -327,7 +327,7 @@ export default function FinancialsManager() {
                 Үлдэгдлийн Өртөг:
               </span>
               <span className="text-xl font-extrabold text-gray-900 block font-sans">
-                {formatMNT(financialData.currentInventoryCostMnt || 0)}
+                {formatMNT(financialData.currentInventoryCostMnt || 0, true)}
               </span>
               <span className="text-[11px] text-gray-500 block">
                 Татан авалтын нийт өртөг
@@ -341,7 +341,7 @@ export default function FinancialsManager() {
                 Зарах Боломжит Дүн:
               </span>
               <span className="text-xl font-extrabold text-teal-950 block font-sans">
-                {formatMNT(financialData.currentInventorySaleValueMnt || 0)}
+                {formatMNT(financialData.currentInventorySaleValueMnt || 0, true)}
               </span>
               <span className="text-[11px] text-teal-800 block">
                 Бүрэн зарагдвал олох орлого
@@ -355,7 +355,7 @@ export default function FinancialsManager() {
                 Боломжит Ашиг:
               </span>
               <span className="text-xl font-extrabold text-emerald-800 block font-sans">
-                {formatMNT(financialData.currentInventoryPotentialProfitMnt || 0)}
+                {formatMNT(financialData.currentInventoryPotentialProfitMnt || 0, true)}
               </span>
               <span className="text-[11px] text-emerald-800 block">
                 Өртөг хассан цэвэр ашиг
@@ -410,7 +410,7 @@ export default function FinancialsManager() {
                 </span>
               </div>
               <span className="text-xl font-extrabold text-emerald-950 block font-sans mt-2">
-                {formatMNT(cashOrdersTotal)}
+                {formatMNT(cashOrdersTotal, true)}
               </span>
               <span className="text-[11px] text-emerald-800 block mt-0.5">
                 Бэлнээр тушаагдсан орлого
@@ -436,7 +436,7 @@ export default function FinancialsManager() {
                 </span>
               </div>
               <span className="text-xl font-extrabold text-teal-950 block font-sans mt-2">
-                {formatMNT(transferOrdersTotal)}
+                {formatMNT(transferOrdersTotal, true)}
               </span>
               <span className="text-[11px] text-teal-800 block mt-0.5">
                 Данс болон QR орлого
@@ -462,7 +462,7 @@ export default function FinancialsManager() {
                 </span>
               </div>
               <span className="text-xl font-extrabold text-purple-950 block font-sans mt-2">
-                {formatMNT(cardOrdersTotal)}
+                {formatMNT(cardOrdersTotal, true)}
               </span>
               <span className="text-[11px] text-purple-800 block mt-0.5">
                 Пос терминалын орлого
@@ -488,7 +488,7 @@ export default function FinancialsManager() {
                 </span>
               </div>
               <span className="text-xl font-extrabold text-rose-950 block font-sans mt-2">
-                {formatMNT(creditOrdersTotal)}
+                {formatMNT(creditOrdersTotal, true)}
               </span>
               <span className="text-[11px] text-rose-800 block mt-0.5">
                 Дараа төлбөрт авлага
@@ -508,16 +508,16 @@ export default function FinancialsManager() {
             <TrendingUp className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl font-black text-gray-900 font-sans">
-            {formatMNT(paidSales)}
+            {formatMNT(paidSales, true)}
           </div>
           <div className="pt-2 border-t border-gray-100 grid grid-cols-2 gap-1 text-[11px] font-mono">
             <div>
               <span className="text-gray-400 block font-sans text-[10px]">Кассаар:</span>
-              <span className="font-bold text-amber-900">{formatMNT(posSalesTotal)}</span>
+              <span className="font-bold text-amber-900">{formatMNT(posSalesTotal, true)}</span>
             </div>
             <div>
               <span className="text-gray-400 block font-sans text-[10px]">Онлайнаар:</span>
-              <span className="font-bold text-teal-800">{formatMNT(onlineSalesTotal)}</span>
+              <span className="font-bold text-teal-800">{formatMNT(onlineSalesTotal, true)}</span>
             </div>
           </div>
         </div>
@@ -529,7 +529,7 @@ export default function FinancialsManager() {
             <ArrowUpCircle className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-700 font-sans">
-            {formatMNT(grossProfit)}
+            {formatMNT(grossProfit, true)}
           </div>
           <span className="text-[11px] text-gray-400 block">
             Өртөг хассан ашиг
@@ -543,7 +543,7 @@ export default function FinancialsManager() {
             <ArrowDownCircle className="w-4 h-4 text-rose-600" />
           </div>
           <div className="text-2xl font-black text-rose-600 font-sans">
-            -{formatMNT(totalOperatingExpenses)}
+            -{formatMNT(totalOperatingExpenses, true)}
           </div>
           <span className="text-[11px] text-gray-400 block">
             Түрээс, тог, ус, бусад
@@ -561,7 +561,7 @@ export default function FinancialsManager() {
             <DollarSign className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-black font-sans text-amber-300">
-            {formatMNT(netProfit)}
+            {formatMNT(netProfit, true)}
           </div>
           <span className="text-[11px] text-teal-100/80 block">
             Үндсэн ашгаас зардлыг хассан дүн
@@ -638,7 +638,7 @@ export default function FinancialsManager() {
             Урсгал Зардлын Түүх ({expenses.length})
           </h3>
           <span className="text-xs font-mono font-bold text-rose-600">
-            Нийт зардал: -{formatMNT(totalOperatingExpenses)}
+            Нийт зардал: -{formatMNT(totalOperatingExpenses, true)}
           </span>
         </div>
 
@@ -677,7 +677,7 @@ export default function FinancialsManager() {
                         {exp.note && <span className="block text-[10px] text-gray-400 font-normal">{exp.note}</span>}
                       </td>
                       <td className="py-3.5 px-4 text-right font-extrabold text-rose-600 font-mono text-sm whitespace-nowrap">
-                        -{formatMNT(exp.amountMnt)}
+                        -{formatMNT(exp.amountMnt, true)}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         <button
@@ -752,7 +752,7 @@ export default function FinancialsManager() {
                         {log.description}
                       </td>
                       <td className="py-3.5 px-4 text-right font-extrabold text-slate-900 font-mono text-sm whitespace-nowrap">
-                        {formatMNT(log.amountMnt)}
+                        {formatMNT(log.amountMnt, true)}
                       </td>
                     </tr>
                   );
