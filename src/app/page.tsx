@@ -83,7 +83,12 @@ function HomeContent() {
           localStorage.setItem('inky_cached_settings', JSON.stringify(dataSettings));
         } catch (e) {}
       }
-      if (Array.isArray(dataSlides)) setHeroSlides(dataSlides);
+      if (Array.isArray(dataSlides)) {
+        setHeroSlides(dataSlides);
+        try {
+          localStorage.setItem('inky_cached_hero_slides', JSON.stringify(dataSlides));
+        } catch (e) {}
+      }
       if (Array.isArray(dataCollections)) setFeaturedCollections(dataCollections);
       if (Array.isArray(dataBanks)) setBanksList(dataBanks);
       if (Array.isArray(dataBundles)) setBundles(dataBundles);
@@ -100,11 +105,15 @@ function HomeContent() {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     } catch (e) {}
 
-    // Load cached settings immediately for instant 0ms logo & address rendering
+    // Load cached settings & hero slides immediately for instant 0ms rendering
     try {
       const cached = localStorage.getItem('inky_cached_settings');
       if (cached) {
         setSettings(JSON.parse(cached));
+      }
+      const cachedSlides = localStorage.getItem('inky_cached_hero_slides');
+      if (cachedSlides) {
+        setHeroSlides(JSON.parse(cachedSlides));
       }
     } catch (e) {}
 
