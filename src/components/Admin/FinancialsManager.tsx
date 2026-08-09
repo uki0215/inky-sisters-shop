@@ -35,7 +35,15 @@ import {
 } from 'lucide-react';
 
 export default function FinancialsManager() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_financials');
+        if (cached) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
   const [paymentFilter, setPaymentFilter] = useState<'ALL' | 'CASH' | 'TRANSFER' | 'CARD' | 'CREDIT'>('ALL');
   
   // Collapsible Section Toggle States
@@ -43,12 +51,14 @@ export default function FinancialsManager() {
   const [showCurrentInventorySection, setShowCurrentInventorySection] = useState(true);
   const [showPaymentMethodsSection, setShowPaymentMethodsSection] = useState(true);
 
-  const [financialData, setFinancialData] = useState<any>({
-    totalSales: 0,
-    paidSales: 0,
-    totalProfit: 0,
-    totalOrders: 0,
-    orders: [],
+  const [financialData, setFinancialData] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_financials');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return { totalSales: 0, paidSales: 0, totalProfit: 0, totalOrders: 0, orders: [] };
   });
 
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -74,17 +84,20 @@ export default function FinancialsManager() {
   ];
 
   const fetchData = async () => {
-    setLoading(true);
+    const hasCachedFin = !!localStorage.getItem('inky_admin_cached_financials');
+    if (!hasCachedFin) setLoading(true);
     try {
       const [resFin, resExp] = await Promise.all([
         fetch('/api/financials'),
         fetch('/api/expenses'),
       ]);
 
-      const dataFin = await resFin.json();
-      const dataExp = await resExp.json();
+      const [dataFin, dataExp] = await Promise.all([resFin.json(), resExp.json()]);
 
-      if (dataFin) setFinancialData(dataFin);
+      if (dataFin) {
+        setFinancialData(dataFin);
+        try { localStorage.setItem('inky_admin_cached_financials', JSON.stringify(dataFin)); } catch (e) {}
+      }
       if (Array.isArray(dataExp)) setExpenses(dataExp);
     } catch (e) {
       console.error(e);

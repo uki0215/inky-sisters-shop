@@ -132,10 +132,26 @@ function renderFormattedHistoryCards(returnNote: string) {
 }
 
 export default function OrderManager({ products = [], onOrderUpdate }: OrderManagerProps) {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_orders');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [filter, setFilter] = useState<'ALL' | 'PENDING_PAYMENT' | 'PAID' | 'CANCELLED' | 'HAS_RETURN' | 'HAS_EDIT'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_orders');
+        if (cached && JSON.parse(cached).length > 0) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [notificationMsg, setNotificationMsg] = useState<string | null>(null);
 
@@ -215,11 +231,17 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
   };
 
   const fetchOrders = async () => {
-    setLoading(true);
+    const hasCached = !!localStorage.getItem('inky_admin_cached_orders');
+    if (!hasCached) setLoading(true);
     try {
       const res = await fetch(`/api/orders?status=${filter}`);
       const data = await res.json();
-      if (Array.isArray(data)) setOrders(data);
+      if (Array.isArray(data)) {
+        setOrders(data);
+        if (filter === 'ALL') {
+          try { localStorage.setItem('inky_admin_cached_orders', JSON.stringify(data)); } catch (e) {}
+        }
+      }
     } catch (e) {
       console.error('Failed to fetch orders', e);
     } finally {

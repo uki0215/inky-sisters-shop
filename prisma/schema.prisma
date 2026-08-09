@@ -55,6 +55,9 @@ model Product {
   bundleItems      BundleItem[]
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
+
+  @@index([categoryId])
+  @@index([createdAt])
 }
 
 model ProductBundle {
@@ -99,6 +102,10 @@ model ProductHistory {
   newStock     Int?
   note         String?
   createdAt    DateTime @default(now())
+
+  @@index([productId])
+  @@index([changeType])
+  @@index([createdAt])
 }
 
 model Order {
@@ -119,6 +126,10 @@ model Order {
   items              OrderItem[]
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
+
+  @@index([paymentStatus])
+  @@index([orderStatus])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -132,6 +143,9 @@ model OrderItem {
   priceMnt    Float
   costMnt     Float?   // авсан өртөг ₮ (тухайн үеийн өртөг)
   quantity    Int
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model BankQR {
@@ -165,6 +179,9 @@ model FinancialLog {
   description String
   referenceId String?
   createdAt   DateTime @default(now())
+
+  @@index([type])
+  @@index([createdAt])
 }
 
 model StoreSetting {

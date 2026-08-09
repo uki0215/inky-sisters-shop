@@ -48,10 +48,16 @@ export function generateOrderNumber(): string {
 export function notifyDataSync() {
   if (typeof window !== 'undefined') {
     try {
+      // Invalidate storefront caches
       localStorage.removeItem('inky_cached_products');
       localStorage.removeItem('inky_cached_categories');
       localStorage.removeItem('inky_cached_hero_slides');
       localStorage.removeItem('inky_cached_settings');
+      // Invalidate admin caches so next load re-fetches fresh data
+      localStorage.removeItem('inky_admin_cached_products');
+      localStorage.removeItem('inky_admin_cached_categories');
+      localStorage.removeItem('inky_admin_cached_financials');
+      localStorage.removeItem('inky_admin_cached_orders');
       localStorage.setItem('inky_last_stock_update', Date.now().toString());
 
       const channel = new BroadcastChannel('inky_stock_sync');

@@ -69,12 +69,44 @@ export default function AdminPage() {
     'pos' | 'financials' | 'products' | 'orders' | 'bundles' | 'categories' | 'banks' | 'promotions' | 'collections' | 'settings' | 'profile'
   >('pos');
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_products');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [categories, setCategories] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_categories');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [bundles, setBundles] = useState<any[]>([]);
-  const [financials, setFinancials] = useState<any>(null);
+  const [financials, setFinancials] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_financials');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return null;
+  });
   const [settings, setSettings] = useState<any>({ showStockQuantity: true });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_products');
+        if (cached && JSON.parse(cached).length > 0) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modals
@@ -311,7 +343,7 @@ export default function AdminPage() {
   };
 
   const fetchAdminData = async (silent = false) => {
-    if (!silent) setLoading(true);
+    if (!silent && products.length === 0) setLoading(true);
     try {
       const [resProd, resCat, resFin, resSet, resBun] = await Promise.all([
         fetch('/api/products'),
@@ -321,16 +353,27 @@ export default function AdminPage() {
         fetch('/api/bundles'),
       ]);
 
-      const dataProd = await resProd.json();
-      const dataCat = await resCat.json();
-      const dataFin = await resFin.json();
-      const dataSet = await resSet.json();
-      const dataBun = await resBun.json();
+      const [dataProd, dataCat, dataFin, dataSet, dataBun] = await Promise.all([
+        resProd.json(),
+        resCat.json(),
+        resFin.json(),
+        resSet.json(),
+        resBun.json(),
+      ]);
 
-      if (Array.isArray(dataProd)) setProducts(dataProd);
-      if (Array.isArray(dataCat)) setCategories(dataCat);
+      if (Array.isArray(dataProd)) {
+        setProducts(dataProd);
+        try { localStorage.setItem('inky_admin_cached_products', JSON.stringify(dataProd)); } catch (e) {}
+      }
+      if (Array.isArray(dataCat)) {
+        setCategories(dataCat);
+        try { localStorage.setItem('inky_admin_cached_categories', JSON.stringify(dataCat)); } catch (e) {}
+      }
       if (Array.isArray(dataBun)) setBundles(dataBun);
-      if (dataFin) setFinancials(dataFin);
+      if (dataFin) {
+        setFinancials(dataFin);
+        try { localStorage.setItem('inky_admin_cached_financials', JSON.stringify(dataFin)); } catch (e) {}
+      }
       if (dataSet && typeof dataSet.showStockQuantity === 'boolean') setSettings(dataSet);
     } catch (e) {
       console.error(e);
