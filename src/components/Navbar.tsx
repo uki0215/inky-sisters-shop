@@ -47,13 +47,14 @@ export default function Navbar({
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Filter ONLY main categories (where parentId is null), exclude "Бусад" / empty names
+  // Filter ONLY main categories (where parentId is null), exclude "Бусад", "Ангилалгүй" / empty names
   const mainCategories = useMemo(() => {
     return (categories || []).filter((c) => {
       if (c.parentId) return false; // must be top-level
       const name = (c.name || '').trim();
       if (!name) return false; // skip unnamed
-      if (name === 'Бусад' || name.toLowerCase() === 'other') return false;
+      const lower = name.toLowerCase();
+      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
       return true;
     });
   }, [categories]);
@@ -469,7 +470,15 @@ export default function Navbar({
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     {activeHover?.children && activeHover.children.length > 0 ? (
-                      activeHover.children.map((sub: any) => (
+                      activeHover.children
+                        .filter((sub: any) => {
+                          const name = (sub.name || '').trim();
+                          if (!name) return false;
+                          const lower = name.toLowerCase();
+                          if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+                          return true;
+                        })
+                        .map((sub: any) => (
                         <button
                           key={sub.id}
                           onClick={() => {

@@ -15,6 +15,7 @@ import DeliveryModal from '@/components/DeliveryModal';
 import BarcodeListener from '@/components/BarcodeListener';
 import HomeBundles from '@/components/HomeBundles';
 import BundleModal from '@/components/BundleModal';
+import AnimatedBackground from '@/components/AnimatedBackground';
 import { CartProvider, useCart } from '@/context/CartContext';
 import { formatMNT } from '@/lib/utils';
 import { ShoppingBag, ChevronLeft, ChevronRight, ChevronDown, Barcode, Sparkles, ArrowRight, Eye, Tag, Star, CreditCard, SlidersHorizontal, RotateCcw, X, PenTool, BookOpen, Brush, Briefcase, LayoutGrid, Folder, GraduationCap, Gift, Layers, Bookmark, Flame } from 'lucide-react';
@@ -338,7 +339,10 @@ function HomeContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-teal-700 selection:text-white">
+    <div className="relative min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-teal-700 selection:text-white overflow-x-hidden">
+
+      {/* Floating Ambient Glowing Visual Effect */}
+      <AnimatedBackground />
 
       {/* Global USB Barcode Scanner Listener */}
       <BarcodeListener onScan={handleHardwareScan} />
@@ -945,9 +949,23 @@ function HomeContent() {
                     </button>
 
                     {categories
-                      .filter((c: any) => !c.parentId)
+                      .filter((c: any) => {
+                        if (c.parentId) return false;
+                        const name = (c.name || '').trim();
+                        if (!name) return false;
+                        const lower = name.toLowerCase();
+                        if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+                        return true;
+                      })
                       .map((mainCat: any) => {
-                        const subCats = categories.filter((sub: any) => sub.parentId === mainCat.id);
+                        const subCats = categories.filter((sub: any) => {
+                          if (sub.parentId !== mainCat.id) return false;
+                          const name = (sub.name || '').trim();
+                          if (!name) return false;
+                          const lower = name.toLowerCase();
+                          if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+                          return true;
+                        });
                         const isMainActive = activeCategory === mainCat.slug || activeCategory === mainCat.id;
                         const isExpanded = expandedCategoryIds.includes(mainCat.id);
 
