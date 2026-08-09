@@ -10,13 +10,14 @@ export interface CartItem {
   originalPriceMnt?: number | null;
   discountPriceMnt?: number | null;
   imageUrl?: string | null;
+  selectedImageUrl?: string | null; // the specific image the customer chose (e.g. a colour variant)
   stock: number;
   quantity: number;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: any, quantity?: number) => void;
+  addToCart: (product: any, quantity?: number, selectedImageUrl?: string | null) => void;
   addBundleToCart: (bundle: any, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -127,7 +128,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsCartOpen(true);
   };
 
-  const addToCart = (product: any, quantity = 1) => {
+  const addToCart = (product: any, quantity = 1, selectedImageUrl?: string | null) => {
     if (product.bundlePriceMnt || product.isBundle) {
       addBundleToCart(product, quantity);
       return;
@@ -140,7 +141,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (existing) {
         const newQty = Math.min(existing.quantity + quantity, product.stock);
         return prevCart.map((item) =>
-          item.id === product.id ? { ...item, quantity: newQty } : item
+          item.id === product.id
+            ? {
+                ...item,
+                quantity: newQty,
+                // Update selectedImageUrl if a new one was specified
+                selectedImageUrl: selectedImageUrl !== undefined ? selectedImageUrl : item.selectedImageUrl,
+              }
+            : item
         );
       } else {
         const itemPrice = product.isDiscounted && product.discountPriceMnt
@@ -157,6 +165,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             originalPriceMnt: product.priceMnt,
             discountPriceMnt: product.discountPriceMnt,
             imageUrl: product.imageUrl,
+            selectedImageUrl: selectedImageUrl ?? null,
             stock: product.stock,
             quantity: Math.min(quantity, product.stock),
           },

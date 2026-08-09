@@ -67,7 +67,7 @@ export default function CartDrawer() {
                 return (
                   <div key={item.id} className="pt-4 first:pt-0 flex items-center gap-3">
                     <img
-                      src={getFirstImageUrl(item.imageUrl)}
+                      src={item.selectedImageUrl || getFirstImageUrl(item.imageUrl)}
                       alt={item.name}
                       onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
                       className="w-16 h-16 object-cover rounded-lg border border-gray-200 bg-gray-50 flex-shrink-0"

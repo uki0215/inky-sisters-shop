@@ -81,7 +81,8 @@ export default function QuickViewModal({
   };
 
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) addToCart(currentProduct);
+    // Pass the currently displayed image so the cart shows the customer's chosen colour/variant
+    addToCart(currentProduct, quantity, mainImgUrl !== FALLBACK_IMG ? mainImgUrl : null);
     showToast('🛒 Сагсанд амжилттай нэмэгдлээ!');
   };
 
