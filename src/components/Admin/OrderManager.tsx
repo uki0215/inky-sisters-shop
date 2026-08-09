@@ -619,12 +619,12 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                     </div>
 
                     {order.returnNote && (
-                      <div className="p-3 bg-amber-50/80 border border-amber-200 text-amber-950 rounded-xl space-y-1.5 shadow-2xs">
+                      <div className="p-3 bg-amber-50/80 border border-amber-200 text-amber-950 rounded-xl space-y-1.5 shadow-2xs overflow-hidden max-w-full">
                         <div className="flex items-center gap-2 font-extrabold text-xs text-amber-900 border-b border-amber-200/60 pb-1">
-                          <History className="w-4 h-4 text-amber-700" />
+                          <History className="w-4 h-4 text-amber-700 shrink-0" />
                           <span>📜 Захиалгын засвар &amp; Буцаалтын түүх (History):</span>
                         </div>
-                        <div className="whitespace-pre-wrap font-mono text-[11px] leading-relaxed pl-1 text-gray-800">
+                        <div className="whitespace-pre-wrap font-mono text-[11px] leading-relaxed pl-1 text-gray-800 break-words break-all overflow-x-auto">
                           {order.returnNote}
                         </div>
                       </div>

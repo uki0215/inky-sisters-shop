@@ -187,7 +187,7 @@ export default function ProductHistoryModal({ product, onClose }: ProductHistory
                   </span>
                 </div>
 
-                <p className="text-xs font-bold text-gray-800 font-sans">
+                <p className="text-xs font-bold text-gray-800 font-sans break-words overflow-hidden">
                   {item.description}
                 </p>
 
@@ -197,7 +197,7 @@ export default function ProductHistoryModal({ product, onClose }: ProductHistory
                     <>
                       {item.newCostMnt !== null && item.newCostMnt !== undefined && item.newCostMnt > 0 && (
                         <span className="px-2.5 py-1 bg-red-50 text-red-800 border border-red-200 rounded-lg font-bold">
-                          Анх авсан нэгж өртөг: <span className="font-extrabold">{formatMNT(item.newCostMnt)}</span>
+                          Анх авсан нэгж өртөг: <span className="font-extrabold">{formatMNT(item.newCostMnt, true)}</span>
                         </span>
                       )}
                       {item.newPriceMnt !== null && item.newPriceMnt !== undefined && item.newPriceMnt > 0 && (
