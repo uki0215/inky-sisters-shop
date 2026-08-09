@@ -248,9 +248,9 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
 
     const { hasReturn, hasEdit } = getOrderActionFlags(order);
 
-    if (filter === 'PENDING_PAYMENT' && (order.paymentStatus === 'PAID' || order.paymentStatus === 'CANCELLED')) return false;
-    if (filter === 'PAID' && order.paymentStatus !== 'PAID') return false;
-    if (filter === 'CANCELLED' && order.paymentStatus !== 'CANCELLED') return false;
+    if (filter === 'PENDING_PAYMENT' && (order.paymentStatus === 'PAID' || order.paymentStatus === 'CANCELLED' || order.orderStatus === 'CANCELLED')) return false;
+    if (filter === 'PAID' && (order.paymentStatus !== 'PAID' || order.paymentStatus === 'CANCELLED' || order.orderStatus === 'CANCELLED')) return false;
+    if (filter === 'CANCELLED' && order.paymentStatus !== 'CANCELLED' && order.orderStatus !== 'CANCELLED') return false;
     if (filter === 'HAS_RETURN' && !hasReturn) return false;
     if (filter === 'HAS_EDIT' && !hasEdit) return false;
 
@@ -370,6 +370,14 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
               }`}
             >
               Баталгаажсан
+            </button>
+            <button
+              onClick={() => setFilter('CANCELLED')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filter === 'CANCELLED' ? 'bg-rose-700 text-white shadow-xs font-extrabold' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Цуцлагдсан
             </button>
             <button
               onClick={() => setFilter('HAS_RETURN')}
@@ -529,15 +537,26 @@ export default function OrderManager({ products = [], onOrderUpdate }: OrderMana
                       );
                     })()}
 
-                    {/* Order Edit & Return Icon Button */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedOrderForReturn(order)}
-                      className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-200 transition-all flex items-center justify-center shrink-0"
-                      title="Захиалга Засах / Буцаалт хийх"
-                    >
-                      <RotateCcw className="w-4 h-4 text-amber-700" />
-                    </button>
+                    {/* Order Edit & Return Icon Button (Disabled for Cancelled orders) */}
+                    {(() => {
+                      const isCancelledOrder = order.paymentStatus === 'CANCELLED' || order.orderStatus === 'CANCELLED';
+
+                      return (
+                        <button
+                          type="button"
+                          disabled={isCancelledOrder}
+                          onClick={() => !isCancelledOrder && setSelectedOrderForReturn(order)}
+                          className={`p-2 rounded-xl border transition-all flex items-center justify-center shrink-0 ${
+                            isCancelledOrder
+                              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50 shadow-none'
+                              : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200 cursor-pointer'
+                          }`}
+                          title={isCancelledOrder ? 'Цуцлагдсан захиалгад засвар/буцаалт хийх боломжгүй' : 'Захиалга Засах / Буцаалт хийх'}
+                        >
+                          <RotateCcw className={`w-4 h-4 ${isCancelledOrder ? 'text-gray-400' : 'text-amber-700'}`} />
+                        </button>
+                      );
+                    })()}
 
                     {(order.paymentStatus === 'PENDING_PAYMENT' || order.paymentStatus === 'UNPAID' || order.paymentMethod === 'CREDIT') && order.paymentStatus !== 'PAID' && (
                       <button
