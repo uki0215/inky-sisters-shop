@@ -22,43 +22,19 @@ import { ShoppingBag, ChevronLeft, ChevronRight, ChevronDown, Barcode, Sparkles,
 
 function HomeContent() {
   const { addBundleToCart } = useCart();
-  const [products, setProducts] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_cached_products');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return [];
-  });
-  const [categories, setCategories] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_cached_categories') || localStorage.getItem('inky_admin_cached_categories');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return [];
-  });
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [heroSlides, setHeroSlides] = useState<any[]>([]);
   const [featuredCollections, setFeaturedCollections] = useState<any[]>([]);
   const [banksList, setBanksList] = useState<any[]>([]);
   const [promoBanner, setPromoBanner] = useState<any>(null);
-  const [settings, setSettings] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_cached_settings');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return {
-      showStockQuantity: true,
-      logoUrl: '',
-      address: 'Улаанбаатар хот, Сүхбаатар дүүрэг, 1-р хороо, Энхтайваны өргөн чөлөө',
-      phone: '88112233, 99112233',
-      email: 'info@inkysisters.mn',
-      workingHours: 'Даваа - Ням: 10:00 - 20:00',
-    };
+  const [settings, setSettings] = useState<any>({
+    showStockQuantity: true,
+    logoUrl: '',
+    address: 'Улаанбаатар хот, Сүхбаатар дүүрэг, 1-р хороо, Энхтайваны өргөн чөлөө',
+    phone: '88112233, 99112233',
+    email: 'info@inkysisters.mn',
+    workingHours: 'Даваа - Ням: 10:00 - 20:00',
   });
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -70,15 +46,7 @@ function HomeContent() {
   const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
   const [quickViewBundle, setQuickViewBundle] = useState<any | null>(null);
   const [bundles, setBundles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_cached_products');
-        if (cached && JSON.parse(cached).length > 0) return false;
-      } catch (e) {}
-    }
-    return true;
-  });
+  const [loading, setLoading] = useState(true);
   const [scannedNotice, setScannedNotice] = useState<string | null>(null);
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
 
@@ -147,7 +115,7 @@ function HomeContent() {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     } catch (e) {}
 
-    // Load cached settings & hero slides immediately for instant 0ms rendering
+    // Load cached settings, hero slides, categories, and products immediately for instant 0ms rendering
     try {
       const cached = localStorage.getItem('inky_cached_settings');
       if (cached) {
@@ -156,6 +124,18 @@ function HomeContent() {
       const cachedSlides = localStorage.getItem('inky_cached_hero_slides');
       if (cachedSlides) {
         setHeroSlides(JSON.parse(cachedSlides));
+      }
+      const cachedCats = localStorage.getItem('inky_cached_categories') || localStorage.getItem('inky_admin_cached_categories');
+      if (cachedCats) {
+        setCategories(JSON.parse(cachedCats));
+      }
+      const cachedProds = localStorage.getItem('inky_cached_products');
+      if (cachedProds) {
+        const parsed = JSON.parse(cachedProds);
+        setProducts(parsed);
+        if (parsed.length > 0) {
+          setLoading(false);
+        }
       }
     } catch (e) {}
 

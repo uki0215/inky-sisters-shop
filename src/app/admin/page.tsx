@@ -71,56 +71,16 @@ export default function AdminPage() {
   >('pos');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const [products, setProducts] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_admin_cached_products');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return [];
-  });
-  const [categories, setCategories] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_admin_cached_categories');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return [];
-  });
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [bundles, setBundles] = useState<any[]>([]);
-  const [financials, setFinancials] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_admin_cached_financials');
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return null;
-  });
+  const [financials, setFinancials] = useState<any>(null);
   const [settings, setSettings] = useState<any>({ showStockQuantity: true });
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = localStorage.getItem('inky_admin_cached_products');
-        if (cached && JSON.parse(cached).length > 0) return false;
-      } catch (e) {}
-    }
-    return true;
-  });
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Left Sidebar Collapse state (persistent in localStorage)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('inky_admin_sidebar_collapsed');
-        return saved === 'true';
-      } catch (e) {}
-    }
-    return false;
-  });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed((prev) => {
@@ -318,8 +278,22 @@ export default function AdminPage() {
 
   useEffect(() => {
     try {
+      // Load cached admin states on mount
+      const cachedProds = localStorage.getItem('inky_admin_cached_products');
+      if (cachedProds) {
+        const parsed = JSON.parse(cachedProds);
+        setProducts(parsed);
+        if (parsed.length > 0) setLoading(false);
+      }
+      const cachedCats = localStorage.getItem('inky_admin_cached_categories');
+      if (cachedCats) setCategories(JSON.parse(cachedCats));
+      const cachedFin = localStorage.getItem('inky_admin_cached_financials');
+      if (cachedFin) setFinancials(JSON.parse(cachedFin));
+      const savedSidebar = localStorage.getItem('inky_admin_sidebar_collapsed');
+      if (savedSidebar) setIsSidebarCollapsed(savedSidebar === 'true');
+
       // Check local authentication state
-      const authSaved = typeof window !== 'undefined' ? localStorage.getItem('inky_admin_auth') : null;
+      const authSaved = localStorage.getItem('inky_admin_auth');
       if (authSaved === 'true') {
         setIsAuthenticated(true);
         fetchAdminData();

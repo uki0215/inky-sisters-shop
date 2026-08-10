@@ -43,6 +43,7 @@ export default function Navbar({
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<any>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -69,14 +70,14 @@ export default function Navbar({
   // Pre-cached category list fallback so mega menu renders in 0ms without waiting for data fetch
   const allCategories = useMemo(() => {
     if (categories && categories.length > 0) return categories;
-    if (typeof window !== 'undefined') {
+    if (isMounted) {
       try {
         const cached = localStorage.getItem('inky_cached_categories') || localStorage.getItem('inky_admin_cached_categories');
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
     return [];
-  }, [categories]);
+  }, [categories, isMounted]);
 
   // Filter ONLY main categories (where parentId is null), exclude "Бусад", "Ангилалгүй" / empty names
   const mainCategories = useMemo(() => {
@@ -148,6 +149,7 @@ export default function Navbar({
 
   // Close mega menu and search dropdown when clicking outside
   useEffect(() => {
+    setIsMounted(true);
     function handleClickOutside(event: MouseEvent) {
       if (megaMenuRef.current && !megaMenuRef.current.contains(event.target as Node)) {
         setIsMegaMenuOpen(false);
