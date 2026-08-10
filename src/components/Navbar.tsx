@@ -374,25 +374,25 @@ export default function Navbar({
         {/* Navigation Bar with Mega Menu Trigger & Delivery Button */}
         <div className="py-2 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 min-w-0 py-0.5">
             {/* Mega Menu Button */}
             <button
               onClick={handleMegaMenuClick}
               onMouseEnter={handleMouseEnterMegaMenu}
-              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm shrink-0 flex-1 sm:flex-none cursor-pointer"
+              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm shrink-0 cursor-pointer"
             >
               <Menu className="w-4 h-4" />
               <span>БҮХ АНГИЛАЛ</span>
               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMegaMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Bundles Navigation Button (SAME TEAL COLOR AS MEGA MENU) */}
+            {/* Bundles Navigation Button */}
             <button
               onClick={() => {
                 onSelectCategory('bundles');
                 setIsMegaMenuOpen(false);
               }}
-              className={`px-4 py-2 text-xs font-extrabold rounded-lg flex items-center justify-center transition-all shadow-sm shrink-0 active:scale-95 flex-1 sm:flex-none ${
+              className={`px-4 py-2 text-xs font-extrabold rounded-lg flex items-center justify-center transition-all shadow-sm shrink-0 active:scale-95 ${
                 activeCategory === 'bundles'
                   ? 'bg-teal-800 text-white shadow-md ring-2 ring-teal-600'
                   : 'bg-teal-700 hover:bg-teal-800 text-white'
@@ -400,6 +400,24 @@ export default function Navbar({
             >
               <span>ИЖ БҮРЭН БАГЦ</span>
             </button>
+
+            {/* Horizontal Categories Pills List */}
+            {mainCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  onSelectCategory(cat.slug);
+                  setIsMegaMenuOpen(false);
+                }}
+                className={`px-3.5 py-2 text-xs font-extrabold rounded-lg whitespace-nowrap transition-all shrink-0 active:scale-95 ${
+                  activeCategory === cat.slug
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
           </div>
 
           {/* Delivery Terms & Zone Map Button (Full-width on Mobile, Auto on Desktop) */}
