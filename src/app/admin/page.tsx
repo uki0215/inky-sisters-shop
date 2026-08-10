@@ -687,7 +687,6 @@ export default function AdminPage() {
       )}
 
       {/* LEFT SIDEBAR NAVIGATION */}
-      {/* LEFT SIDEBAR NAVIGATION */}
       <aside
         className={`${
           isSidebarCollapsed ? 'w-16 px-2 py-3' : 'w-64 p-4'
@@ -700,13 +699,13 @@ export default function AdminPage() {
               isSidebarCollapsed ? 'justify-center py-2' : 'justify-between px-2 py-2.5'
             } border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10 transition-all`}
           >
-            <div className="flex items-center gap-3 overflow-hidden">
-              <img
-                src={settings.logoUrl || '/logo.svg'}
-                alt="Inky Sisters Logo"
-                className="w-9 h-9 object-contain bg-white rounded-lg p-1 shrink-0 shadow-xs"
-              />
-              {!isSidebarCollapsed && (
+            {!isSidebarCollapsed && (
+              <div className="flex items-center gap-3 overflow-hidden">
+                <img
+                  src={settings.logoUrl || '/logo.svg'}
+                  alt="Inky Sisters Logo"
+                  className="w-9 h-9 object-contain bg-white rounded-lg p-1 shrink-0 shadow-xs"
+                />
                 <div className="truncate">
                   <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans">
                     INKY SISTERS
@@ -715,13 +714,13 @@ export default function AdminPage() {
                     Admin Dashboard
                   </span>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <button
               onClick={toggleSidebar}
-              className={`p-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-600/50 shrink-0 ${
-                isSidebarCollapsed ? 'hidden sm:flex mt-1' : 'flex'
+              className={`p-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-600/50 shrink-0 flex items-center justify-center ${
+                isSidebarCollapsed ? 'w-full py-2' : ''
               }`}
               title={isSidebarCollapsed ? 'Цэс дэлгэх' : 'Цэс хураах'}
             >
