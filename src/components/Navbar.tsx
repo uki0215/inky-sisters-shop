@@ -74,6 +74,7 @@ export default function Navbar({
       if (!name) return false; // skip unnamed
       const lower = name.toLowerCase();
       if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+      return true;
     });
   }, [categories]);
 
