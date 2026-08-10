@@ -724,7 +724,6 @@ export default function AdminPage() {
                 <ShoppingBag className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20 shrink-0" />
                 {!isSidebarCollapsed && <span className="font-sans text-xs">Касс</span>}
               </div>
-              {!isSidebarCollapsed && <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />}
             </button>
 
             {[
@@ -775,9 +774,7 @@ export default function AdminPage() {
                     >
                       {item.badge}
                     </span>
-                  ) : (
-                    !isSidebarCollapsed && <ChevronRight className="w-3.5 h-3.5 opacity-60 shrink-0" />
-                  )}
+                  ) : null}
                 </button>
               );
             })}
