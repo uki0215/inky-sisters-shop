@@ -342,7 +342,7 @@ function HomeContent() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-teal-700 selection:text-white overflow-x-hidden">
+    <div className="relative min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-teal-700 selection:text-white overflow-x-clip">
 
       {/* Floating Ambient Glowing Visual Effect */}
       <AnimatedBackground />
