@@ -492,7 +492,11 @@ export default function Navbar({
                       }`}
                     >
                       <span className="flex items-center gap-2">
-                        {getCategoryIcon(cat.icon)}
+                        {cat.imageUrl ? (
+                          <img src={cat.imageUrl} alt={cat.name} className="w-4 h-4 object-cover rounded-md shrink-0" />
+                        ) : (
+                          getCategoryIcon(cat.icon)
+                        )}
                         <span>{cat.name}</span>
                       </span>
                     </button>
