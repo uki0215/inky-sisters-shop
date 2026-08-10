@@ -53,55 +53,49 @@ function HomeContent() {
   const fetchData = async (silent = false) => {
     if (!silent && products.length === 0) setLoading(true);
     try {
-      const [resProducts, resCategories, resPromo, resSettings, resSlides, resCollections, resBanks, resBundles] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/categories'),
-        fetch('/api/promotions'),
-        fetch('/api/settings'),
-        fetch('/api/hero-slides'),
-        fetch('/api/featured-collections'),
-        fetch('/api/banks'),
-        fetch('/api/bundles?activeOnly=true'),
-      ]);
+      const res = await fetch('/api/home-data');
+      const data = await res.json();
 
-      const [dataProducts, dataCategories, dataPromo, dataSettings, dataSlides, dataCollections, dataBanks, dataBundles] = await Promise.all([
-        resProducts.json(),
-        resCategories.json(),
-        resPromo.json(),
-        resSettings.json(),
-        resSlides.json(),
-        resCollections.json(),
-        resBanks.json(),
-        resBundles.json(),
-      ]);
+      if (data) {
+        const {
+          products: dataProducts,
+          categories: dataCategories,
+          promotions: dataPromo,
+          settings: dataSettings,
+          heroSlides: dataSlides,
+          featuredCollections: dataCollections,
+          banks: dataBanks,
+          bundles: dataBundles
+        } = data;
 
-      if (Array.isArray(dataProducts)) {
-        setProducts(dataProducts);
-        try { localStorage.setItem('inky_cached_products', JSON.stringify(dataProducts)); } catch (e) {}
+        if (Array.isArray(dataProducts)) {
+          setProducts(dataProducts);
+          try { localStorage.setItem('inky_cached_products', JSON.stringify(dataProducts)); } catch (e) {}
+        }
+        if (Array.isArray(dataCategories)) {
+          setCategories(dataCategories);
+          try {
+            localStorage.setItem('inky_cached_categories', JSON.stringify(dataCategories));
+            localStorage.setItem('inky_admin_cached_categories', JSON.stringify(dataCategories));
+          } catch (e) {}
+        }
+        if (dataPromo !== undefined) setPromoBanner(dataPromo);
+        if (dataSettings) {
+          setSettings(dataSettings);
+          try {
+            localStorage.setItem('inky_cached_settings', JSON.stringify(dataSettings));
+          } catch (e) {}
+        }
+        if (Array.isArray(dataSlides)) {
+          setHeroSlides(dataSlides);
+          try {
+            localStorage.setItem('inky_cached_hero_slides', JSON.stringify(dataSlides));
+          } catch (e) {}
+        }
+        if (Array.isArray(dataCollections)) setFeaturedCollections(dataCollections);
+        if (Array.isArray(dataBanks)) setBanksList(dataBanks);
+        if (Array.isArray(dataBundles)) setBundles(dataBundles);
       }
-      if (Array.isArray(dataCategories)) {
-        setCategories(dataCategories);
-        try {
-          localStorage.setItem('inky_cached_categories', JSON.stringify(dataCategories));
-          localStorage.setItem('inky_admin_cached_categories', JSON.stringify(dataCategories));
-        } catch (e) {}
-      }
-      if (dataPromo) setPromoBanner(dataPromo);
-      if (dataSettings) {
-        setSettings(dataSettings);
-        try {
-          localStorage.setItem('inky_cached_settings', JSON.stringify(dataSettings));
-        } catch (e) {}
-      }
-      if (Array.isArray(dataSlides)) {
-        setHeroSlides(dataSlides);
-        try {
-          localStorage.setItem('inky_cached_hero_slides', JSON.stringify(dataSlides));
-        } catch (e) {}
-      }
-      if (Array.isArray(dataCollections)) setFeaturedCollections(dataCollections);
-      if (Array.isArray(dataBanks)) setBanksList(dataBanks);
-      if (Array.isArray(dataBundles)) setBundles(dataBundles);
     } catch (e) {
       console.error(e);
     } finally {
