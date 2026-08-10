@@ -34,7 +34,7 @@ function HomeContent() {
   const [categories, setCategories] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const cached = localStorage.getItem('inky_cached_categories');
+        const cached = localStorage.getItem('inky_cached_categories') || localStorage.getItem('inky_admin_cached_categories');
         if (cached) return JSON.parse(cached);
       } catch (e) {}
     }
@@ -113,7 +113,10 @@ function HomeContent() {
       }
       if (Array.isArray(dataCategories)) {
         setCategories(dataCategories);
-        try { localStorage.setItem('inky_cached_categories', JSON.stringify(dataCategories)); } catch (e) {}
+        try {
+          localStorage.setItem('inky_cached_categories', JSON.stringify(dataCategories));
+          localStorage.setItem('inky_admin_cached_categories', JSON.stringify(dataCategories));
+        } catch (e) {}
       }
       if (dataPromo) setPromoBanner(dataPromo);
       if (dataSettings) {
@@ -954,7 +957,7 @@ function HomeContent() {
                         const name = (c.name || '').trim();
                         if (!name) return false;
                         const lower = name.toLowerCase();
-                        if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+                        if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || lower === 'ангилалгүй' || lower === 'бусад') return false;
                         return true;
                       })
                       .map((mainCat: any) => {
@@ -963,7 +966,7 @@ function HomeContent() {
                           const name = (sub.name || '').trim();
                           if (!name) return false;
                           const lower = name.toLowerCase();
-                          if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+                          if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || lower === 'ангилалгүй' || lower === 'бусад') return false;
                           return true;
                         });
                         const isMainActive = activeCategory === mainCat.slug || activeCategory === mainCat.id;

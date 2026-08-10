@@ -61,6 +61,7 @@ export default function CategoryManager({ onCategoryUpdate }: CategoryManagerPro
       if (Array.isArray(data)) {
         setCategories(data);
         try {
+          localStorage.setItem('inky_cached_categories', JSON.stringify(data));
           localStorage.setItem('inky_admin_cached_categories', JSON.stringify(data));
         } catch (e) {}
       }
