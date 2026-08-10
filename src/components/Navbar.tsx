@@ -66,17 +66,29 @@ export default function Navbar({
     setIsMegaMenuOpen((prev) => !prev);
   };
 
+  // Pre-cached category list fallback so mega menu renders in 0ms without waiting for data fetch
+  const allCategories = useMemo(() => {
+    if (categories && categories.length > 0) return categories;
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_cached_categories') || localStorage.getItem('inky_admin_cached_categories');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  }, [categories]);
+
   // Filter ONLY main categories (where parentId is null), exclude "Бусад", "Ангилалгүй" / empty names
   const mainCategories = useMemo(() => {
-    return (categories || []).filter((c) => {
+    return (allCategories || []).filter((c: any) => {
       if (c.parentId) return false; // must be top-level
       const name = (c.name || '').trim();
       if (!name) return false; // skip unnamed
       const lower = name.toLowerCase();
-      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || lower === 'ангилалгүй' || lower === 'бусад') return false;
       return true;
     });
-  }, [categories]);
+  }, [allCategories]);
 
   // Currently active or hovered category object (defaults to "Бүх Бараанууд")
   const activeHover = useMemo(() => {
@@ -89,16 +101,16 @@ export default function Navbar({
 
     let subs = Array.isArray(activeHover.children) && activeHover.children.length > 0
       ? activeHover.children
-      : (categories || []).filter((c) => c.parentId === activeHover.id);
+      : (allCategories || []).filter((c: any) => c.parentId === activeHover.id);
 
     return subs.filter((sub: any) => {
       const name = (sub.name || '').trim();
       if (!name) return false;
       const lower = name.toLowerCase();
-      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || lower === 'ангилалгүй' || lower === 'бусад') return false;
       return true;
     });
-  }, [activeHover, categories]);
+  }, [activeHover, allCategories]);
 
   // Dynamic feature showcase product for hovered category in Mega Menu
   const showcaseProduct = useMemo(() => {
@@ -129,13 +141,6 @@ export default function Navbar({
     );
   }, [products, searchQuery]);
 
-  const scrollPills = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -250 : 250;
-      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
   // Close mega menu and search dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -163,7 +168,7 @@ export default function Navbar({
 
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-gray-200 text-gray-900 shadow-sm relative">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 text-gray-900 shadow-md">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" ref={megaMenuRef}>
         <div className="flex items-center justify-between h-20 gap-4">
@@ -411,7 +416,7 @@ export default function Navbar({
             </button>
 
             {/* Horizontal Categories Pills List */}
-            {mainCategories.map((cat) => (
+            {mainCategories.map((cat: any) => (
               <button
                 key={cat.id}
                 onClick={() => {
@@ -477,7 +482,7 @@ export default function Navbar({
                     </span>
                   </button>
 
-                  {mainCategories.map((cat) => (
+                  {mainCategories.map((cat: any) => (
                     <button
                       key={cat.id}
                       onMouseEnter={() => setHoveredCategory(cat)}
@@ -492,11 +497,7 @@ export default function Navbar({
                       }`}
                     >
                       <span className="flex items-center gap-2">
-                        {cat.imageUrl ? (
-                          <img src={cat.imageUrl} alt={cat.name} className="w-4 h-4 object-cover rounded-md shrink-0" />
-                        ) : (
-                          getCategoryIcon(cat.icon)
-                        )}
+                        {getCategoryIcon(cat.icon)}
                         <span>{cat.name}</span>
                       </span>
                     </button>
@@ -522,7 +523,7 @@ export default function Navbar({
 
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     {activeHover?.slug === 'all' ? (
-                      mainCategories.map((cat) => (
+                      mainCategories.map((cat: any) => (
                         <button
                           key={cat.id}
                           onClick={() => {
@@ -550,9 +551,7 @@ export default function Navbar({
                           className="text-left p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-xs font-semibold text-gray-700 hover:text-teal-900 flex items-center justify-between group"
                         >
                           <span className="flex items-center gap-2">
-                            {sub.imageUrl && (
-                              <img src={sub.imageUrl} alt={sub.name} className="w-5 h-5 object-cover rounded-md shrink-0" />
-                            )}
+                            {getCategoryIcon(sub.icon)}
                             <span>{sub.name}</span>
                           </span>
                           <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700 shrink-0" />
