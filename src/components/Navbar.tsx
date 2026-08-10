@@ -86,7 +86,21 @@ export default function Navbar({
       const name = (c.name || '').trim();
       if (!name) return false; // skip unnamed
       const lower = name.toLowerCase();
-      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || lower === 'ангилалгүй' || lower === 'бусад') return false;
+      const slugLower = (c.slug || '').toLowerCase();
+      if (
+        lower === 'бусад' ||
+        lower === 'other' ||
+        lower === 'uncategorized' ||
+        lower === 'ангилалгүй' ||
+        lower.includes('бусад') ||
+        lower.includes('ангилалгүй') ||
+        lower.includes('other') ||
+        lower.includes('uncategorized') ||
+        slugLower.includes('other') ||
+        slugLower.includes('uncategorized') ||
+        slugLower.includes('busad') ||
+        slugLower.includes('angilalgui')
+      ) return false;
       return true;
     });
   }, [allCategories]);
@@ -108,7 +122,21 @@ export default function Navbar({
       const name = (sub.name || '').trim();
       if (!name) return false;
       const lower = name.toLowerCase();
-      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || lower === 'ангилалгүй' || lower === 'бусад') return false;
+      const slugLower = (sub.slug || '').toLowerCase();
+      if (
+        lower === 'бусад' ||
+        lower === 'other' ||
+        lower === 'uncategorized' ||
+        lower === 'ангилалгүй' ||
+        lower.includes('бусад') ||
+        lower.includes('ангилалгүй') ||
+        lower.includes('other') ||
+        lower.includes('uncategorized') ||
+        slugLower.includes('other') ||
+        slugLower.includes('uncategorized') ||
+        slugLower.includes('busad') ||
+        slugLower.includes('angilalgui')
+      ) return false;
       return true;
     });
   }, [activeHover, allCategories]);
