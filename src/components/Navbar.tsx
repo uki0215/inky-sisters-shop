@@ -389,14 +389,13 @@ export default function Navbar({
         <div className="py-2 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 min-w-0 py-0.5">
-            {/* Mega Menu Button Container with Hover Open/Close */}
-            <div
-              onMouseEnter={handleMouseEnterMegaMenu}
-              onMouseLeave={handleMouseLeaveMegaMenu}
-              className="inline-block shrink-0"
-            >
+            {/* Mega Menu Button Container (Pure Click Trigger) */}
+            <div className="inline-block shrink-0">
               <button
-                onClick={handleMegaMenuClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMegaMenuOpen(!isMegaMenuOpen);
+                }}
                 className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
               >
                 <Menu className="w-4 h-4" />
@@ -419,24 +418,6 @@ export default function Navbar({
             >
               <span>ИЖ БҮРЭН БАГЦ</span>
             </button>
-
-            {/* Horizontal Categories Pills List */}
-            {mainCategories.map((cat: any) => (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  onSelectCategory(cat.slug);
-                  setIsMegaMenuOpen(false);
-                }}
-                className={`px-3.5 py-2 text-xs font-extrabold rounded-lg whitespace-nowrap transition-all shrink-0 active:scale-95 ${
-                  activeCategory === cat.slug
-                    ? 'bg-teal-700 text-white shadow-xs'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
           </div>
 
           {/* Delivery Terms & Zone Map Button (Full-width on Mobile, Auto on Desktop) */}
@@ -455,11 +436,7 @@ export default function Navbar({
 
         {/* EXPANDABLE MEGA MENU FLYOUT PANEL (Matching screenshot design!) */}
         {isMegaMenuOpen && (
-          <div
-            onMouseEnter={handleMouseEnterMegaMenu}
-            onMouseLeave={handleMouseLeaveMegaMenu}
-            className="absolute left-0 right-0 top-full bg-white border-b border-gray-200 shadow-2xl z-50 animate-fadeIn"
-          >
+          <div className="absolute left-0 right-0 top-full bg-white border-b border-gray-200 shadow-2xl z-50 animate-fadeIn">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-white rounded-2xl p-2">
                 
@@ -470,10 +447,8 @@ export default function Navbar({
                   </span>
                   
                   <button
-                    onMouseEnter={() => setHoveredCategory({ name: 'Бүх Ангилал', slug: 'all' })}
                     onClick={() => {
-                      setIsMegaMenuOpen(false);
-                      onSelectCategory('all');
+                      setHoveredCategory({ id: 'all', name: 'БҮХ АНГИЛАЛ', slug: 'all' });
                     }}
                     className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center transition-all ${
                       activeHover?.slug === 'all'
@@ -487,26 +462,34 @@ export default function Navbar({
                     </span>
                   </button>
 
-                  {mainCategories.map((cat: any) => (
-                    <button
-                      key={cat.id}
-                      onMouseEnter={() => setHoveredCategory(cat)}
-                      onClick={() => {
-                        setIsMegaMenuOpen(false);
-                        onSelectCategory(cat.slug);
-                      }}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center transition-all ${
-                        activeHover?.slug === cat.slug
-                          ? 'bg-teal-50 text-teal-900 border border-teal-200'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {getCategoryIcon(cat.icon)}
-                        <span>{cat.name}</span>
-                      </span>
-                    </button>
-                  ))}
+                  {mainCategories.map((cat: any) => {
+                    const hasSub = (allCategories || []).some((c: any) => c.parentId === cat.id);
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          if (activeHover?.id === cat.id || !hasSub) {
+                            // Click again or has no subcategories -> navigate
+                            onSelectCategory(cat.slug);
+                            setIsMegaMenuOpen(false);
+                          } else {
+                            // Show subcategories on click
+                            setHoveredCategory(cat);
+                          }
+                        }}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center transition-all ${
+                          activeHover?.id === cat.id
+                            ? 'bg-teal-50 text-teal-900 border border-teal-200'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {getCategoryIcon(cat.icon)}
+                          <span>{cat.name}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {/* Column 2 & 3: Middle Subcategories list for Hovered Category */}
