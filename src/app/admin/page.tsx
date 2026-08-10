@@ -1375,38 +1375,41 @@ export default function AdminPage() {
 
       {/* Live Incoming Order Popup Toast */}
       {newOrderToast && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-teal-950 text-white p-4 rounded-2xl shadow-2xl border-2 border-amber-400 animate-bounce space-y-2 font-sans">
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-700 space-y-3 font-sans">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-400 font-extrabold text-xs uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>🔔 ШИНЭ ЗАХИАЛГА ИРЛЭЭ!</span>
+            <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+              <ShoppingBag className="w-4 h-4 text-emerald-400" />
+              <span>Шинэ захиалга ирлээ</span>
             </div>
             <button
+              type="button"
               onClick={() => setNewOrderToast(null)}
-              className="text-gray-400 hover:text-white p-1"
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-all"
+              title="Хаах"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div>
+          <div className="space-y-1">
             <div className="font-mono font-extrabold text-sm text-white">
               Захиалгын №: #{newOrderToast.orderNumber}
             </div>
-            <div className="text-xs text-gray-300 mt-0.5">
-              Харилцагч: {newOrderToast.customerName} ({newOrderToast.customerPhone})
+            <div className="text-xs text-slate-300">
+              Захиалагч: {newOrderToast.customerName} ({newOrderToast.customerPhone})
             </div>
-            <div className="text-sm font-extrabold text-amber-400 font-mono mt-1">
+            <div className="text-sm font-extrabold text-teal-400 font-mono pt-1">
               Дүн: {formatMNT(newOrderToast.totalMnt)}
             </div>
           </div>
 
           <button
+            type="button"
             onClick={() => {
               setActiveTab('orders');
               setNewOrderToast(null);
             }}
-            className="w-full mt-2 py-2 bg-amber-400 hover:bg-amber-500 text-teal-950 font-extrabold text-xs rounded-xl shadow-md transition-all text-center block"
+            className="w-full py-2 px-3 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-sm transition-all text-center block"
           >
             Захиалга Шалгах &amp; Баталгаажуулах
           </button>
