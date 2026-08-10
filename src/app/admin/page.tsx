@@ -753,10 +753,10 @@ export default function AdminPage() {
                   title={item.label}
                   className={`w-full flex items-center ${
                     isSidebarCollapsed ? 'justify-center p-2.5 relative' : 'justify-between px-3 py-2.5'
-                  } rounded-xl font-bold text-xs transition-all ${
+                  } rounded-xl font-bold text-xs transition-all border ${
                     isActive
-                      ? 'bg-slate-700 text-white shadow-md border border-slate-600'
-                      : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
+                      ? 'bg-slate-700 text-white shadow-md border-slate-600'
+                      : 'text-slate-300 hover:bg-slate-700/60 hover:text-white border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
