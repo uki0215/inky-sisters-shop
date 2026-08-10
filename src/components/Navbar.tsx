@@ -71,9 +71,26 @@ export default function Navbar({
       if (!name) return false; // skip unnamed
       const lower = name.toLowerCase();
       if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
-      return true;
     });
   }, [categories]);
+
+  // Dynamic active subcategories for hovered category in Mega Menu (Instant 0ms lookup from cache/flat list)
+  const activeSubcategories = useMemo(() => {
+    const currentCat = hoveredCategory || mainCategories[0] || categories[0];
+    if (!currentCat || currentCat.slug === 'all') return [];
+
+    let subs = Array.isArray(currentCat.children) && currentCat.children.length > 0
+      ? currentCat.children
+      : (categories || []).filter((c) => c.parentId === currentCat.id);
+
+    return subs.filter((sub: any) => {
+      const name = (sub.name || '').trim();
+      if (!name) return false;
+      const lower = name.toLowerCase();
+      if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
+      return true;
+    });
+  }, [hoveredCategory, mainCategories, categories]);
 
   // Dynamic feature showcase product for hovered category in Mega Menu
   const showcaseProduct = useMemo(() => {
@@ -492,16 +509,8 @@ export default function Navbar({
                           <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700" />
                         </button>
                       ))
-                    ) : activeHover?.children && activeHover.children.length > 0 ? (
-                      activeHover.children
-                        .filter((sub: any) => {
-                          const name = (sub.name || '').trim();
-                          if (!name) return false;
-                          const lower = name.toLowerCase();
-                          if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
-                          return true;
-                        })
-                        .map((sub: any) => (
+                    ) : activeSubcategories.length > 0 ? (
+                      activeSubcategories.map((sub: any) => (
                         <button
                           key={sub.id}
                           onClick={() => {
@@ -511,8 +520,13 @@ export default function Navbar({
                           }}
                           className="text-left p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-xs font-semibold text-gray-700 hover:text-teal-900 flex items-center justify-between group"
                         >
-                          <span>{sub.name}</span>
-                          <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700" />
+                          <span className="flex items-center gap-2">
+                            {sub.imageUrl && (
+                              <img src={sub.imageUrl} alt={sub.name} className="w-5 h-5 object-cover rounded-md shrink-0" />
+                            )}
+                            <span>{sub.name}</span>
+                          </span>
+                          <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700 shrink-0" />
                         </button>
                       ))
                     ) : (
