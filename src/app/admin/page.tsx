@@ -663,15 +663,17 @@ export default function AdminPage() {
       )}
 
       {/* LEFT SIDEBAR NAVIGATION */}
-      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between p-4 shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden transition-all duration-300`}>
+      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between ${sidebarCollapsed ? 'p-2' : 'p-4'} shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden transition-all duration-300`}>
 
         <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin">
           {/* Brand Header */}
-          <div className="flex items-center gap-3 px-2 py-2.5 border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10">
-            <img src={settings.logoUrl || '/logo.svg'} alt="Inky Sisters Logo" className="w-10 h-10 object-contain bg-white rounded-lg p-1 shrink-0" />
+          <div className={`flex items-center border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10 ${sidebarCollapsed ? 'justify-center py-2' : 'gap-3 px-2 py-2.5'}`}>
             {!sidebarCollapsed && (
-              <div>
-                <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans">
+              <img src={settings.logoUrl || '/logo.svg'} alt="Inky Sisters Logo" className="w-10 h-10 object-contain bg-white rounded-lg p-1 shrink-0" />
+            )}
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans truncate">
                   INKY SISTERS
                 </span>
                 <span className="text-[10px] font-mono text-teal-400 uppercase tracking-widest block mt-1">
@@ -681,7 +683,7 @@ export default function AdminPage() {
             )}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="ml-auto p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-all shrink-0"
+              className={`p-1.5 rounded-lg hover:bg-slate-700 transition-all shrink-0 ${sidebarCollapsed ? 'text-teal-400 hover:text-white bg-slate-700/60' : 'text-slate-400 hover:text-white ml-auto'}`}
               title={sidebarCollapsed ? 'Задлах' : 'Хураах'}
             >
               <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`} />
