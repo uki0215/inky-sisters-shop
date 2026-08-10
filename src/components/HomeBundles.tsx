@@ -57,11 +57,7 @@ export default function HomeBundles({ onViewAll }: HomeBundlesProps) {
 
   return (
     <>
-      <section className="w-full bg-gradient-to-r from-teal-50/90 via-slate-50/80 to-rose-50/90 py-12 my-8 border-y border-teal-100 relative overflow-hidden shadow-xs">
-      {/* Background glowing soft ambient highlights */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-rose-400/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
+      <section className="w-full bg-white py-12 my-8 border-y border-gray-100 relative overflow-hidden">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}

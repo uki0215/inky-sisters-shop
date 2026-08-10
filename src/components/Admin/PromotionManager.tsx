@@ -270,6 +270,9 @@ export default function PromotionManager() {
                 onChange={(url) => setNewSlide({ ...newSlide, imageUrl: url })}
                 label="Слайд Зураг (Upload / PC) *"
               />
+              <p className="text-[11px] text-gray-400 mt-1.5 font-sans">
+                📌 Санал болгосон хэмжээ: <strong>1920×600px</strong> (16:5 харьцаа), JPG/PNG, 2MB-с бага
+              </p>
             </div>
 
             <div className="md:col-span-2 space-y-3">

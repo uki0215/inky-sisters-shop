@@ -406,7 +406,7 @@ export default function Navbar({
                       setIsMegaMenuOpen(false);
                       onSelectCategory('all');
                     }}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center justify-between transition-all ${
+                    className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center transition-all ${
                       activeHover?.slug === 'all'
                         ? 'bg-teal-50 text-teal-900 border border-teal-200'
                         : 'text-gray-700 hover:bg-gray-50'
@@ -416,7 +416,6 @@ export default function Navbar({
                       <Grid className="w-4 h-4 text-teal-700" />
                       <span>Бүх Бараанууд</span>
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
                   </button>
 
                   {mainCategories.map((cat) => (
@@ -427,7 +426,7 @@ export default function Navbar({
                         setIsMegaMenuOpen(false);
                         onSelectCategory(cat.slug);
                       }}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center justify-between transition-all ${
+                      className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center transition-all ${
                         activeHover?.slug === cat.slug
                           ? 'bg-teal-50 text-teal-900 border border-teal-200'
                           : 'text-gray-700 hover:bg-gray-50'
@@ -437,7 +436,6 @@ export default function Navbar({
                         {getCategoryIcon(cat.icon)}
                         <span>{cat.name}</span>
                       </span>
-                      <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
                     </button>
                   ))}
                 </div>
@@ -508,9 +506,31 @@ export default function Navbar({
                   </div>
                 </div>
 
-                {/* Column 4: Right Feature Showcase Product Card */}
-                {showcaseProduct && (
-                  <div className="md:col-span-1 pl-2">
+                {/* Column 4: Right — Category image or Feature Showcase Product Card */}
+                <div className="md:col-span-1 pl-2">
+                  {activeHover?.imageUrl ? (
+                    // Show category image if available
+                    <div
+                      onClick={() => {
+                        onSelectCategory(activeHover.slug);
+                        setIsMegaMenuOpen(false);
+                      }}
+                      className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-gray-100 shadow-md group cursor-pointer border border-gray-200"
+                    >
+                      <img
+                        src={getFirstImageUrl(activeHover.imageUrl)}
+                        alt={activeHover.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent p-4 flex flex-col justify-end text-white">
+                        <span className="text-[10px] font-extrabold text-amber-300 uppercase tracking-widest font-mono">
+                          {activeHover.name}
+                        </span>
+                        <h5 className="font-black text-sm mt-0.5 font-sans">Бүгдийг үзэх</h5>
+                      </div>
+                    </div>
+                  ) : showcaseProduct ? (
+                    // Fallback: show showcase product
                     <div
                       onClick={() => {
                         if (onQuickView) onQuickView(showcaseProduct);
@@ -551,8 +571,8 @@ export default function Navbar({
                         </button>
                       </div>
                     </div>
-                  </div>
-                )}
+                  ) : null}
+                </div>
 
               </div>
             </div>

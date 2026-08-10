@@ -68,6 +68,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<
     'pos' | 'financials' | 'products' | 'orders' | 'bundles' | 'categories' | 'banks' | 'promotions' | 'collections' | 'settings' | 'profile'
   >('pos');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const [products, setProducts] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
@@ -662,20 +663,29 @@ export default function AdminPage() {
       )}
 
       {/* LEFT SIDEBAR NAVIGATION */}
-      <aside className="w-64 bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between p-4 shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden">
+      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between p-4 shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden transition-all duration-300`}>
 
         <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin">
           {/* Brand Header */}
           <div className="flex items-center gap-3 px-2 py-2.5 border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10">
-            <img src={settings.logoUrl || '/logo.svg'} alt="Inky Sisters Logo" className="w-10 h-10 object-contain bg-white rounded-lg p-1" />
-            <div>
-              <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans">
-                INKY SISTERS
-              </span>
-              <span className="text-[10px] font-mono text-teal-400 uppercase tracking-widest block mt-1">
-                Admin Dashboard
-              </span>
-            </div>
+            <img src={settings.logoUrl || '/logo.svg'} alt="Inky Sisters Logo" className="w-10 h-10 object-contain bg-white rounded-lg p-1 shrink-0" />
+            {!sidebarCollapsed && (
+              <div>
+                <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans">
+                  INKY SISTERS
+                </span>
+                <span className="text-[10px] font-mono text-teal-400 uppercase tracking-widest block mt-1">
+                  Admin Dashboard
+                </span>
+              </div>
+            )}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="ml-auto p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-all shrink-0"
+              title={sidebarCollapsed ? 'Задлах' : 'Хураах'}
+            >
+              <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`} />
+            </button>
           </div>
 
           {/* Navigation Items List */}
@@ -683,56 +693,56 @@ export default function AdminPage() {
             {/* IN-STORE POS TAB - VERY TOP OF SIDEBAR */}
             <button
               onClick={() => setActiveTab('pos')}
-              className={`w-full flex items-center justify-between p-3 rounded-2xl font-black text-xs transition-all shadow-lg mb-2 ${activeTab === 'pos'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} p-3 rounded-2xl font-black text-xs transition-all shadow-lg mb-2 ${activeTab === 'pos'
                   ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 text-slate-950 ring-2 ring-amber-300 shadow-amber-500/20'
                   : 'bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 border border-amber-400/30'
                 }`}
             >
-              <div className="flex items-center gap-2.5">
-                <ShoppingBag className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20" />
-                <span className="font-sans text-xs">Касс</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <ShoppingBag className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20 shrink-0" />
+                {!sidebarCollapsed && <span className="font-sans text-xs">Касс</span>}
               </div>
-              <ChevronRight className="w-4 h-4 text-amber-400" />
             </button>
 
             <button
               onClick={() => setActiveTab('financials')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'financials'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'financials'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
+              title="Санхүүгийн Тайлан"
             >
-              <div className="flex items-center gap-2.5">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span>Санхүүгийн Тайлан</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+                {!sidebarCollapsed && <span>Санхүүгийн Тайлан</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('products')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'products'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'products'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
+              title="Барааны Бүртгэл"
             >
-              <div className="flex items-center gap-2.5">
-                <Package className="w-4 h-4 text-amber-400" />
-                <span>Барааны Бүртгэл</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <Package className="w-4 h-4 text-amber-400 shrink-0" />
+                {!sidebarCollapsed && <span>Барааны Бүртгэл</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('orders')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'orders'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'orders'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
+              title="Захиалга Тулгах"
             >
-              <div className="flex items-center gap-2.5">
-                <ShoppingBag className="w-4 h-4 text-teal-300" />
-                <span>Захиалга Тулгах</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <ShoppingBag className="w-4 h-4 text-teal-300 shrink-0" />
+                {!sidebarCollapsed && <span>Захиалга Тулгах</span>}
               </div>
               {pendingOrdersCount > 0 && (
                 <span className="bg-red-500 text-white px-2 py-0.5 rounded-full font-extrabold text-[10px] animate-pulse font-mono">
@@ -743,100 +753,94 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab('bundles')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'bundles'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'bundles'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
+              title="Иж Бүрэн Багцууд"
             >
-              <div className="flex items-center gap-2.5">
-                <Gift className="w-4 h-4 text-purple-400" />
-                <span>Иж Бүрэн Багцууд</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <Gift className="w-4 h-4 text-purple-400 shrink-0" />
+                {!sidebarCollapsed && <span>Иж Бүрэн Багцууд</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('categories')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'categories'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'categories'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
             >
-              <div className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4 text-sky-400" />
-                <span>Ангилалууд</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <Layers className="w-4 h-4 text-sky-400 shrink-0" />
+                {!sidebarCollapsed && <span>Ангилалууд</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('banks')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'banks'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'banks'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
             >
-              <div className="flex items-center gap-2.5">
-                <QrCode className="w-4 h-4 text-emerald-300" />
-                <span>Банкны QR</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <QrCode className="w-4 h-4 text-emerald-300 shrink-0" />
+                {!sidebarCollapsed && <span>Банкны QR</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('promotions')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'promotions'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'promotions'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
             >
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-pink-400" />
-                <span>Промошн & Слайд</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <Sparkles className="w-4 h-4 text-pink-400 shrink-0" />
+                {!sidebarCollapsed && <span>Промошн &amp; Слайд</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('collections')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'collections'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'collections'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
             >
-              <div className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4 text-amber-400" />
-                <span>Онцлох Цуглуулга</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <Layers className="w-4 h-4 text-amber-400 shrink-0" />
+                {!sidebarCollapsed && <span>Онцлох Цуглуулга</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'settings'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'settings'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
             >
-              <div className="flex items-center gap-2.5">
-                <Settings className="w-4 h-4 text-purple-400" />
-                <span>Тохиргоо</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <Settings className="w-4 h-4 text-purple-400 shrink-0" />
+                {!sidebarCollapsed && <span>Тохиргоо</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
 
             <button
               onClick={() => setActiveTab('profile')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'profile'
+              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'profile'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                 }`}
             >
-              <div className="flex items-center gap-2.5">
-                <User className="w-4 h-4 text-amber-300" />
-                <span>Профайл & Нууц үг</span>
+              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+                <User className="w-4 h-4 text-amber-300 shrink-0" />
+                {!sidebarCollapsed && <span>Профайл &amp; Нууц үг</span>}
               </div>
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
             </button>
           </nav>
         </div>
@@ -845,19 +849,21 @@ export default function AdminPage() {
         <div className="pt-3 mt-2 border-t border-slate-700/60 space-y-2 shrink-0 bg-slate-800 z-10">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-red-950/60 hover:bg-red-900 text-red-200 font-bold text-xs rounded-xl transition-all border border-red-800/50"
+            className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-center gap-2'} py-2 px-3 bg-red-950/60 hover:bg-red-900 text-red-200 font-bold text-xs rounded-xl transition-all border border-red-800/50`}
           >
-            <LogOut className="w-4 h-4" />
-            <span>Системээс гарах (Logout)</span>
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!sidebarCollapsed && <span>Системээс гарах (Logout)</span>}
           </button>
 
-          <Link
-            href="/"
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-700/60 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-600/60"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Сайт руу буцах</span>
-          </Link>
+          {!sidebarCollapsed && (
+            <Link
+              href="/"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-700/60 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-600/60"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Сайт руу буцах</span>
+            </Link>
+          )}
         </div>
 
       </aside>
@@ -883,7 +889,6 @@ export default function AdminPage() {
                     ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
                     : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                   }`}
-                title="Сануулга & Мэдэгдэл"
               >
                 <Bell className="w-4.5 h-4.5" />
                 {totalNotifCount > 0 && (
@@ -910,7 +915,6 @@ export default function AdminPage() {
                           type="button"
                           onClick={handleMarkAllAsRead}
                           className="flex items-center gap-1 px-2.5 py-1 bg-teal-100 hover:bg-teal-200 text-teal-900 text-[11px] font-extrabold rounded-lg transition-colors border border-teal-300 shadow-2xs"
-                          title="Бүх мэдэгдлийг уншсанаар тэмдэглэх"
                         >
                           <CheckCheck className="w-3.5 h-3.5 text-teal-800" />
                           <span>Бүгдийг унших</span>
@@ -1040,46 +1044,6 @@ export default function AdminPage() {
           {activeTab === 'products' && (
             <div className="space-y-5">
 
-              {/* Stock Display Toggle Card */}
-              <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="toggleStock"
-                    checked={settings.showStockQuantity}
-                    onChange={async (e) => {
-                      const checked = e.target.checked;
-                      setSettings((prev: any) => ({ ...prev, showStockQuantity: checked }));
-                      await fetch('/api/settings', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ showStockQuantity: checked }),
-                      });
-                    }}
-                    className="w-5 h-5 text-teal-700 rounded focus:ring-teal-500 border-gray-300 cursor-pointer"
-                  />
-                  <label htmlFor="toggleStock" className="cursor-pointer">
-                    <span className="font-bold text-gray-900 text-sm block">
-                      Сайт дээр барааны үлдэгдэл тоо ширхэгийг харуулах
-                    </span>
-                    <span className="text-xs text-gray-500 block">
-                      {settings.showStockQuantity
-                        ? '✓ Идэвхтэй: Хэрэглэгчдэд "Үлдэгдэл: 15 ширхэг" гэж тодорхой тоо харагдана.'
-                        : '✗ Идэвхгүй: Хэрэглэгчдэд тоо харагдахгүй, зөвхөн "Бэлэн байгаа" эсвэл "Дууссан" төлөв харагдана.'}
-                    </span>
-                  </label>
-                </div>
-
-                <span
-                  className={`text-xs px-3 py-1.5 rounded-full font-bold ${settings.showStockQuantity
-                      ? 'bg-teal-100 text-teal-800'
-                      : 'bg-gray-100 text-gray-600'
-                    }`}
-                >
-                  {settings.showStockQuantity ? 'Тоо харагдаж байна' : 'Тоо нуугдсан'}
-                </span>
-              </div>
-
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
                 <div className="relative flex-1 w-full">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1106,7 +1070,7 @@ export default function AdminPage() {
                       Барааны Жагсаалт
                     </span>
                     <span className="px-3 py-1 bg-teal-100 text-teal-900 font-mono font-extrabold text-xs rounded-full border border-teal-200 shadow-2xs">
-                      Нийт {products.length} Төрлийн Бараа
+                      {products.length} бараа
                     </span>
                   </div>
 
@@ -1343,142 +1307,6 @@ export default function AdminPage() {
                   }}
                 />
               </div>
-
-              {/* 2. Stock Display Setting */}
-              <div className="space-y-4">
-                <h4 className="font-bold text-sm text-gray-800">2. Барааны Үлдэгдэл Харагдац</h4>
-                <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      id="toggleStockSettings"
-                      checked={settings.showStockQuantity}
-                      onChange={async (e) => {
-                        const checked = e.target.checked;
-                        setSettings((prev: any) => ({ ...prev, showStockQuantity: checked }));
-                        await fetch('/api/settings', {
-                          method: 'PUT',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ showStockQuantity: checked }),
-                        });
-                      }}
-                      className="w-5 h-5 mt-0.5 text-teal-700 rounded focus:ring-teal-500 border-gray-300 cursor-pointer"
-                    />
-                    <label htmlFor="toggleStockSettings" className="cursor-pointer">
-                      <span className="font-bold text-gray-900 text-sm block">
-                        Сайт дээр барааны үлдэгдэл тоо ширхэгийг харуулах
-                      </span>
-                      <span className="text-xs text-gray-500 block mt-1">
-                        {settings.showStockQuantity
-                          ? 'Идэвхтэй: Хэрэглэгчид карт дээр болон түргэн харах цонхонд "Үлдэгдэл: 15 ширхэг" гэсэн нарийвчилсан тоог харна.'
-                          : 'Идэвхгүй: Тоо ширхэгийг харуулахгүй, зөвхөн "Бэлэн байгаа" эсвэл "Дууссан" гэсэн нийтлэг төлөвийг харуулна.'}
-                      </span>
-                    </label>
-                  </div>
-
-                  <span
-                    className={`text-xs px-3 py-1 rounded-full font-bold ${settings.showStockQuantity
-                        ? 'bg-teal-100 text-teal-800'
-                        : 'bg-gray-100 text-gray-600'
-                      }`}
-                  >
-                    {settings.showStockQuantity ? 'Идэвхтэй' : 'Идэвхгүй'}
-                  </span>
-                </div>
-              </div>
-
-              {/* 2. Hero Banner Customization */}
-              <div className="space-y-4 pt-4 border-t border-gray-100">
-                <h4 className="font-bold text-sm text-gray-800">2. Нүүр Хуудасны Hero Банер Тохиргоо</h4>
-                <p className="text-xs text-gray-500">
-                  Сайтын хамгийн дээр харагдах Hero банерын гарчиг, тайлбар болон Онцлох барааг сонгоно уу.
-                </p>
-
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    await fetch('/api/settings', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(settings),
-                    });
-                    alert('Hero банерын тохиргоо амжилттай хадгалагдлаа!');
-                  }}
-                  className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200"
-                >
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Банерын Тэмдэгт (Badge Text):
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.heroBadge || ''}
-                      onChange={(e) => setSettings({ ...settings, heroBadge: e.target.value })}
-                      placeholder="🔥 ЭРЭЛТТЭЙ БАРАА"
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-gray-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Үндсэн Гарчиг (Hero Title):
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.heroTitle || ''}
-                      onChange={(e) => setSettings({ ...settings, heroTitle: e.target.value })}
-                      placeholder="Онцлох Бичиг Хэргийн Цуглуулга"
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs font-extrabold text-gray-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 block mb-1">
-                      Дэд Текст / Тайлбар (Hero Subtitle):
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={settings.heroSubtitle || ''}
-                      onChange={(e) => setSettings({ ...settings, heroSubtitle: e.target.value })}
-                      placeholder="Хамгийн тренд болж буй пастел үзэг, дэвтрүүдийг шууд захиалаарай..."
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs text-gray-900"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-gray-700 block mb-1">
-                        Hero Банер Зурах Зургийн URL (Image URL):
-                      </label>
-                      <input
-                        type="text"
-                        value={settings.heroImageUrl || ''}
-                        onChange={(e) => setSettings({ ...settings, heroImageUrl: e.target.value })}
-                        placeholder="https://..."
-                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs text-gray-900"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <ProductSelector
-                        products={products}
-                        categories={categories}
-                        selectedProductId={settings.heroProductId || ''}
-                        onSelectProduct={(id) => setSettings({ ...settings, heroProductId: id })}
-                        label="Онцлох Захиалах Бараа Сонгох (Ангилалаар болон Баркодоор хайж сонгох):"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs rounded-lg shadow-sm"
-                  >
-                    Тохиргоо Хадгалах
-                  </button>
-                </form>
-              </div>
-
 
 
               {/* DANGER ZONE: DATABASE RESET TO 0 */}
