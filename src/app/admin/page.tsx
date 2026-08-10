@@ -38,6 +38,7 @@ import {
   Sparkles,
   ArrowLeft,
   Settings,
+  ChevronLeft,
   ChevronRight,
   ShieldCheck,
   User,
@@ -109,6 +110,29 @@ export default function AdminPage() {
     return true;
   });
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Left Sidebar Collapse state (persistent in localStorage)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('inky_admin_sidebar_collapsed');
+        return saved === 'true';
+      } catch (e) {}
+    }
+    return false;
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('inky_admin_sidebar_collapsed', String(next));
+        } catch (e) {}
+      }
+      return next;
+    });
+  };
 
   // Modals
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<any | null>(null);
@@ -663,30 +687,49 @@ export default function AdminPage() {
       )}
 
       {/* LEFT SIDEBAR NAVIGATION */}
-      <aside className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between ${sidebarCollapsed ? 'p-2' : 'p-4'} shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden transition-all duration-300`}>
-
-        <div className="flex-1 overflow-y-auto pr-1 space-y-4 scrollbar-thin">
+      {/* LEFT SIDEBAR NAVIGATION */}
+      <aside
+        className={`${
+          isSidebarCollapsed ? 'w-16 px-2 py-3' : 'w-64 p-4'
+        } bg-slate-800 text-slate-100 shrink-0 flex flex-col justify-between shadow-xl z-30 sticky top-0 h-screen border-r border-slate-700/60 overflow-hidden transition-all duration-300 ease-in-out`}
+      >
+        <div className="flex-1 overflow-y-auto pr-0.5 space-y-4 scrollbar-thin">
           {/* Brand Header */}
-          <div className={`flex items-center border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10 ${sidebarCollapsed ? 'justify-center py-2' : 'gap-3 px-2 py-2.5'}`}>
-            {!sidebarCollapsed && (
-              <img src={settings.logoUrl || '/logo.svg'} alt="Inky Sisters Logo" className="w-10 h-10 object-contain bg-white rounded-lg p-1 shrink-0" />
-            )}
-            {!sidebarCollapsed && (
-              <div className="flex-1 min-w-0">
-                <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans truncate">
-                  INKY SISTERS
-                </span>
-                <span className="text-[10px] font-mono text-teal-400 uppercase tracking-widest block mt-1">
-                  Admin Dashboard
-                </span>
-              </div>
-            )}
+          <div
+            className={`flex items-center ${
+              isSidebarCollapsed ? 'justify-center py-2' : 'justify-between px-2 py-2.5'
+            } border-b border-slate-700/50 sticky top-0 bg-slate-800 z-10 transition-all`}
+          >
+            <div className="flex items-center gap-3 overflow-hidden">
+              <img
+                src={settings.logoUrl || '/logo.svg'}
+                alt="Inky Sisters Logo"
+                className="w-9 h-9 object-contain bg-white rounded-lg p-1 shrink-0 shadow-xs"
+              />
+              {!isSidebarCollapsed && (
+                <div className="truncate">
+                  <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans">
+                    INKY SISTERS
+                  </span>
+                  <span className="text-[10px] font-mono text-teal-400 uppercase tracking-widest block mt-1">
+                    Admin Dashboard
+                  </span>
+                </div>
+              )}
+            </div>
+
             <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className={`p-1.5 rounded-lg hover:bg-slate-700 transition-all shrink-0 ${sidebarCollapsed ? 'text-teal-400 hover:text-white bg-slate-700/60' : 'text-slate-400 hover:text-white ml-auto'}`}
-              title={sidebarCollapsed ? 'Задлах' : 'Хураах'}
+              onClick={toggleSidebar}
+              className={`p-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-600/50 shrink-0 ${
+                isSidebarCollapsed ? 'hidden sm:flex mt-1' : 'flex'
+              }`}
+              title={isSidebarCollapsed ? 'Цэс дэлгэх' : 'Цэс хураах'}
             >
-              <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${sidebarCollapsed ? '' : 'rotate-180'}`} />
+              {isSidebarCollapsed ? (
+                <ChevronRight className="w-4 h-4 text-teal-400" />
+              ) : (
+                <ChevronLeft className="w-4 h-4" />
+              )}
             </button>
           </div>
 
@@ -695,155 +738,76 @@ export default function AdminPage() {
             {/* IN-STORE POS TAB - VERY TOP OF SIDEBAR */}
             <button
               onClick={() => setActiveTab('pos')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} p-3 rounded-2xl font-black text-xs transition-all shadow-lg mb-2 ${activeTab === 'pos'
+              title="Касс (POS)"
+              className={`w-full flex items-center ${
+                isSidebarCollapsed ? 'justify-center p-2.5' : 'justify-between p-3'
+              } rounded-2xl font-black text-xs transition-all shadow-lg mb-2 ${
+                activeTab === 'pos'
                   ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 text-slate-950 ring-2 ring-amber-300 shadow-amber-500/20'
                   : 'bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 border border-amber-400/30'
-                }`}
+              }`}
             >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
+              <div className="flex items-center gap-2.5">
                 <ShoppingBag className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20 shrink-0" />
-                {!sidebarCollapsed && <span className="font-sans text-xs">Касс</span>}
+                {!isSidebarCollapsed && <span className="font-sans text-xs">Касс</span>}
               </div>
+              {!isSidebarCollapsed && <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />}
             </button>
 
-            <button
-              onClick={() => setActiveTab('financials')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'financials'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-              title="Санхүүгийн Тайлан"
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
-                {!sidebarCollapsed && <span>Санхүүгийн Тайлан</span>}
-              </div>
-            </button>
+            {[
+              { id: 'financials', label: 'Санхүүгийн Тайлан', icon: TrendingUp, color: 'text-emerald-400' },
+              { id: 'products', label: 'Барааны Бүртгэл', icon: Package, color: 'text-amber-400' },
+              {
+                id: 'orders',
+                label: 'Захиалга Тулгах',
+                icon: ShoppingBag,
+                color: 'text-teal-300',
+                badge: pendingOrdersCount,
+              },
+              { id: 'bundles', label: 'Иж Бүрэн Багцууд', icon: Gift, color: 'text-purple-400' },
+              { id: 'categories', label: 'Ангилалууд', icon: Layers, color: 'text-sky-400' },
+              { id: 'banks', label: 'Банкны QR', icon: QrCode, color: 'text-emerald-300' },
+              { id: 'promotions', label: 'Промошн & Слайд', icon: Sparkles, color: 'text-pink-400' },
+              { id: 'collections', label: 'Онцлох Цуглуулга', icon: Layers, color: 'text-amber-400' },
+              { id: 'settings', label: 'Тохиргоо', icon: Settings, color: 'text-purple-400' },
+              { id: 'profile', label: 'Профайл & Нууц үг', icon: User, color: 'text-amber-300' },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id as any)}
+                  title={item.label}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5 relative' : 'justify-between px-3 py-2.5'
+                  } rounded-xl font-bold text-xs transition-all ${
+                    isActive
+                      ? 'bg-teal-600 text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-4 h-4 ${item.color} shrink-0`} />
+                    {!isSidebarCollapsed && <span>{item.label}</span>}
+                  </div>
 
-            <button
-              onClick={() => setActiveTab('products')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'products'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-              title="Барааны Бүртгэл"
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <Package className="w-4 h-4 text-amber-400 shrink-0" />
-                {!sidebarCollapsed && <span>Барааны Бүртгэл</span>}
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('orders')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'orders'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-              title="Захиалга Тулгах"
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <ShoppingBag className="w-4 h-4 text-teal-300 shrink-0" />
-                {!sidebarCollapsed && <span>Захиалга Тулгах</span>}
-              </div>
-              {pendingOrdersCount > 0 && (
-                <span className="bg-red-500 text-white px-2 py-0.5 rounded-full font-extrabold text-[10px] animate-pulse font-mono">
-                  {pendingOrdersCount}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab('bundles')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'bundles'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-              title="Иж Бүрэн Багцууд"
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <Gift className="w-4 h-4 text-purple-400 shrink-0" />
-                {!sidebarCollapsed && <span>Иж Бүрэн Багцууд</span>}
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('categories')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'categories'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <Layers className="w-4 h-4 text-sky-400 shrink-0" />
-                {!sidebarCollapsed && <span>Ангилалууд</span>}
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('banks')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'banks'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <QrCode className="w-4 h-4 text-emerald-300 shrink-0" />
-                {!sidebarCollapsed && <span>Банкны QR</span>}
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('promotions')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'promotions'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <Sparkles className="w-4 h-4 text-pink-400 shrink-0" />
-                {!sidebarCollapsed && <span>Промошн &amp; Слайд</span>}
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('collections')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'collections'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <Layers className="w-4 h-4 text-amber-400 shrink-0" />
-                {!sidebarCollapsed && <span>Онцлох Цуглуулга</span>}
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'settings'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <Settings className="w-4 h-4 text-purple-400 shrink-0" />
-                {!sidebarCollapsed && <span>Тохиргоо</span>}
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : ''} px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${activeTab === 'profile'
-                  ? 'bg-teal-600 text-white shadow-md'
-                  : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
-                }`}
-            >
-              <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2.5'}`}>
-                <User className="w-4 h-4 text-amber-300 shrink-0" />
-                {!sidebarCollapsed && <span>Профайл &amp; Нууц үг</span>}
-              </div>
-            </button>
+                  {item.badge !== undefined && item.badge > 0 ? (
+                    <span
+                      className={`${
+                        isSidebarCollapsed
+                          ? 'absolute -top-1 -right-1 px-1.5 py-0.2'
+                          : 'px-2 py-0.5'
+                      } bg-red-500 text-white rounded-full font-extrabold text-[10px] animate-pulse font-mono shadow-xs`}
+                    >
+                      {item.badge}
+                    </span>
+                  ) : (
+                    !isSidebarCollapsed && <ChevronRight className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
@@ -851,31 +815,53 @@ export default function AdminPage() {
         <div className="pt-3 mt-2 border-t border-slate-700/60 space-y-2 shrink-0 bg-slate-800 z-10">
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-center gap-2'} py-2 px-3 bg-red-950/60 hover:bg-red-900 text-red-200 font-bold text-xs rounded-xl transition-all border border-red-800/50`}
+            title="Системээс гарах (Logout)"
+            className={`w-full flex items-center ${
+              isSidebarCollapsed ? 'justify-center p-2.5' : 'justify-center gap-2 py-2 px-3'
+            } bg-red-950/60 hover:bg-red-900 text-red-200 font-bold text-xs rounded-xl transition-all border border-red-800/50`}
           >
             <LogOut className="w-4 h-4 shrink-0" />
-            {!sidebarCollapsed && <span>Системээс гарах (Logout)</span>}
+            {!isSidebarCollapsed && <span>Системээс гарах</span>}
           </button>
 
-          {!sidebarCollapsed && (
-            <Link
-              href="/"
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-700/60 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-600/60"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Сайт руу буцах</span>
-            </Link>
-          )}
+          <Link
+            href="/"
+            title="Сайт руу буцах"
+            className={`w-full flex items-center ${
+              isSidebarCollapsed ? 'justify-center p-2.5' : 'justify-center gap-2 py-2 px-3'
+            } bg-slate-700/60 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-600/60`}
+          >
+            <ArrowLeft className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span>Сайт руу буцах</span>}
+          </Link>
         </div>
-
       </aside>
 
       {/* RIGHT MAIN CONTENT CONTAINER */}
       <div className="flex-1 flex flex-col min-w-0 bg-gray-50 min-h-screen">
 
         {/* Top Header Bar */}
-        <header className="bg-white border-b border-gray-200 px-6 sm:px-8 py-3 flex items-center justify-between shadow-xs sticky top-0 z-20">
-          <div>
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-8 py-3 flex items-center justify-between shadow-xs sticky top-0 z-20">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="p-2 rounded-xl bg-gray-100 hover:bg-teal-50 text-gray-700 hover:text-teal-700 border border-gray-200 transition-all flex items-center gap-1.5 text-xs font-bold shadow-xs active:scale-95"
+              title={isSidebarCollapsed ? 'Цэс дэлгэх' : 'Цэс хураах'}
+            >
+              {isSidebarCollapsed ? (
+                <>
+                  <ChevronRight className="w-4 h-4 text-teal-600" />
+                  <span className="text-gray-700 font-sans">Цэс дэлгэх</span>
+                </>
+              ) : (
+                <>
+                  <ChevronLeft className="w-4 h-4 text-slate-600" />
+                  <span className="hidden sm:inline text-gray-700 font-sans">Цэс хураах</span>
+                </>
+              )}
+            </button>
+
             <span className="text-[11px] font-mono font-bold text-gray-500 uppercase tracking-wider block">
               Admin Panel / {activeTab}
             </span>
