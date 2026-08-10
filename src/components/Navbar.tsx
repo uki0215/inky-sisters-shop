@@ -74,14 +74,18 @@ export default function Navbar({
     });
   }, [categories]);
 
+  // Currently active or hovered category object (defaults to "Бүх Бараанууд")
+  const activeHover = useMemo(() => {
+    return hoveredCategory || { id: 'all', name: 'БҮХ АНГИЛАЛ', slug: 'all' };
+  }, [hoveredCategory]);
+
   // Dynamic active subcategories for hovered category in Mega Menu (Instant 0ms lookup from cache/flat list)
   const activeSubcategories = useMemo(() => {
-    const currentCat = hoveredCategory || mainCategories[0] || categories[0];
-    if (!currentCat || currentCat.slug === 'all') return [];
+    if (!activeHover || activeHover.slug === 'all') return [];
 
-    let subs = Array.isArray(currentCat.children) && currentCat.children.length > 0
-      ? currentCat.children
-      : (categories || []).filter((c) => c.parentId === currentCat.id);
+    let subs = Array.isArray(activeHover.children) && activeHover.children.length > 0
+      ? activeHover.children
+      : (categories || []).filter((c) => c.parentId === activeHover.id);
 
     return subs.filter((sub: any) => {
       const name = (sub.name || '').trim();
@@ -90,12 +94,12 @@ export default function Navbar({
       if (name === 'Бусад' || lower === 'other' || lower === 'uncategorized' || name.includes('Ангилалгүй') || lower.includes('бусад')) return false;
       return true;
     });
-  }, [hoveredCategory, mainCategories, categories]);
+  }, [activeHover, categories]);
 
   // Dynamic feature showcase product for hovered category in Mega Menu
   const showcaseProduct = useMemo(() => {
     if (!products || products.length === 0) return null;
-    const currentCat = hoveredCategory || { slug: 'all' };
+    const currentCat = activeHover;
     if (currentCat.slug === 'all') return products[0];
 
     const catProds = products.filter(
@@ -107,7 +111,7 @@ export default function Navbar({
     );
 
     return catProds.length > 0 ? catProds[0] : products[0];
-  }, [products, hoveredCategory]);
+  }, [products, activeHover]);
 
   // Live real-time search results filtering
   const liveSearchResults = useMemo(() => {
@@ -153,13 +157,6 @@ export default function Navbar({
     }
   };
 
-  const defaultCategory = mainCategories[0] || categories[0] || {
-    id: 'all',
-    name: 'Бүх Бараанууд',
-    slug: 'all',
-  };
-
-  const activeHover = hoveredCategory || defaultCategory;
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 text-gray-900 shadow-sm relative">
