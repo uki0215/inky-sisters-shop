@@ -141,6 +141,11 @@ export default function Navbar({
     );
   }, [products, searchQuery]);
 
+  // Check if the rightmost column in Mega Menu should be shown
+  const showRightColumn = useMemo(() => {
+    return !!(activeHover?.imageUrl || showcaseProduct);
+  }, [activeHover, showcaseProduct]);
+
   // Close mega menu and search dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -505,7 +510,7 @@ export default function Navbar({
                 </div>
 
                 {/* Column 2 & 3: Middle Subcategories list for Hovered Category */}
-                <div className="md:col-span-2 px-2 space-y-4">
+                <div className={`${showRightColumn ? 'md:col-span-2' : 'md:col-span-3'} px-2 space-y-4`}>
                   <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                     <h4 className="font-extrabold text-gray-900 text-sm flex items-center gap-2">
                       <span>{activeHover?.name || 'Сонгосон Ангилал'}</span>
@@ -521,7 +526,7 @@ export default function Navbar({
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className={`grid ${showRightColumn ? 'grid-cols-2' : 'grid-cols-3'} gap-3 pt-1`}>
                     {activeHover?.slug === 'all' ? (
                       mainCategories.map((cat: any) => (
                         <button
@@ -558,7 +563,7 @@ export default function Navbar({
                         </button>
                       ))
                     ) : (
-                      <div className="col-span-2 p-6 text-center text-xs text-gray-400 bg-gray-50 rounded-2xl border border-gray-100 font-sans">
+                      <div className="col-span-full p-6 text-center text-xs text-gray-400 bg-gray-50 rounded-2xl border border-gray-100 font-sans">
                         Энэ ангилалд одоогоор дэд ангилал бүртгэгдээгүй байна.
                       </div>
                     )}
@@ -566,8 +571,9 @@ export default function Navbar({
                 </div>
 
                 {/* Column 4: Right — Category image or Feature Showcase Product Card */}
-                <div className="md:col-span-1 pl-2">
-                  {activeHover?.imageUrl ? (
+                {showRightColumn && (
+                  <div className="md:col-span-1 pl-2">
+                    {activeHover?.imageUrl ? (
                     // Show category image if available
                     <div
                       onClick={() => {
@@ -632,6 +638,7 @@ export default function Navbar({
                     </div>
                   ) : null}
                 </div>
+              )}
 
               </div>
             </div>
