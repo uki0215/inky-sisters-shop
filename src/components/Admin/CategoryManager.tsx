@@ -22,12 +22,28 @@ interface CategoryManagerProps {
 }
 
 export default function CategoryManager({ onCategoryUpdate }: CategoryManagerProps) {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_categories');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [newCatName, setNewCatName] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string>('');
   const [newCatImageUrl, setNewCatImageUrl] = useState<string>('');
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('inky_admin_cached_categories');
+        if (cached && JSON.parse(cached).length > 0) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Edit Category Modal State
@@ -37,12 +53,17 @@ export default function CategoryManager({ onCategoryUpdate }: CategoryManagerPro
   const [editImageUrl, setEditImageUrl] = useState<string>('');
   const [savingEdit, setSavingEdit] = useState(false);
 
-  const fetchCategories = async () => {
-    setLoading(true);
+  const fetchCategories = async (silent = false) => {
+    if (!silent && categories.length === 0) setLoading(true);
     try {
       const res = await fetch('/api/categories');
       const data = await res.json();
-      if (Array.isArray(data)) setCategories(data);
+      if (Array.isArray(data)) {
+        setCategories(data);
+        try {
+          localStorage.setItem('inky_admin_cached_categories', JSON.stringify(data));
+        } catch (e) {}
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -65,30 +86,48 @@ export default function CategoryManager({ onCategoryUpdate }: CategoryManagerPro
     e.preventDefault();
     if (!editingCategory || !editCatName.trim()) return;
 
+    const updatedName = editCatName.trim();
+    const updatedParentId = editParentId || null;
+    const updatedImageUrl = editImageUrl || null;
+
     setSavingEdit(true);
+
+    // Optimistic UI update
+    setCategories((prev) =>
+      prev.map((c) =>
+        c.id === editingCategory.id
+          ? {
+              ...c,
+              name: updatedName,
+              parentId: updatedParentId,
+              imageUrl: updatedImageUrl,
+            }
+          : c
+      )
+    );
+    setEditingCategory(null);
+
     try {
       const res = await fetch(`/api/categories/${editingCategory.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: editCatName.trim(),
-          parentId: editParentId || null,
-          imageUrl: editImageUrl || null,
+          name: updatedName,
+          parentId: updatedParentId,
+          imageUrl: updatedImageUrl,
         }),
       });
 
       if (res.ok) {
-        setEditingCategory(null);
         notifyDataSync();
         if (onCategoryUpdate) onCategoryUpdate();
-        fetchCategories();
+        fetchCategories(true);
       } else {
-        const data = await res.json();
-        alert('Алдаа: ' + (data.error || 'Ангилал засахад алдаа гарлаа'));
+        fetchCategories(true);
       }
     } catch (err: any) {
       console.error(err);
-      alert('Алдаа гарлаа: ' + err.message);
+      fetchCategories(true);
     } finally {
       setSavingEdit(false);
     }
@@ -106,6 +145,10 @@ export default function CategoryManager({ onCategoryUpdate }: CategoryManagerPro
       const data = await res.json();
       if (data.url) {
         if (catId) {
+          // Optimistic image update
+          setCategories((prev) =>
+            prev.map((c) => (c.id === catId ? { ...c, imageUrl: data.url } : c))
+          );
           // Update existing category image directly via PATCH API
           await fetch(`/api/categories/${catId}`, {
             method: 'PATCH',
@@ -114,7 +157,7 @@ export default function CategoryManager({ onCategoryUpdate }: CategoryManagerPro
           });
           notifyDataSync();
           if (onCategoryUpdate) onCategoryUpdate();
-          fetchCategories();
+          fetchCategories(true);
         } else if (editingCategory) {
           setEditImageUrl(data.url);
         } else {
@@ -133,41 +176,65 @@ export default function CategoryManager({ onCategoryUpdate }: CategoryManagerPro
     e.preventDefault();
     if (!newCatName.trim()) return;
 
+    const tempId = `temp-${Date.now()}`;
+    const newCatObj = {
+      id: tempId,
+      name: newCatName.trim(),
+      parentId: selectedParentId || null,
+      imageUrl: newCatImageUrl || null,
+      slug: newCatName.toLowerCase().replace(/\s+/g, '-'),
+      _count: { products: 0 },
+      children: [],
+    };
+
+    // Optimistic UI update
+    setCategories((prev) => [...prev, newCatObj]);
+    setNewCatName('');
+    setSelectedParentId('');
+    setNewCatImageUrl('');
+
     try {
       const res = await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: newCatName,
-          parentId: selectedParentId || null,
-          imageUrl: newCatImageUrl || null,
+          name: newCatObj.name,
+          parentId: newCatObj.parentId,
+          imageUrl: newCatObj.imageUrl,
         }),
       });
 
       if (res.ok) {
-        setNewCatName('');
-        setSelectedParentId('');
-        setNewCatImageUrl('');
         notifyDataSync();
         if (onCategoryUpdate) onCategoryUpdate();
-        fetchCategories();
+        fetchCategories(true);
+      } else {
+        fetchCategories(true);
       }
     } catch (e) {
       console.error(e);
+      fetchCategories(true);
     }
   };
 
   const handleDeleteCategory = async (id: string) => {
     if (!confirm('Энэ ангиллыг (болон түүний дэд ангилуудыг) устгах уу?')) return;
+
+    // Optimistic UI update
+    setCategories((prev) => prev.filter((c) => c.id !== id && c.parentId !== id));
+
     try {
       const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
       if (res.ok) {
         notifyDataSync();
         if (onCategoryUpdate) onCategoryUpdate();
-        fetchCategories();
+        fetchCategories(true);
+      } else {
+        fetchCategories(true);
       }
     } catch (e) {
       console.error(e);
+      fetchCategories(true);
     }
   };
 
