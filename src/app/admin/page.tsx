@@ -755,7 +755,7 @@ export default function AdminPage() {
                     isSidebarCollapsed ? 'justify-center p-2.5 relative' : 'justify-between px-3 py-2.5'
                   } rounded-xl font-bold text-xs transition-all ${
                     isActive
-                      ? 'bg-teal-600 text-white shadow-md'
+                      ? 'bg-slate-700 text-white shadow-md border border-slate-600'
                       : 'text-slate-300 hover:bg-slate-700/60 hover:text-white'
                   }`}
                 >

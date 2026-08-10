@@ -390,96 +390,102 @@ function HomeContent() {
       )}
 
       {/* THREE-PROMO-BANNER GRID SECTION (3 Зураг, Холбосон Бараа & Линк) */}
-      {!isCatalogMode && (
+      {!isCatalogMode && (settings.banner1Image || settings.banner2Image || settings.banner3Image) && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
             {/* Banner 1 */}
-            <div
-              onClick={() => {
-                if (settings.banner1ProductId) {
-                  const targetProd = products.find((p) => p.id === settings.banner1ProductId);
-                  if (targetProd) setQuickViewProduct(targetProd);
-                } else if (settings.banner1Link) {
-                  window.location.href = settings.banner1Link;
-                }
-              }}
-              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
-            >
-              <img
-                src={settings.banner1Image || 'https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=800&auto=format&fit=crop&q=80'}
-                alt={settings.banner1Title || 'Banner 1'}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex items-end p-5">
-                <div>
-                  <h3 className="text-lg font-black text-white font-sans group-hover:text-teal-200 transition-colors">
-                    {settings.banner1Title || 'Эстэтик Пастел Үзэгнүүд'}
-                  </h3>
-                  <span className="text-xs text-teal-300 font-extrabold flex items-center gap-1 mt-1 group-hover:translate-x-1 transition-transform">
-                    {settings.banner1ProductId ? 'Бараа үзэх / Захиалах' : 'Үзэх'} <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
+            {settings.banner1Image && (
+              <div
+                onClick={() => {
+                  if (settings.banner1ProductId) {
+                    const targetProd = products.find((p) => p.id === settings.banner1ProductId);
+                    if (targetProd) setQuickViewProduct(targetProd);
+                  } else if (settings.banner1Link) {
+                    window.location.href = settings.banner1Link;
+                  }
+                }}
+                className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
+              >
+                <img
+                  src={settings.banner1Image}
+                  alt={settings.banner1Title || 'Banner 1'}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex items-end p-5">
+                  <div>
+                    <h3 className="text-lg font-black text-white font-sans group-hover:text-teal-200 transition-colors">
+                      {settings.banner1Title || ''}
+                    </h3>
+                    <span className="text-xs text-teal-300 font-extrabold flex items-center gap-1 mt-1 group-hover:translate-x-1 transition-transform">
+                      {settings.banner1ProductId ? 'Бараа үзэх / Захиалах' : 'Үзэх'} <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Banner 2 */}
-            <div
-              onClick={() => {
-                if (settings.banner2ProductId) {
-                  const targetProd = products.find((p) => p.id === settings.banner2ProductId);
-                  if (targetProd) setQuickViewProduct(targetProd);
-                } else if (settings.banner2Link) {
-                  window.location.href = settings.banner2Link;
-                }
-              }}
-              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
-            >
-              <img
-                src={settings.banner2Image || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80'}
-                alt={settings.banner2Title || 'Banner 2'}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex items-end p-5">
-                <div>
-                  <h3 className="text-lg font-black text-white font-sans group-hover:text-teal-200 transition-colors">
-                    {settings.banner2Title || 'Планер & Төлөвлөгч Дэвтрүүд'}
-                  </h3>
-                  <span className="text-xs text-teal-300 font-extrabold flex items-center gap-1 mt-1 group-hover:translate-x-1 transition-transform">
-                    {settings.banner2ProductId ? 'Бараа үзэх / Захиалах' : 'Үзэх'} <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
+            {settings.banner2Image && (
+              <div
+                onClick={() => {
+                  if (settings.banner2ProductId) {
+                    const targetProd = products.find((p) => p.id === settings.banner2ProductId);
+                    if (targetProd) setQuickViewProduct(targetProd);
+                  } else if (settings.banner2Link) {
+                    window.location.href = settings.banner2Link;
+                  }
+                }}
+                className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
+              >
+                <img
+                  src={settings.banner2Image}
+                  alt={settings.banner2Title || 'Banner 2'}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex items-end p-5">
+                  <div>
+                    <h3 className="text-lg font-black text-white font-sans group-hover:text-teal-200 transition-colors">
+                      {settings.banner2Title || ''}
+                    </h3>
+                    <span className="text-xs text-teal-300 font-extrabold flex items-center gap-1 mt-1 group-hover:translate-x-1 transition-transform">
+                      {settings.banner2ProductId ? 'Бараа үзэх / Захиалах' : 'Үзэх'} <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Banner 3 */}
-            <div
-              onClick={() => {
-                if (settings.banner3ProductId) {
-                  const targetProd = products.find((p) => p.id === settings.banner3ProductId);
-                  if (targetProd) setQuickViewProduct(targetProd);
-                } else if (settings.banner3Link) {
-                  window.location.href = settings.banner3Link;
-                }
-              }}
-              className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
-            >
-              <img
-                src={settings.banner3Image || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&auto=format&fit=crop&q=80'}
-                alt={settings.banner3Title || 'Banner 3'}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex items-end p-5">
-                <div>
-                  <h3 className="text-lg font-black text-white font-sans group-hover:text-teal-200 transition-colors">
-                    {settings.banner3Title || 'Зургийн Усан Будаг & Багс'}
-                  </h3>
-                  <span className="text-xs text-teal-300 font-extrabold flex items-center gap-1 mt-1 group-hover:translate-x-1 transition-transform">
-                    {settings.banner3ProductId ? 'Бараа үзэх / Захиалах' : 'Үзэх'} <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
+            {settings.banner3Image && (
+              <div
+                onClick={() => {
+                  if (settings.banner3ProductId) {
+                    const targetProd = products.find((p) => p.id === settings.banner3ProductId);
+                    if (targetProd) setQuickViewProduct(targetProd);
+                  } else if (settings.banner3Link) {
+                    window.location.href = settings.banner3Link;
+                  }
+                }}
+                className="group relative h-48 sm:h-56 rounded-2xl overflow-hidden shadow-sm card-3d-glow border border-gray-200/80 block cursor-pointer sheen-effect transform-gpu"
+              >
+                <img
+                  src={settings.banner3Image}
+                  alt={settings.banner3Title || 'Banner 3'}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex items-end p-5">
+                  <div>
+                    <h3 className="text-lg font-black text-white font-sans group-hover:text-teal-200 transition-colors">
+                      {settings.banner3Title || ''}
+                    </h3>
+                    <span className="text-xs text-teal-300 font-extrabold flex items-center gap-1 mt-1 group-hover:translate-x-1 transition-transform">
+                      {settings.banner3ProductId ? 'Бараа үзэх / Захиалах' : 'Үзэх'} <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
           </div>
         </section>
