@@ -46,20 +46,23 @@ export default function Navbar({
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const lastHoverTimeRef = useRef<number>(0);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnterMegaMenu = () => {
-    lastHoverTimeRef.current = Date.now();
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     setIsMegaMenuOpen(true);
+  };
+
+  const handleMouseLeaveMegaMenu = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsMegaMenuOpen(false);
+    }, 250);
   };
 
   const handleMegaMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // If it was opened by hover within the last 400ms, keep it open (don't toggle closed on click)
-    if (Date.now() - lastHoverTimeRef.current < 400) {
-      setIsMegaMenuOpen(true);
-      return;
-    }
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     setIsMegaMenuOpen((prev) => !prev);
   };
 
@@ -375,16 +378,21 @@ export default function Navbar({
         <div className="py-2 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 min-w-0 py-0.5">
-            {/* Mega Menu Button */}
-            <button
-              onClick={handleMegaMenuClick}
+            {/* Mega Menu Button Container with Hover Open/Close */}
+            <div
               onMouseEnter={handleMouseEnterMegaMenu}
-              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm shrink-0 cursor-pointer"
+              onMouseLeave={handleMouseLeaveMegaMenu}
+              className="inline-block shrink-0"
             >
-              <Menu className="w-4 h-4" />
-              <span>БҮХ АНГИЛАЛ</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMegaMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
+              <button
+                onClick={handleMegaMenuClick}
+                className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+              >
+                <Menu className="w-4 h-4" />
+                <span>БҮХ АНГИЛАЛ</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMegaMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
 
             {/* Bundles Navigation Button */}
             <button
@@ -437,7 +445,8 @@ export default function Navbar({
         {/* EXPANDABLE MEGA MENU FLYOUT PANEL (Matching screenshot design!) */}
         {isMegaMenuOpen && (
           <div
-            onMouseEnter={() => setIsMegaMenuOpen(true)}
+            onMouseEnter={handleMouseEnterMegaMenu}
+            onMouseLeave={handleMouseLeaveMegaMenu}
             className="absolute left-0 right-0 top-full bg-white border-b border-gray-200 shadow-2xl z-50 animate-fadeIn"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
