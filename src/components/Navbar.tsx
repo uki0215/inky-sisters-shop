@@ -46,6 +46,22 @@ export default function Navbar({
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastHoverTimeRef = useRef<number>(0);
+
+  const handleMouseEnterMegaMenu = () => {
+    lastHoverTimeRef.current = Date.now();
+    setIsMegaMenuOpen(true);
+  };
+
+  const handleMegaMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // If it was opened by hover within the last 400ms, keep it open (don't toggle closed on click)
+    if (Date.now() - lastHoverTimeRef.current < 400) {
+      setIsMegaMenuOpen(true);
+      return;
+    }
+    setIsMegaMenuOpen((prev) => !prev);
+  };
 
   // Filter ONLY main categories (where parentId is null), exclude "Бусад", "Ангилалгүй" / empty names
   const mainCategories = useMemo(() => {
@@ -347,9 +363,9 @@ export default function Navbar({
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             {/* Mega Menu Button */}
             <button
-              onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
-              onMouseEnter={() => setIsMegaMenuOpen(true)}
-              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm shrink-0 flex-1 sm:flex-none"
+              onClick={handleMegaMenuClick}
+              onMouseEnter={handleMouseEnterMegaMenu}
+              className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm shrink-0 flex-1 sm:flex-none cursor-pointer"
             >
               <Menu className="w-4 h-4" />
               <span>БҮХ АНГИЛАЛ</span>
@@ -389,6 +405,7 @@ export default function Navbar({
         {/* EXPANDABLE MEGA MENU FLYOUT PANEL (Matching screenshot design!) */}
         {isMegaMenuOpen && (
           <div
+            onMouseEnter={() => setIsMegaMenuOpen(true)}
             className="absolute left-0 right-0 top-full bg-white border-b border-gray-200 shadow-2xl z-50 animate-fadeIn"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
