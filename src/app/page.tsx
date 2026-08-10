@@ -379,7 +379,7 @@ function HomeContent() {
       />
 
       {/* AUTO-SLIDING HERO BANNER SECTION */}
-      {!isCatalogMode && (
+      {!isCatalogMode && heroSlides.length > 0 && (
         <HeroSlider
           slides={heroSlides}
           allProducts={products}
@@ -579,7 +579,7 @@ function HomeContent() {
       {!isCatalogMode && <HomeBundles onViewAll={() => setActiveCategory('bundles')} />}
 
       {/* SECTION 3: FEATURED PRODUCTS / COLLECTIONS ("Inky's choice") */}
-      {!isCatalogMode && (
+      {!isCatalogMode && featuredCollections.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center mb-8">
             <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight font-sans">
@@ -589,129 +589,37 @@ function HomeContent() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {featuredCollections.length > 0 ? (
-              featuredCollections.slice(0, 4).map((col) => (
-                <div
-                  key={col.id}
-                  onClick={() => {
-                    if (col.linkCategory) {
-                      setActiveCategory(col.linkCategory);
-                      setIsFilterView(true);
-                    } else if (col.productId) {
-                      const p = products.find((pr) => pr.id === col.productId);
-                      if (p) setQuickViewProduct(p);
-                    }
-                    scrollToProducts();
-                  }}
-                  className="relative rounded-2xl overflow-hidden aspect-[4/5] group bg-gray-900 border border-gray-200 cursor-pointer shadow-xs hover:shadow-lg transition-all"
-                >
-                  <img
-                    src={getFirstImageUrl(col.imageUrl)}
-                    alt={col.title}
-                    className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white">
-                    {col.subtitle && (
-                      <span className="text-xs font-bold text-teal-300 uppercase tracking-wider">{col.subtitle}</span>
-                    )}
-                    <h3 className="text-lg font-extrabold mt-1">{col.title}</h3>
-                    <span className="text-xs text-gray-300 flex items-center gap-1 mt-2 font-semibold group-hover:text-white transition-colors">
-                      Цуглуулга үзэх <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
+            {featuredCollections.slice(0, 4).map((col) => (
+              <div
+                key={col.id}
+                onClick={() => {
+                  if (col.linkCategory) {
+                    setActiveCategory(col.linkCategory);
+                    setIsFilterView(true);
+                  } else if (col.productId) {
+                    const p = products.find((pr) => pr.id === col.productId);
+                    if (p) setQuickViewProduct(p);
+                  }
+                  scrollToProducts();
+                }}
+                className="relative rounded-2xl overflow-hidden aspect-[4/5] group bg-gray-900 border border-gray-200 cursor-pointer shadow-xs hover:shadow-lg transition-all"
+              >
+                <img
+                  src={getFirstImageUrl(col.imageUrl)}
+                  alt={col.title}
+                  className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-all duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white">
+                  {col.subtitle && (
+                    <span className="text-xs font-bold text-teal-300 uppercase tracking-wider">{col.subtitle}</span>
+                  )}
+                  <h3 className="text-lg font-extrabold mt-1">{col.title}</h3>
+                  <span className="text-xs text-gray-300 flex items-center gap-1 mt-2 font-semibold group-hover:text-white transition-colors">
+                    Цуглуулга үзэх <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
                 </div>
-              ))
-            ) : (
-              <>
-                {/* Default Fallback Card 1 */}
-                <div
-                  onClick={() => {
-                    setActiveCategory('pens-markers');
-                    scrollToProducts();
-                  }}
-                  className="relative rounded-2xl overflow-hidden aspect-[4/5] group bg-gray-900 border border-gray-200 cursor-pointer"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1585336261026-875a60a1c92f?w=600&auto=format&fit=crop&q=80"
-                    alt="Pastel Pen Set"
-                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white">
-                    <span className="text-xs font-bold text-teal-300 uppercase tracking-wider">Inky Special</span>
-                    <h3 className="text-lg font-extrabold mt-1">Pastel Pen Sets</h3>
-                    <span className="text-xs text-gray-300 flex items-center gap-1 mt-2 font-semibold group-hover:text-white transition-colors">
-                      Үзэг & Маркер үзэх <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-
-                {/* Default Fallback Card 2 */}
-                <div
-                  onClick={() => {
-                    setActiveCategory('notebooks-planners');
-                    scrollToProducts();
-                  }}
-                  className="relative rounded-2xl overflow-hidden aspect-[4/5] group bg-gray-900 border border-gray-200 cursor-pointer"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80"
-                    alt="Bullet Journal"
-                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white">
-                    <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">Leather Journals</span>
-                    <h3 className="text-lg font-extrabold mt-1">Bullet Planners</h3>
-                    <span className="text-xs text-gray-300 flex items-center gap-1 mt-2 font-semibold group-hover:text-white transition-colors">
-                      Дэвтэр үзэх <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-
-                {/* Default Fallback Card 3 */}
-                <div
-                  onClick={() => {
-                    setSearchQuery('Майлдлайнер');
-                    scrollToProducts();
-                  }}
-                  className="relative rounded-2xl overflow-hidden aspect-[4/5] group bg-gray-900 border border-gray-200 cursor-pointer"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1569683795645-b62e50fbf103?w=600&auto=format&fit=crop&q=80"
-                    alt="Highlighters"
-                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white">
-                    <span className="text-xs font-bold text-rose-300 uppercase tracking-wider">Mildliners</span>
-                    <h3 className="text-lg font-extrabold mt-1">Aesthetic Markers</h3>
-                    <span className="text-xs text-gray-300 flex items-center gap-1 mt-2 font-semibold group-hover:text-white transition-colors">
-                      Тодотгогч үзэх <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-
-                {/* Default Fallback Card 4 */}
-                <div
-                  onClick={() => {
-                    setActiveCategory('art-supplies');
-                    scrollToProducts();
-                  }}
-                  className="relative rounded-2xl overflow-hidden aspect-[4/5] group bg-gray-900 border border-gray-200 cursor-pointer"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=600&auto=format&fit=crop&q=80"
-                    alt="Watercolor Paints"
-                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5 text-white">
-                    <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">Art Studio</span>
-                    <h3 className="text-lg font-extrabold mt-1">Watercolor Kits</h3>
-                    <span className="text-xs text-gray-300 flex items-center gap-1 mt-2 font-semibold group-hover:text-white transition-colors">
-                      Усан будаг үзэх <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
+              </div>
+            ))}
           </div>
         </section>
       )}
