@@ -461,7 +461,7 @@ export default function AdminPage() {
       )
       .join('');
 
-    const logoSrc = window.location.origin + (settings?.logoUrl || '/logo.svg');
+    const logoSrc = settings?.logoUrl ? (settings.logoUrl.startsWith('http') ? settings.logoUrl : window.location.origin + settings.logoUrl) : '';
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -568,11 +568,9 @@ export default function AdminPage() {
 
           {/* Header */}
           <div className="text-center space-y-2">
-            <img
-              src="/logo.svg"
-              alt="Inky Sisters"
-              className="w-16 h-16 object-contain mx-auto bg-slate-900 rounded-2xl p-2.5 shadow-lg border border-slate-800"
-            />
+            <div className="mx-auto w-16 h-16 bg-slate-900 rounded-2xl p-2.5 shadow-lg border border-slate-800 flex items-center justify-center">
+              <Lock className="w-8 h-8 text-teal-400" />
+            </div>
             <h2 className="text-2xl font-extrabold text-gray-900 font-sans tracking-tight">
               Админ Системд Нэвтрэх
             </h2>
@@ -675,11 +673,13 @@ export default function AdminPage() {
           >
             {!isSidebarCollapsed && (
               <div className="flex items-center gap-3 overflow-hidden">
-                <img
-                  src={settings.logoUrl || '/logo.svg'}
-                  alt="Inky Sisters Logo"
-                  className="w-9 h-9 object-contain bg-white rounded-lg p-1 shrink-0 shadow-xs"
-                />
+                {settings.logoUrl && (
+                  <img
+                    src={settings.logoUrl}
+                    alt="Inky Sisters Logo"
+                    className="w-9 h-9 object-contain bg-white rounded-lg p-1 shrink-0 shadow-xs"
+                  />
+                )}
                 <div className="truncate">
                   <span className="font-extrabold text-sm text-white block tracking-tight leading-none font-sans">
                     INKY SISTERS
@@ -1246,14 +1246,18 @@ export default function AdminPage() {
                       Компьютерээсээ шинэ Лого зургаа хуулснаар веб сайтын цэс болон Админ самбарын лого шууд шинэчлэгдэнэ.
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-white border border-teal-200 p-1 shadow-xs shrink-0 flex items-center justify-center">
-                    <img src={settings.logoUrl || '/logo.svg'} alt="Current Logo" className="w-full h-full object-contain" />
+                  <div className="w-12 h-12 rounded-xl bg-white border border-teal-200 p-1 shadow-xs shrink-0 flex items-center justify-center overflow-hidden">
+                    {settings.logoUrl ? (
+                      <img src={settings.logoUrl} alt="Current Logo" className="w-full h-full object-contain" />
+                    ) : (
+                      <span className="text-[10px] text-gray-400 text-center font-bold font-sans">Хоосон</span>
+                    )}
                   </div>
                 </div>
 
                 <ImageUploader
                   label="Шинэ Лого Зураг Сонгож Хуулах:"
-                  value={settings.logoUrl || '/logo.svg'}
+                  value={settings.logoUrl || ''}
                   onChange={async (url) => {
                     setSettings((prev: any) => ({ ...prev, logoUrl: url }));
                     await fetch('/api/settings', {

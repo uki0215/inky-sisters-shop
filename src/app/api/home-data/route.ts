@@ -65,7 +65,7 @@ export async function GET() {
         data: {
           id: 'default',
           showStockQuantity: true,
-          logoUrl: '/logo.svg',
+          logoUrl: '',
           heroTitle: 'Онцлох Бичиг Хэргийн Цуглуулга',
           heroSubtitle: 'Хамгийн тренд болж буй пастел үзэг, эстетик тэмдэглэлийн дэвтэр ба зургийн хэрэгслүүдийг шууд онлайн захиалаарай.',
           heroImageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=80',

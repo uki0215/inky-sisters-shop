@@ -63,7 +63,7 @@ export default function ProfileManager() {
           setPhone(data.phone || '88112233, 99112233');
           setEmail(data.email || 'info@inkysisters.mn');
           setWorkingHours(data.workingHours || 'Даваа - Ням: 10:00 - 20:00');
-          setLogoUrl(data.logoUrl || '/logo.svg');
+          setLogoUrl(data.logoUrl || '');
         }
       })
       .catch(console.error);
