@@ -1047,7 +1047,7 @@ export default function AdminPage() {
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs text-gray-700">
-                    <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 uppercase font-mono tracking-wider">
+                    <thead className="bg-gray-50 text-gray-500 border-b border-gray-200 uppercase font-mono tracking-wider text-[10px]">
                       <tr>
                         <th className="p-4">Бараа & Бар код</th>
                         <th className="p-4">Ангилал</th>

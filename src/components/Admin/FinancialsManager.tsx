@@ -662,7 +662,7 @@ export default function FinancialsManager() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-600 uppercase font-mono border-b border-gray-200">
+              <thead className="bg-gray-50 text-gray-500 uppercase font-mono border-b border-gray-200 text-[10px] tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Огноо</th>
                   <th className="py-3 px-4">Ангилал</th>
@@ -734,7 +734,7 @@ export default function FinancialsManager() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-600 uppercase font-mono border-b border-gray-200">
+              <thead className="bg-gray-50 text-gray-500 uppercase font-mono border-b border-gray-200 text-[10px] tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Устгасан Огноо</th>
                   <th className="py-3 px-4">Захиалгын Төлөв</th>
