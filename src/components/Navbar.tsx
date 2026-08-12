@@ -507,7 +507,7 @@ export default function Navbar({
                             setHoveredCategory(cat);
                           }
                         }}
-                        className={`w-full text-left px-3 py-2.5 rounded-xl font-bold text-xs flex items-center transition-all ${
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
                           activeHover?.id === cat.id
                             ? 'bg-teal-50 text-teal-900 border border-teal-200'
                             : 'text-gray-700 hover:bg-gray-50'
@@ -517,6 +517,11 @@ export default function Navbar({
                           {getCategoryIcon(cat.icon)}
                           <span>{cat.name}</span>
                         </span>
+                        {hasSub && (
+                          <ChevronRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${
+                            activeHover?.id === cat.id ? 'text-teal-700' : 'text-gray-400'
+                          }`} />
+                        )}
                       </button>
                     );
                   })}
