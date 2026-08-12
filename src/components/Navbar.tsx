@@ -190,6 +190,13 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Reset active hovered category when mega menu closes to avoid keeping states open next time
+  useEffect(() => {
+    if (!isMegaMenuOpen) {
+      setHoveredCategory(null);
+    }
+  }, [isMegaMenuOpen]);
+
   // Category Icon map helper
   const getCategoryIcon = (iconName?: string) => {
     switch (iconName) {
@@ -498,12 +505,15 @@ export default function Navbar({
                       <div key={cat.id} className="space-y-1">
                         <button
                           onClick={() => {
-                            if (activeHover?.id === cat.id || !hasSub) {
-                              // Click again or has no subcategories -> navigate
+                            if (!hasSub) {
+                              // Has no subcategories -> navigate immediately
                               onSelectCategory(cat.slug);
                               setIsMegaMenuOpen(false);
+                            } else if (activeHover?.id === cat.id) {
+                              // Already active -> collapse (reset)
+                              setHoveredCategory(null);
                             } else {
-                              // Show subcategories on click
+                              // Expand on click
                               setHoveredCategory(cat);
                             }
                           }}
