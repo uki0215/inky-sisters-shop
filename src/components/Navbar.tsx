@@ -105,10 +105,26 @@ export default function Navbar({
     });
   }, [allCategories]);
 
-  // Currently active or hovered category object (defaults to "Бүх Бараанууд")
+  // Currently active or hovered category object (defaults to parent of activeCategory or "БҮХ АНГИЛАЛ")
   const activeHover = useMemo(() => {
-    return hoveredCategory || { id: 'all', name: 'БҮХ АНГИЛАЛ', slug: 'all' };
-  }, [hoveredCategory]);
+    if (hoveredCategory) return hoveredCategory;
+    // Default to parent of activeCategory if activeCategory is set
+    if (activeCategory && activeCategory !== 'all') {
+      const activeCatObj = (allCategories || []).find(
+        (c: any) => c.slug === activeCategory || c.id === activeCategory
+      );
+      if (activeCatObj) {
+        const parentId = activeCatObj.parentId;
+        if (parentId) {
+          const parentObj = (allCategories || []).find((c: any) => c.id === parentId);
+          if (parentObj) return parentObj;
+        } else {
+          return activeCatObj;
+        }
+      }
+    }
+    return { id: 'all', name: 'БҮХ АНГИЛАЛ', slug: 'all' };
+  }, [hoveredCategory, activeCategory, allCategories]);
 
   // Dynamic active subcategories for hovered category in Mega Menu (Instant 0ms lookup from cache/flat list)
   const activeSubcategories = useMemo(() => {
@@ -537,20 +553,29 @@ export default function Navbar({
                         {/* Inline Accordion for Subcategories */}
                         {hasSub && activeHover?.id === cat.id && activeSubcategories.length > 0 && (
                           <div className="pl-6 pr-2 py-1 space-y-1 border-l-2 border-teal-100 ml-5 animate-fadeIn">
-                            {activeSubcategories.map((sub: any) => (
-                              <button
-                                key={sub.id}
-                                onClick={() => {
-                                  onSelectCategory(sub.slug || sub.id);
-                                  onSearchChange('');
-                                  setIsMegaMenuOpen(false);
-                                }}
-                                className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-600 hover:text-teal-800 hover:bg-gray-50 transition-all flex items-center justify-between group"
-                              >
-                                <span>{sub.name}</span>
-                                <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700 shrink-0" />
-                              </button>
-                            ))}
+                            {activeSubcategories.map((sub: any) => {
+                              const isSubActive = activeCategory === sub.slug || activeCategory === sub.id;
+                              return (
+                                <button
+                                  key={sub.id}
+                                  onClick={() => {
+                                    onSelectCategory(sub.slug || sub.id);
+                                    onSearchChange('');
+                                    setIsMegaMenuOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-between group ${
+                                    isSubActive
+                                      ? 'bg-teal-600 text-white font-extrabold shadow-sm'
+                                      : 'text-gray-600 hover:text-teal-800 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <span>{sub.name}</span>
+                                  <ChevronRight className={`w-3 h-3 transition-colors ${
+                                    isSubActive ? 'text-white' : 'text-gray-300 group-hover:text-teal-700 shrink-0'
+                                  }`} />
+                                </button>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -594,23 +619,32 @@ export default function Navbar({
                         </button>
                       ))
                     ) : activeSubcategories.length > 0 ? (
-                      activeSubcategories.map((sub: any) => (
-                        <button
-                          key={sub.id}
-                          onClick={() => {
-                            onSelectCategory(sub.slug || sub.id);
-                            onSearchChange('');
-                            setIsMegaMenuOpen(false);
-                          }}
-                          className="text-left p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 hover:border-teal-200 border border-gray-100 transition-all text-xs font-semibold text-gray-700 hover:text-teal-900 flex items-center justify-between group"
-                        >
-                          <span className="flex items-center gap-2">
-                            {getCategoryIcon(sub.icon)}
-                            <span>{sub.name}</span>
-                          </span>
-                          <ChevronRight className="w-3 h-3 text-gray-300 group-hover:text-teal-700 shrink-0" />
-                        </button>
-                      ))
+                      activeSubcategories.map((sub: any) => {
+                        const isSubActive = activeCategory === sub.slug || activeCategory === sub.id;
+                        return (
+                          <button
+                            key={sub.id}
+                            onClick={() => {
+                              onSelectCategory(sub.slug || sub.id);
+                              onSearchChange('');
+                              setIsMegaMenuOpen(false);
+                            }}
+                            className={`text-left p-2.5 rounded-xl border transition-all text-xs font-semibold flex items-center justify-between group ${
+                              isSubActive
+                                ? 'bg-teal-700 text-white border-teal-600 shadow-sm font-extrabold'
+                                : 'bg-gray-50 hover:bg-teal-50 hover:border-teal-200 border-gray-100 text-gray-700 hover:text-teal-900'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              {getCategoryIcon(sub.icon)}
+                              <span>{sub.name}</span>
+                            </span>
+                            <ChevronRight className={`w-3 h-3 transition-colors ${
+                              isSubActive ? 'text-white' : 'text-gray-300 group-hover:text-teal-700 shrink-0'
+                            }`} />
+                          </button>
+                        );
+                      })
                     ) : (
                       <div className="col-span-full p-6 text-center text-xs text-gray-400 bg-gray-50 rounded-2xl border border-gray-100 font-sans">
                         Энэ ангилалд одоогоор дэд ангилал бүртгэгдээгүй байна.

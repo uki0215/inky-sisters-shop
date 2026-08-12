@@ -172,21 +172,15 @@ function HomeContent() {
     }
   }, [products]);
 
+  // Synchronize expandedCategoryIds with activeCategory (only expand the active category's parent, collapse others)
   useEffect(() => {
-    if (categories.length > 0 && expandedCategoryIds.length === 0) {
-      const mainIds = categories.filter((c: any) => !c.parentId).map((c: any) => c.id);
-      setExpandedCategoryIds(mainIds);
-    }
-  }, [categories]);
-
-  useEffect(() => {
-    if (activeCategory !== 'all') {
+    if (activeCategory === 'all') {
+      setExpandedCategoryIds([]);
+    } else {
       const cat = categories.find((c) => c.slug === activeCategory || c.id === activeCategory);
       if (cat) {
-        const targetId = cat.parentId || cat.id;
-        setExpandedCategoryIds((prev) =>
-          prev.includes(targetId) ? prev : [...prev, targetId]
-        );
+        const parentId = cat.parentId || cat.id;
+        setExpandedCategoryIds([parentId]);
       }
     }
   }, [activeCategory, categories]);
