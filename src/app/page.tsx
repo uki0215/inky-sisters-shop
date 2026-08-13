@@ -49,6 +49,7 @@ function HomeContent() {
   const [loading, setLoading] = useState(true);
   const [scannedNotice, setScannedNotice] = useState<string | null>(null);
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(false);
+  const lastFocusFetchTimeRef = React.useRef<number>(0);
 
   const fetchData = async (silent = false) => {
     if (!silent && products.length === 0) setLoading(true);
@@ -95,6 +96,7 @@ function HomeContent() {
         if (Array.isArray(dataCollections)) setFeaturedCollections(dataCollections);
         if (Array.isArray(dataBanks)) setBanksList(dataBanks);
         if (Array.isArray(dataBundles)) setBundles(dataBundles);
+        lastFocusFetchTimeRef.current = Date.now();
       }
     } catch (e) {
       console.error(e);
@@ -135,26 +137,41 @@ function HomeContent() {
 
     fetchData();
 
+    // Dedup/debounce timer for stock synchronization events
+    let syncDebounceTimeout: NodeJS.Timeout | null = null;
+
+    const triggerStockSync = () => {
+      if (syncDebounceTimeout) {
+        clearTimeout(syncDebounceTimeout);
+      }
+      syncDebounceTimeout = setTimeout(() => {
+        fetchData(true);
+      }, 100); // 100ms window to deduplicate simultaneous events
+    };
+
     // Cross-tab BroadcastChannel event listener
     let channel: BroadcastChannel | null = null;
     try {
       channel = new BroadcastChannel('inky_stock_sync');
       channel.onmessage = () => {
-        fetchData(true);
+        triggerStockSync();
       };
     } catch (e) {}
 
     // Storage event listener
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'inky_last_stock_update') {
-        fetchData(true);
+        triggerStockSync();
       }
     };
     window.addEventListener('storage', handleStorageChange);
 
     // Window focus listener
     const handleFocus = () => {
-      fetchData(true);
+      const now = Date.now();
+      if (now - lastFocusFetchTimeRef.current >= 300000) {
+        fetchData(true);
+      }
     };
     window.addEventListener('focus', handleFocus);
 
@@ -162,6 +179,9 @@ function HomeContent() {
       if (channel) channel.close();
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleFocus);
+      if (syncDebounceTimeout) {
+        clearTimeout(syncDebounceTimeout);
+      }
     };
   }, []);
 

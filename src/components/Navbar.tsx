@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { formatMNT } from '@/lib/utils';
-import { getFirstImageUrl } from '@/lib/imageUtils';
+import { getFirstImageUrl, getProductImageUrl } from '@/lib/imageUtils';
 import { ShoppingBag, Search, Tag, Sparkles, Menu, ChevronDown, ChevronRight, ChevronLeft, PenTool, BookOpen, Brush, Briefcase, GraduationCap, Grid, Heart, RefreshCw, Eye, ArrowRight, Truck } from 'lucide-react';
 
 interface NavbarProps {
@@ -317,7 +317,7 @@ export default function Navbar({
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-12 h-12 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
                               <img
-                                src={getFirstImageUrl(product.imageUrl)}
+                                src={getProductImageUrl(product)}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
                               />
@@ -687,7 +687,7 @@ export default function Navbar({
                       className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-gray-900 shadow-md group cursor-pointer border border-gray-200"
                     >
                       <img
-                        src={getFirstImageUrl(showcaseProduct.imageUrl)}
+                        src={getProductImageUrl(showcaseProduct)}
                         alt={showcaseProduct.name}
                         className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
                       />

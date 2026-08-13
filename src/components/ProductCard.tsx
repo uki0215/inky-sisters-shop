@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { formatMNT } from '@/lib/utils';
-import { getFirstImageUrl } from '@/lib/imageUtils';
+import { getProductImageUrl } from '@/lib/imageUtils';
 import { useCart } from '@/context/CartContext';
 import { Barcode, Heart, RefreshCw } from 'lucide-react';
 
@@ -53,7 +53,7 @@ export default function ProductCard({ product, onQuickView, showStockQuantity = 
       {/* Image Container */}
       <div className="relative aspect-square w-full bg-gray-50 overflow-hidden sheen-effect">
         {(() => {
-          const firstUrl = getFirstImageUrl(product.imageUrl);
+          const firstUrl = getProductImageUrl(product);
           return (
             <img
               src={firstUrl}

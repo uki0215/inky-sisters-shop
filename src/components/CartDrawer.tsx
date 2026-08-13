@@ -3,7 +3,7 @@
 import React from 'react';
 import { useCart } from '@/context/CartContext';
 import { formatMNT } from '@/lib/utils';
-import { getFirstImageUrl } from '@/lib/imageUtils';
+import { getFirstImageUrl, getProductImageUrl } from '@/lib/imageUtils';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
 
 export default function CartDrawer() {
@@ -67,7 +67,7 @@ export default function CartDrawer() {
                 return (
                   <div key={item.id} className="pt-4 first:pt-0 flex items-center gap-3">
                     <img
-                      src={item.selectedImageUrl || getFirstImageUrl(item.imageUrl)}
+                      src={item.selectedImageUrl || getProductImageUrl(item)}
                       alt={item.name}
                       onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
                       className="w-16 h-16 object-cover rounded-lg border border-gray-200 bg-gray-50 flex-shrink-0"

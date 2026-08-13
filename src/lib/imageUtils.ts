@@ -59,6 +59,29 @@ export const getFirstImageUrl = (
 };
 
 /**
+ * Get all image URLs for a product, falling back to the lazy image endpoint.
+ */
+export const getProductImageUrls = (
+  product?: { id: string; imageUrl?: string | null } | null,
+  fallback = '/placeholder-product.svg'
+): string[] => {
+  if (!product) return [fallback];
+  const urls = parseImageUrls(product.imageUrl);
+  if (urls.length > 0) return urls;
+  return [`/api/products/${product.id}/image` || fallback];
+};
+
+/**
+ * Get the main image URL for a product, falling back to the lazy image endpoint.
+ */
+export const getProductImageUrl = (
+  product?: { id: string; imageUrl?: string | null } | null,
+  fallback = '/placeholder-product.svg'
+): string => {
+  return getProductImageUrls(product, fallback)[0];
+};
+
+/**
  * Serialize an array of URLs to the JSON storage format.
  */
 export const serializeImageUrls = (urls: string[]): string => {
