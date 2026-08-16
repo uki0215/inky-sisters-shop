@@ -15,14 +15,29 @@ export async function GET(request: Request) {
       include: {
         items: {
           include: {
-            product: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                imageUrl: true,
+                priceMnt: true,
+                isDiscounted: true,
+                discountPercent: true,
+                discountPriceMnt: true,
+                stock: true,
+              },
+            },
           },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(bundles);
+    return NextResponse.json(bundles, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

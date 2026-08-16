@@ -8,7 +8,11 @@ export async function GET() {
     const banks = await db.bankQR.findMany({
       orderBy: { createdAt: 'asc' },
     });
-    return NextResponse.json(banks);
+    return NextResponse.json(banks, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

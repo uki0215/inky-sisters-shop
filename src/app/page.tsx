@@ -590,7 +590,13 @@ function HomeContent() {
       )}
 
       {/* PRODUCT BUNDLES SHOWCASE SECTION ("ОНЦЛОХ ИЖ БҮРЭН БАГЦУУД") */}
-      {!isCatalogMode && <HomeBundles onViewAll={() => setActiveCategory('bundles')} />}
+      {!isCatalogMode && (
+        <HomeBundles
+          initialBundles={bundles}
+          initialSettings={settings}
+          onViewAll={() => setActiveCategory('bundles')}
+        />
+      )}
 
       {/* SECTION 3: FEATURED PRODUCTS / COLLECTIONS ("Inky's choice") */}
       {!isCatalogMode && featuredCollections.length > 0 && (

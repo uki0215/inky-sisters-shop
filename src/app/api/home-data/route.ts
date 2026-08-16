@@ -24,6 +24,7 @@ export async function GET() {
           name: true,
           description: true,
           categoryId: true,
+          imageUrl: true,
           priceMnt: true,
           stock: true,
           isDiscounted: true,
@@ -155,6 +156,10 @@ export async function GET() {
       featuredCollections: collections,
       banks,
       bundles
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
     });
   } catch (error: any) {
     console.error('Error fetching consolidated home page data:', error);

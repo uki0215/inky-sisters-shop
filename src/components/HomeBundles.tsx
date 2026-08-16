@@ -9,17 +9,26 @@ import BundleModal from '@/components/BundleModal';
 
 interface HomeBundlesProps {
   onViewAll?: () => void;
+  initialBundles?: any[];
+  initialSettings?: any;
 }
 
-export default function HomeBundles({ onViewAll }: HomeBundlesProps) {
-  const [bundles, setBundles] = useState<any[]>([]);
-  const [settings, setSettings] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export default function HomeBundles({ onViewAll, initialBundles, initialSettings }: HomeBundlesProps) {
+  const [bundles, setBundles] = useState<any[]>(initialBundles || []);
+  const [settings, setSettings] = useState<any>(initialSettings || null);
+  const [loading, setLoading] = useState(initialBundles === undefined);
   const [selectedBundle, setSelectedBundle] = useState<any | null>(null);
   const [addedBundleId, setAddedBundleId] = useState<string | null>(null);
   const { addBundleToCart } = useCart();
 
   useEffect(() => {
+    if (initialBundles !== undefined) {
+      setBundles(initialBundles);
+      if (initialSettings) setSettings(initialSettings);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const [resBundles, resSettings] = await Promise.all([
@@ -41,7 +50,7 @@ export default function HomeBundles({ onViewAll }: HomeBundlesProps) {
       }
     };
     fetchData();
-  }, []);
+  }, [initialBundles, initialSettings]);
 
   const handleAddBundle = (bundle: any, e: React.MouseEvent) => {
     e.stopPropagation();

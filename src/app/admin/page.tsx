@@ -174,8 +174,25 @@ export default function AdminPage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchOrdersRealtime();
-      const interval = setInterval(fetchOrdersRealtime, 3000); // Fast 3s real-time polling interval
-      return () => clearInterval(interval);
+
+      const interval = setInterval(() => {
+        if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+          fetchOrdersRealtime();
+        }
+      }, 45000);
+
+      const handleVisibilityChange = () => {
+        if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+          fetchOrdersRealtime();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
+      return () => {
+        clearInterval(interval);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      };
     }
   }, [isAuthenticated]);
 
